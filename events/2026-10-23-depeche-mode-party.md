@@ -1,5 +1,6 @@
 ---
 title: "Depeche Mode Party"
+teaser: "Über vierzig Jahre Depeche Mode und Artverwandtes – die legendäre Party mit DJ Matze."
 start: "2026-10-23 22:00"
 djs: ["DJ Matze"]
 genres: ["Synthpop", "Wave", "EBM"]

@@ -1,5 +1,6 @@
 ---
 title: "Another Remaining Nightmare"
+teaser: "Ein düstermelodisches Treffen: harte Elektronik, traurige Gitarren und morbide Romantik."
 reihe: dark                    # Calavera Dark (siehe config.yml → reihen)
 start: "2026-10-24 22:00"
 subtitle: "Spinne & Doc Grotabol & Frank S aus HB"

@@ -1,5 +1,6 @@
 ---
 title: "Feiern für Fortgeschrittene"
+teaser: "Die Go-To-Party im Viertel: tanzbare Musik aus vielen Generationen, zum ersten Mal mit DJ Matze."
 start: "2026-11-14 22:00"
 djs: ["DJ Matze"]
 genres: ["Querbeet", "Tanzbares aus vielen Generationen"]

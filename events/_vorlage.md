@@ -24,7 +24,7 @@ tags: ["Ab 18"]                  # z. B. Ab 18, Rauchfrei
 #   label: "Auch im Stream"
 # eintritt: "Hutspende"          # sonst Standard aus config.yml (5 € · Azubis & Studis frei)
 # fans_of: ["The Cure", "Joy Division"]      # "Für Freunde von"
-# teaser: "Ein Satz für die Kachel"          # sonst: der erste Absatz unten, gekürzt
+teaser: "Ein, höchstens zwei Sätze für die Kachel im Programm."   # sonst: erster Absatz unten, gekürzt
 # visual: "mein-flyer.jpg"       # sonst automatisch: Bild mit gleichem Dateinamen wie diese .md
 # visual_alt: "Flyer: …"         # Bildbeschreibung für Screenreader
 # links:

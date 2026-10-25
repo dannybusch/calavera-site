@@ -1,5 +1,6 @@
 ---
 title: "They call it HIP HOP"
+teaser: "Die Hip-Hop-Primetime-Nacht – von oldschool bis heute, englisch und deutsch. Boom-bap!"
 start: "2026-10-30 22:00"
 djs: ["Keine Kunst"]
 genres: ["Hip-Hop", "Oldschool bis heute"]

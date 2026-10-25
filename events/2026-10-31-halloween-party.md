@@ -1,5 +1,6 @@
 ---
 title: "Halloween Party"
+teaser: "Zeit zum Gruseln, auf Calavera-Art – vielleicht schaut Jack O'Lantern persönlich vorbei."
 start: "2026-10-31 22:00"
 djs: ["DJ Pete Bo"]
 genres: ["Gruseln & Feiern"]

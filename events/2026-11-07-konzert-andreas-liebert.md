@@ -1,5 +1,6 @@
 ---
 title: "Konzert: Andreas Liebert"
+teaser: "Ehrliche, poetische Lieder über die Momente, über die man kaum spricht. Hutspende erwünscht."
 art: "Konzert"
 highlight: "Live-Konzert"
 start: "2026-11-07 20:00"

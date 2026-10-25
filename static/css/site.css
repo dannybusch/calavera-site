@@ -192,7 +192,10 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 .t-title { font-family: var(--display); font-size: 27px; line-height: 1.02; text-transform: uppercase; overflow-wrap: anywhere; }
 .t-by { margin-top: -6px; font-size: 15px; color: var(--text-3); }
 .t-tags { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px; }
-.t-flags, .t-badge, .t-hl, .t-teaser, .t-more { display: none; }
+.t-flags, .t-badge, .t-hl, .t-more { display: none; }
+/* Teaser (aus "teaser:" in der .md): in normalen Kacheln höchstens 3 Zeilen */
+.t-teaser { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+  font-size: 15px; line-height: 1.5; color: var(--text-3); }
 
 /* Etiketten: "Heute · 22:00" (gefüllt) und Highlight-Etikett (umrandet) */
 .t-badge, .t-hl { align-items: center; padding: 7px 13px; border-radius: 999px; font-family: var(--mono); font-size: 13px; font-weight: 500;
@@ -213,7 +216,7 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 .tile.is-next .t-meta { display: none; }
 .tile.is-next .t-title { grid-area: title; margin-top: 12px; font-size: clamp(44px, 5vw, 72px); line-height: .95; }
 .tile.is-next .t-by { grid-area: by; margin: 0; font-size: 19px; color: var(--text-2); }
-.tile.is-next .t-teaser { grid-area: teaser; display: block; max-width: 640px; font-size: 17px; line-height: 1.55; color: var(--text-3); }
+.tile.is-next .t-teaser { grid-area: teaser; display: block; -webkit-line-clamp: unset; line-clamp: none; max-width: 640px; font-size: 17px; line-height: 1.55; color: var(--text-3); }
 .tile.is-next .t-tags { grid-area: tags; align-self: end; margin-top: 8px; }
 .tile.is-next .t-more { grid-area: more; display: inline-flex; gap: 6px; align-self: end; justify-self: end; font-family: var(--mono); font-size: 13px;
   letter-spacing: .06em; color: var(--accent-text); }
@@ -342,6 +345,9 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 .more-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--gap); }
 .more-item { height: 100%; background: var(--surface-1); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 8px; color: var(--text); }
 .more-item:hover { background: #1a1a1a; color: var(--text); }
+/* Teaser in "Weitere Termine": höchstens 2 Zeilen, damit die kleinen Kacheln kompakt bleiben */
+.mi-teaser { margin-top: 2px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+  font-size: 14px; line-height: 1.45; color: var(--text-3); }
 /* Gruppen unter "Weitere Termine": Reihe zuerst, dann der Rest. Auf großen Bildschirmen nebeneinander,
    jede Gruppe so breit, wie sie Termine hat (--n), damit alle Kacheln gleich groß bleiben. */
 .more-groups { display: flex; flex-wrap: wrap; gap: 24px var(--gap); }
@@ -466,7 +472,7 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
   .h-section { font-size: 48px; }
   .program-grid, .program-grid.cols-3 { grid-template-columns: minmax(0, 1fr); }
   /* normale Termine: kompakte Zeile Datum | Titel | Mini-Flyer */
-  .tile-link { display: grid; grid-template-columns: 72px minmax(0, 1fr) 64px; grid-template-areas: "date title flyer" "date by flyer" "date tags flyer";
+  .tile-link { display: grid; grid-template-columns: 72px minmax(0, 1fr) 64px; grid-template-areas: "date title flyer" "date by flyer" "date teaser flyer" "date tags flyer";
                column-gap: 12px; row-gap: 4px; padding: 12px; align-items: center; }
   .t-date { grid-area: date; flex-direction: column; align-items: flex-start; gap: 5px; align-self: center; }
   .t-num { font-size: 24px; line-height: .95; }
@@ -480,7 +486,8 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
   .t-tags .chip { padding: 2px 8px; font-size: 11px; }
   .tile:not(.is-next) .chip--genre { display: none; }
   /* Highlight in der kompakten Zeile: Etikett klein über dem Titel statt auf dem Mini-Flyer */
-  .tile.is-highlight:not(.is-next) .tile-link { grid-template-areas: "date flags flyer" "date title flyer" "date by flyer" "date tags flyer"; }
+  .tile.is-highlight:not(.is-next) .tile-link { grid-template-areas: "date flags flyer" "date title flyer" "date by flyer" "date teaser flyer" "date tags flyer"; }
+  .t-teaser { grid-area: teaser; -webkit-line-clamp: 2; line-clamp: 2; font-size: 13px; line-height: 1.45; }
   .tile.is-highlight:not(.is-next) .t-flags { grid-area: flags; display: flex; }
   .tile.is-highlight:not(.is-next) .t-flags .t-hl { display: inline-flex; padding: 3px 8px; font-size: 10px; letter-spacing: .1em; }
   .tile.is-highlight:not(.is-next) .t-flyer .t-hl { display: none; }
@@ -541,7 +548,8 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
   .more-list, .more-group .more-list { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .more-groups { gap: 20px; }
   .more-group { flex-basis: 100%; gap: 8px; }
-  .more-item { display: grid; grid-template-columns: 72px minmax(0, 1fr); grid-template-areas: "date title" "meta by"; column-gap: 12px; row-gap: 2px; padding: 12px; }
+  .more-item { display: grid; grid-template-columns: 72px minmax(0, 1fr); grid-template-areas: "date title" "meta by" ". teaser"; column-gap: 12px; row-gap: 2px; padding: 12px; }
+  .mi-teaser { grid-area: teaser; font-size: 13px; }
   .mi-date { grid-area: date; font-size: 24px; }
   .more-item .label { grid-area: meta; font-size: 11px; letter-spacing: .04em; }
   .mi-title { grid-area: title; font-size: 20px; }

@@ -1,5 +1,6 @@
 ---
 title: "Nachtschwärmer"
+teaser: "Bis 23 Uhr gratis rein, Happy Hour an der Theke und ein Mix aus Pop, Rock, Wave und Punk."
 start: "2026-11-20 22:00"
 djs: ["DJ Kijote"]
 genres: ["Pop", "Rock", "Wave", "(Electro-)Punk"]

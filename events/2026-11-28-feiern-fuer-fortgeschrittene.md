@@ -1,5 +1,6 @@
 ---
 title: "Feiern für Fortgeschrittene"
+teaser: "Feiern, und zwar richtig: eine abwechslungsreiche Nacht ohne Tanzpausen mit DJ Kijote."
 start: "2026-11-28 22:00"
 djs: ["DJ Kijote"]
 genres: ["Querbeet", "Tanzbares aus vielen Generationen"]

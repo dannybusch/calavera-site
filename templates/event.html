@@ -107,6 +107,7 @@
         <span class="label">{{ o.start|wd|upper }} · {{ o.start|hhmm }}</span>
         <span class="mi-title">{{ o.title }}</span>
         <span class="muted">{{ o.byline }}</span>
+        {% if o.teaser %}<span class="mi-teaser">{{ o.teaser }}</span>{% endif %}
       </a></li>
   {% endmacro %}
   {% if more_same or more_rest %}
