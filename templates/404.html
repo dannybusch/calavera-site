@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% set title = "Nicht gefunden" %}
+{% set noindex = true %}
+{% block content %}
+<section class="page-head wrap">
+  <p class="kicker">Fehler 404</p>
+  <h1 class="display display--page">Falscher Keller.</h1>
+  <p class="lead">Diese Seite gibt es (nicht mehr). Vielleicht findest du hier, was du suchst:</p>
+  <p class="actions"><a class="btn btn-light" href="/programm/">Zum Programm</a> <a class="btn btn-dark" href="/">Zur Startseite</a></p>
+</section>
+{% endblock %}

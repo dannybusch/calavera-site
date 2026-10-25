@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set title = "Archiv" %}
+{% set description = "Vergangene Veranstaltungen im Calavera Bremen." %}
+{% block content %}
+<section class="page-head wrap">
+  <p class="kicker"><a href="/programm/">← Programm</a></p>
+  <h1 class="display display--page">Archiv</h1>
+  <p class="lead">Was schon war. Die Seiten der einzelnen Abende bleiben erreichbar. </p>
+</section>
+<section  class="wrap">
+   <p style="font-size: smaller">Archiv wurde Ende Oktober 2026 erst auf der Seite integriert.</p>
+</section>
+<section class="wrap archive">
+  {% if not events %}<p class="muted">Noch nichts im Archiv.</p>{% endif %}
+  {% set ns = namespace(current="") %}
+  {% for ev in events %}
+    {% set m = ev.start|month_year %}
+    {% if m != ns.current %}
+      {% if not loop.first %}</ol>{% endif %}
+      <h2 class="archive-month">{{ m }}</h2><ol class="archive-list">
+      {% set ns.current = m %}
+    {% endif %}
+    <li><a class="archive-row" href="{{ ev.url }}">
+      <span class="ar-date">{{ ev.start|ddmm }}<span class="muted"> {{ ev.start|wd }}</span></span>
+      <span class="ar-title">{{ ev.title }}</span>
+      <span class="ar-by muted">{{ ev.byline }}</span>
+    </a></li>
+    {% if loop.last %}</ol>{% endif %}
+  {% endfor %}
+</section>
+{% endblock %}

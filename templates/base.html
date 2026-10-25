@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{% set full_title = (title ~ " · " ~ site.name) if title is defined and title else site.name ~ " · Kellerclub im Viertel" %}
+<title>{{ full_title }}</title>
+<meta name="description" content="{{ description if description is defined and description else site.description }}">
+<meta name="theme-color" content="#0b0b0b">
+<link rel="canonical" href="{{ site.url }}{{ page_path }}">
+<meta property="og:type" content="{{ og_type if og_type is defined else 'website' }}">
+<meta property="og:site_name" content="{{ site.name }}">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="{{ site.url }}{{ page_path }}">
+<meta property="og:title" content="{{ title if title is defined and title else site.name }}">
+<meta property="og:description" content="{{ description if description is defined and description else site.description }}">
+{% if og_image is defined and og_image %}
+<meta property="og:image" content="{{ og_image if og_image.startswith('http') else site.url ~ og_image }}">
+<meta name="twitter:card" content="summary_large_image">
+{% endif %}
+{% if noindex is defined and noindex %}<meta name="robots" content="noindex">{% endif %}
+<link rel="icon" href="{{ asset('img/calavera_logo.svg') }}" type="image/svg+xml">
+<link rel="preload" href="/static/fonts/bebas-neue-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/space-grotesk-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ asset('css/site.css') }}">
+<style>:root{--accent:{{ palette.accent }};--accent-rgb:{{ palette.accent_rgb }};--accent-display:{{ palette.accent_display }};--accent-text:{{ palette.accent_text }};--text:{{ textpal.text }};--text-2:{{ textpal.text_2 }};--text-3:{{ textpal.text_3 }};--muted:{{ textpal.muted }}}</style>
+<link rel="alternate" type="text/calendar" title="Calavera Programm" href="/kalender.ics">
+<script>document.documentElement.classList.add('js')</script>
+{% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<a class="skip" href="#inhalt">Zum Inhalt springen</a>
+
+<header class="site-header">
+  <div class="bar wrap">
+    <a class="brand" href="/" aria-label="{{ site.name }} – Startseite">
+      <span class="brand-rod" aria-hidden="true"></span>
+      <span class="brand-rod brand-rod--r" aria-hidden="true"></span>
+      <img src="{{ asset('img/calavera_logo.svg') }}" alt="{{ site.name }}" width="1024" height="789">
+    </a>
+    <nav class="nav" id="hauptmenue" aria-label="Hauptmenü">
+      <ul>
+        {% for item in nav %}
+        <li><a href="{{ item.href }}"{% if page_path.startswith(item.href) %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
+        {% endfor %}
+        <li class="nav-kf"><a href="{{ kellerfunk.url }}">Kellerfunk <span aria-hidden="true">↗</span></a></li>
+      </ul>
+      <p class="nav-meta">{{ club.address }} · {{ club.hours }}</p>
+    </nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="hauptmenue">
+      <span class="menu-label">Menü</span>
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path class="i-open" d="M4 7h16M4 12h16M4 17h16"/><path class="i-close" d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="inhalt" class="site-main">
+{% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <img class="footer-logo" src="{{ asset('img/calavera_logo.svg') }}" alt="" width="1024" height="789" loading="lazy">
+    <p><strong>{{ site.name }}</strong><br>{{ club.address }} · {{ club.city }}<br><span class="muted">{{ club.directions }}</span></p>
+    <p><a href="mailto:{{ club.email }}">{{ club.email }}</a><br>
+      {% for s in social %}<a href="{{ s.url }}" rel="noopener">{{ s.label }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
+    <p><a href="/kontakt/">Kontakt &amp; Impressum</a> · <a href="/datenschutz/">Datenschutz</a><br>
+      <a href="/kalender.ics">Programm als Kalender</a><br>© {{ year }} {{ site.name }}</p>
+  </div>
+</footer>
+
+{% set nc = cfg.no_cookie_banner|default({}) %}
+{% if nc and nc.anzeigen|default(true) %}
+<aside class="nocookie" id="nocookie" aria-labelledby="nocookie-title" data-seconds="{{ nc.sekunden|default(10) }}" hidden style="--nc-seconds: {{ nc.sekunden|default(10) }}s">
+  <svg class="nc-icon" aria-hidden="true" width="44" height="44" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M38 23.5A15 15 0 1 1 24.5 9a5 5 0 0 0 6.5 6.5 5 5 0 0 0 7 8z"/>
+    <circle cx="18" cy="21" r="1.6" fill="currentColor"/><circle cx="27" cy="29" r="1.6" fill="currentColor"/><circle cx="17" cy="31" r="1.6" fill="currentColor"/>
+    <path class="nc-strike" d="M7 41L41 7"/>
+  </svg>
+  <div class="nc-copy">
+    <p class="nc-title" id="nocookie-title">{{ nc.titel|default("No Cookies") }}</p>
+    <p class="nc-text">{% for part in nc.text.split("SAFE SPACE") %}{{ part }}{% if not loop.last %}<a href="/safe-space/">SAFE SPACE</a>{% endif %}{% endfor %}</p>
+    <div class="nc-actions">
+      <button type="button" class="nc-btn" data-nc-close>Alle akzeptieren (0)</button>
+      <button type="button" class="nc-btn nc-btn--ghost" data-nc-close>Alle ablehnen (0)</button>
+    </div>
+  </div>
+  <span class="nc-timer" aria-hidden="true"></span>
+</aside>
+{% endif %}
+
+<script src="{{ asset('js/js-yaml.min.js') }}" defer></script>
+<script src="{{ asset('js/site.js') }}" defer></script>
+</body>
+</html>

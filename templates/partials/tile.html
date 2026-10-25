@@ -1,0 +1,36 @@
+{# Eine Programm-Kachel.
+   - is-next:      die erste kommende Veranstaltung, ganz groß (site.js zieht das im Browser nach,
+                   falls der letzte Build schon etwas älter ist)
+   - is-highlight: per "highlight:" in der .md hervorgehoben – normale Größe, abgehobene Fläche,
+                   Etikett auf dem Flyer (Handy: über dem Titel) #}
+{% macro tile(ev, is_next=false) %}
+<article class="tile{% if is_next %} is-next{% endif %}{% if ev.highlight %} is-highlight{% endif %}" data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}">
+  <a class="tile-link" href="{{ ev.url }}">
+    <span class="t-flags">
+      <span class="t-badge" data-label>{{ relative_label(ev) }}</span>
+      {% if ev.highlight %}<span class="t-hl">{{ ev.highlight }}</span>{% endif %}
+    </span>
+    <span class="t-date">
+      <span class="t-num">{{ ev.start|ddmm }}</span>
+      <span class="t-meta">{{ ev.start|wd|upper }} · {{ ev.start|hhmm }}</span>
+    </span>
+    <span class="t-flyer">
+      {% if ev.highlight %}<span class="t-hl">{{ ev.highlight }}</span>{% endif %}
+      {% if ev.visual_thumb %}
+      <img src="{{ ev.visual_thumb }}" alt="{{ ev.visual_alt }}" loading="lazy" decoding="async">
+      {% else %}
+      <span class="t-placeholder" aria-hidden="true"><img src="{{ asset('img/calavera_logo.svg') }}" alt="" loading="lazy"></span>
+      {% endif %}
+    </span>
+    <span class="t-title">{{ ev.title }}</span>
+    {% if ev.byline %}<span class="t-by">{{ ev.byline }}</span>{% endif %}
+    {% if ev.teaser %}<span class="t-teaser">{{ ev.teaser }}</span>{% endif %}
+    <span class="t-tags">
+      {% if ev.stream_url %}<span class="chip chip--stream"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M8 8a5.6 5.6 0 0 0 0 8M16 8a5.6 5.6 0 0 1 0 8M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/></svg>{{ ev.stream_label }}</span>{% endif %}
+      {% if ev.genres %}<span class="chip chip--genre">{{ ev.genres|join(" · ") }}</span>{% endif %}
+      {% for t in ev.tags %}<span class="chip">{{ t }}</span>{% endfor %}
+    </span>
+    <span class="t-more">Mehr erfahren <span aria-hidden="true">→</span></span>
+  </a>
+</article>
+{% endmacro %}

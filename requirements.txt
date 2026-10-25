@@ -1,0 +1,5 @@
+Jinja2>=3.1
+Markdown>=3.5
+PyYAML>=6.0
+Pillow>=10.0      # optional: verkleinert Visuals; ohne Pillow werden sie nur kopiert
+tzdata>=2024.1    # Zeitzonen-Daten (nötig unter Windows)

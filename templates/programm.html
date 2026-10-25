@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "partials/tile.html" import tile %}
+{% set title = "Programm" %}
+{% set description = "Alle kommenden Partys und Konzerte im Calavera, Körnerwall 1, Bremen." %}
+{% block content %}
+<section class="page-head wrap">
+  <p class="kicker">{{ span or "Calavera Bremen" }}</p>
+  <h1 class="display display--page">Programm</h1>
+  <p class="lead">Wenn nicht anders erwähnt: ab {{ cfg.events.default_start }} Uhr, {{ cfg.events.default_entry }}, {{ club.box_office }}.</p>
+</section>
+<section class="programm wrap" aria-label="Kommende Veranstaltungen">
+  {% if events %}
+  <div class="program-grid cols-{{ cols }}">
+    {% for ev in events %}{{ tile(ev, loop.first) }}{% endfor %}
+  </div>
+  {% endif %}
+  <p class="program-empty"{% if events %} hidden{% endif %}>Gerade steht nichts im Programm – schaut bald wieder rein.</p>
+  <div class="section-foot">
+    <a class="btn btn-ghost" href="/kalender.ics">Programm in den Kalender</a>
+    {% if has_archive %}<a class="btn btn-ghost" href="/programm/archiv/">Vergangene Veranstaltungen</a>{% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% set title = page.title %}
+{% set description = page.description %}
+{% if page.hero %}{% set og_image = page.hero.full %}{% endif %}
+{% block body_class %}page page-{{ page.slug }}{% endblock %}
+{% block content %}
+<section class="page-head wrap">
+  {% if page.kicker %}<p class="kicker">{{ page.kicker }}</p>{% endif %}
+  <h1 class="display display--page">{{ page.title }}</h1>
+  {% if page.lead and not page.hero %}<p class="lead">{{ page.lead }}</p>{% endif %}
+</section>
+
+{% if page.hero and not page.cards %}
+{# Titelbild neben dem Einleitungssatz (ohne Kacheln) #}
+<section class="wrap page-intro">
+  <img class="page-intro-img" src="{{ page.hero.url }}" alt="{{ page.hero.alt }}" width="900" height="900" decoding="async">
+  {% if page.lead %}<p class="page-intro-lead">{{ page.lead }}</p>{% endif %}
+</section>
+{% endif %}
+
+{% if page.cards %}
+{# Kacheln aus "cards:" im Kopf der .md – Bild oben, Text als echter Text darunter #}
+<section class="wrap pcards" aria-label="{{ page.title }}">
+  {% if page.hero %}
+  {# Mit Kacheln wird das Titelbild die erste Kachel. Der Einleitungssatz steht in der Grafik,
+     daher hier als Bildbeschreibung (für Screenreader und Suchmaschinen) statt doppelt als Text. #}
+  <article class="pcard pcard--intro">
+    <img class="pcard-img" src="{{ page.hero.url }}" alt="{{ page.hero.alt or page.lead }}" width="900" height="900" decoding="async">
+  </article>
+  {% endif %}
+  {% for c in page.cards %}
+  <article class="pcard">
+    {% if c.url %}<img class="pcard-img" src="{{ c.url }}" alt="{{ c.alt }}" width="900" height="900" loading="lazy" decoding="async">{% endif %}
+    <div class="pcard-body">
+      {% if page.numbered %}<p class="pcard-nr">No. {{ c.nr }}</p>{% endif %}
+      {% if c.titel %}<h2 class="pcard-title">{{ c.titel }}</h2>{% endif %}
+      {% if c.motto %}<p class="pcard-motto">{{ c.motto }}</p>{% endif %}
+      {% if c.text_html %}<div class="pcard-text">{{ c.text_html|safe }}</div>{% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+
+<div class="wrap">
+  <div class="prose prose--page">{{ page.body_html|safe }}</div>
+</div>
+{% endblock %}

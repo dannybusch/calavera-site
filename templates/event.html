@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% set title = ev.title ~ " · " ~ (ev.start|ddmmyyyy) %}
+{% set description = (ev.start|wd_long) ~ ", " ~ (ev.start|ddmmyyyy) ~ ", " ~ (ev.start|hhmm) ~ " Uhr im Calavera Bremen" ~ ((": " ~ ev.teaser) if ev.teaser else ".") %}
+{% set og_type = "article" %}
+{% set og_image = ev.visual_og %}
+{% block body_class %}event-page{% if ev.is_past %} is-past{% endif %}{% endblock %}
+{% block head %}
+<script type="application/ld+json">
+{{ ev.json_ld(site, club)|tojson }}
+</script>
+{% endblock %}
+{% block content %}
+<div class="wrap event" data-end="{{ ev.end|iso }}">
+  <p class="back"><a href="/programm/">← Zurück zum Programm</a></p>
+
+  <p class="past-note" role="status"{% if not ev.is_past %} hidden{% endif %}>Diese Veranstaltung ist vorbei. <a href="/programm/">Zum aktuellen Programm →</a></p>
+
+  <div class="event-grid">
+    <div class="event-visual">
+      {% if ev.visual_url %}
+      <a href="{{ ev.visual_url }}" class="event-flyer">
+        <img src="{{ ev.visual_og or ev.visual_url }}" alt="{{ ev.visual_alt }}" decoding="async">
+      </a>
+      <a class="small-link" href="{{ ev.visual_url }}">Flyer in voller Größe <span aria-hidden="true">↗</span></a>
+      {% else %}
+      <div class="event-flyer t-placeholder" aria-hidden="true"><img src="{{ asset('img/calavera_logo.svg') }}" alt=""></div>
+      {% endif %}
+    </div>
+
+    <article class="event-info">
+      <p class="event-kicker">
+        {% if ev.highlight %}<span class="t-hl">{{ ev.highlight }}</span>{% endif %}
+        {% if ev.kind and ev.kind != ev.highlight %}<span class="chip">{{ ev.kind }}</span>{% endif %}
+        <span class="label">{{ ev.start|wd_long }}</span>
+      </p>
+      <p class="event-date">{{ ev.start|ddmmyyyy }}</p>
+      <h1 class="event-title">{{ ev.title }}</h1>
+      {% if ev.byline %}<p class="event-by">{{ ev.byline }}</p>{% endif %}
+
+      <dl class="event-facts">
+        {% if ev.doors %}<div><dt>Einlass</dt><dd>{{ ev.doors|hhmm }}</dd></div>{% endif %}
+        <div><dt>Beginn</dt><dd>{{ ev.start|hhmm }}</dd></div>
+        <div><dt>Ende</dt><dd>ca. {{ ev.end|hhmm }}</dd></div>
+        {% if ev.entry %}<div><dt>Eintritt</dt><dd>{{ ev.entry }}</dd></div>{% endif %}
+        {% if ev.stream_url %}<div><dt>Wo</dt><dd>Vor Ort + Stream</dd></div>{% endif %}
+      </dl>
+
+      {% if ev.stream_url %}
+      {# Stream-Karte: vorher "Hör live mit", während der Veranstaltung "Jetzt live" (site.js schaltet um), danach weg #}
+      <section class="ev-stream{% if ev.start <= now < ev.end %} is-live{% endif %}" aria-labelledby="stream-titel"
+        data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}"{% if ev.is_past %} hidden{% endif %}>
+        <span class="evs-rings" aria-hidden="true"><span class="kf-ring"></span><span class="kf-ring"></span><span class="kf-ring"></span></span>
+        <div class="evs-copy">
+          <p class="evs-status"><span class="kf-dot" aria-hidden="true"></span><span data-evs-status>{% if ev.start <= now < ev.end %}Jetzt live{% else %}Auch im Stream{% endif %}</span></p>
+          <h2 class="evs-title" id="stream-titel">Nicht dabei? Hör live mit.</h2>
+          <p class="evs-text">Der Abend läuft auch im Kellerfunk-Stream – {{ ev.start|wd_long }}, {{ ev.start|ddmm }} ab {{ ev.start|hhmm }} Uhr.</p>
+        </div>
+        <a class="evs-cta" href="{{ ev.stream_url }}" rel="noopener"><span data-evs-cta>{% if ev.start <= now < ev.end %}Jetzt reinhören{% else %}Zum Stream{% endif %}</span> <span aria-hidden="true">↗</span></a>
+      </section>
+      {% endif %}
+
+      {% if ev.genres or ev.tags %}
+      <p class="chips">{% for g in ev.genres %}<span class="chip">{{ g }}</span>{% endfor %}{% for t in ev.tags %}<span class="chip chip--strong">{{ t }}</span>{% endfor %}</p>
+      {% endif %}
+
+      {% if ev.body_html %}<div class="prose">{{ ev.body_html|safe }}</div>{% endif %}
+
+      {% if ev.fans_of %}
+      <div class="fans">
+        <h2 class="label">Für Freunde von</h2>
+        <p class="chips">{% for f in ev.fans_of %}<span class="chip">{{ f }}</span>{% endfor %}</p>
+      </div>
+      {% endif %}
+
+      {% if ev.links %}
+      <ul class="event-links">{% for l in ev.links %}<li><a href="{{ l.url }}" rel="noopener">{{ l.label or l.url }} <span aria-hidden="true">↗</span></a></li>{% endfor %}</ul>
+      {% endif %}
+
+      <div class="actions">
+        {% if not ev.is_past %}
+        <a class="btn btn-light" href="termin.ics" download="{{ ev.slug }}.ics">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          <span><span class="hide-sm">In den </span>Kalender</span></a>
+        {% endif %}
+        <button class="btn btn-dark" type="button" data-share data-title="{{ ev.title }} – Calavera, {{ ev.start|ddmm }}" data-url="{{ site.url }}{{ ev.url }}">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+          <span data-share-label>Teilen</span></button>
+        <a class="btn btn-dark" href="{{ club.maps_url }}" rel="noopener">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          Location</a>
+      </div>
+
+      {% for o in ev.before %}
+      <a class="linked" href="{{ o.url }}"><span class="label accent">Davor · {{ o.start|hhmm }}</span><span class="linked-title">{{ o.title }}</span><span class="muted">{{ o.byline }}</span></a>
+      {% endfor %}
+      {% for o in ev.after %}
+      <a class="linked" href="{{ o.url }}"><span class="label accent">Danach · {{ o.start|hhmm }}</span><span class="linked-title">{{ o.title }}</span><span class="muted">{{ o.byline }}</span></a>
+      {% endfor %}
+    </article>
+  </div>
+
+  {#- Weitere Termine: zuerst bis zu zwei aus derselben Reihe (Überschrift aus config.yml → reihen → more),
+      dann der Rest des Programms ohne Doppelte. Ohne Reihe gibt es nur die zweite Gruppe. -#}
+  {% macro more_item(o) %}
+      <li><a class="more-item" href="{{ o.url }}" data-end="{{ o.end|iso }}">
+        <span class="mi-date">{{ o.start|ddmm }}</span>
+        <span class="label">{{ o.start|wd|upper }} · {{ o.start|hhmm }}</span>
+        <span class="mi-title">{{ o.title }}</span>
+        <span class="muted">{{ o.byline }}</span>
+      </a></li>
+  {% endmacro %}
+  {% if more_same or more_rest %}
+  <section class="more" aria-labelledby="mehr-titel">
+    <div class="section-head">
+      <h2 class="h-section h-section--sm" id="mehr-titel">Weitere Termine</h2>
+      <a class="label" href="/programm/">Ganzes Programm →</a>
+    </div>
+    <div class="more-groups">
+      {% if more_same %}
+      <div class="more-group more-group--reihe" style="--n: {{ more_same|length }}">
+        <h3 class="more-group-title">{{ reihe.more }}</h3>
+        <ol class="more-list">{% for o in more_same %}{{ more_item(o) }}{% endfor %}</ol>
+      </div>
+      {% endif %}
+      {% if more_rest %}
+      <div class="more-group" style="--n: {{ more_rest|length }}">
+        {% if more_same %}<h3 class="more-group-title">Außerdem im Programm</h3>{% endif %}
+        <ol class="more-list">{% for o in more_rest %}{{ more_item(o) }}{% endfor %}</ol>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

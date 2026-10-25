@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "partials/tile.html" import tile %}
+{% block body_class %}home{% endblock %}
+{% block content %}
+<section class="hero wrap">
+  <div class="hero-claim">
+    <p class="kicker">{{ site.kicker }}</p>
+    <h1 class="display">{% for line in site.claim %}{% if loop.last %}<span class="accent">{{ line }}</span>{% else %}{{ line }}<br>{% endif %}{% endfor %}</h1>
+  </div>
+
+  <div class="facts" aria-label="Öffnungszeiten, Eintritt und Adresse">
+    <div class="fact">
+      <span class="label">Offen</span>
+      <span class="fact-big">{{ club.hours }}</span>
+    </div>
+    <div class="fact">
+      <span class="label">Eintritt · {{ club.box_office }}</span>
+      <span class="fact-big">{{ club.entry }} · {{ club.entry_note }}</span>
+    </div>
+    <a class="fact" href="{{ club.maps_url }}" rel="noopener">
+      <span class="label">Wo <span aria-hidden="true">↗</span></span>
+      <span class="fact-text">{{ club.address }}, {{ club.city }}<br><span class="muted">{{ club.directions }}</span></span>
+    </a>
+  </div>
+
+  {% include "partials/kellerfunk.html" %}
+</section>
+
+<section class="programm wrap" id="programm" aria-labelledby="programm-titel">
+  <div class="section-head">
+    <h2 class="h-section" id="programm-titel">Programm</h2>
+    <span class="label">{{ span }}</span>
+  </div>
+  {% if events %}
+  <div class="program-grid cols-{{ cols }}">
+    {% for ev in events %}{{ tile(ev, loop.first) }}{% endfor %}
+  </div>
+  {% endif %}
+  <p class="program-empty"{% if events %} hidden{% endif %}>Gerade steht nichts im Programm – schaut bald wieder rein oder folgt uns auf Instagram.</p>
+  <div class="section-foot">
+    <a class="btn btn-ghost" href="/programm/">{% if more %}Alle Termine ({{ events|length + more }}){% else %}Ganzes Programm{% endif %} <span aria-hidden="true">→</span></a>
+    <a class="btn btn-ghost" href="/kalender.ics">Programm in den Kalender</a>
+  </div>
+</section>
+
+<section class="teasers wrap">
+  <a class="teaser" href="/safe-space/">
+    <span class="label">Safe Space</span>
+    <span class="teaser-title">Sprich Freund und tritt ein.</span>
+    <span class="teaser-text">Unsere Clubregeln für einen Abend, an dem sich alle wohlfühlen.</span>
+    <span class="teaser-link">Clubregeln lesen <span aria-hidden="true">→</span></span>
+  </a>
+  <a class="teaser" href="/calavera-mieten/">
+    <span class="label">Privat feiern</span>
+    <span class="teaser-title">Calavera mieten.</span>
+    <span class="teaser-text">Geburtstag, Hochzeit, Firmenfeier – offene oder geschlossene Gesellschaft.</span>
+    <span class="teaser-link">Möglichkeiten ansehen <span aria-hidden="true">→</span></span>
+  </a>
+</section>
+{% endblock %}

@@ -1,0 +1,89 @@
+# ------------------------------------------------------------------
+#  Calavera Bremen – Einstellungen für die ganze Website
+#  Nach jeder Änderung neu bauen:  python build.py
+# ------------------------------------------------------------------
+
+site:
+  name: "Calavera Bremen"
+  url: "https://www.calavera.club"          # ohne Schrägstrich am Ende
+  language: "de"
+  timezone: "Europe/Berlin"
+  description: "Kleiner, aber feiner Club im 1/4 Bremen – entspannte Leute feiern zu guter Musik. Die Alternative in Bremen!"
+  kicker: "Kleiner, aber feiner Club in Bremen"
+  claim: ["Vielfalt.", "Musik.", "Freude."]   # letzte Zeile erscheint rot
+  accent: "#b3122e"                          # gedämpftes Rot wie auf live.calavera.club
+                                             # (hellere Töne für rote Schrift berechnet der Build selbst)
+  text: "#d1cabf"                            # Schriftfarbe: gedämpftes, warmes Hellgrau statt Weiß
+                                             # (Nebentexte werden daraus abgestuft; heller = "#e0dad0", dunkler = "#c4bdb2")
+
+club:
+  address: "Körnerwall 1"
+  city: "28203 Bremen"
+  directions: "zwischen Sielwall-Kreuzung und Osterdeich"
+  maps_url: "https://maps.google.com/?cid=6473833586006662898"
+  email: "team@calavera.club"
+  hours: "Fr + Sa · 22–04"
+  hours_note: "Zu besonderen Anlässen starten wir auch früher."
+  entry: "5 €"
+  entry_note: "Azubis & Studis frei"
+  box_office: "nur Abendkasse"
+
+social:
+  - { label: "Instagram", url: "https://www.instagram.com/calavera.bremen/" }
+  - { label: "Facebook",  url: "https://www.facebook.com/calavera.bremen" }
+  - { label: "Mixcloud",  url: "https://www.mixcloud.com/calaverabremen" }
+
+# Hauptmenü (Reihenfolge = Reihenfolge im Menü)
+navigation:
+  - { label: "Programm",        href: "/programm/" }
+  - { label: "Safe Space",      href: "/safe-space/" }
+  - { label: "Über den Club",   href: "/ueber-den-club/" }
+  - { label: "Calavera mieten", href: "/calavera-mieten/" }
+  - { label: "Kontakt",         href: "/kontakt/" }
+
+# Standardwerte für Veranstaltungen (in jeder events/*.md überschreibbar)
+events:
+  default_start: "22:00"
+  default_hours: 6            # ohne "end:" endet eine Veranstaltung 6 h nach Beginn (22:00 → 04:00)
+  default_entry: "5 € · Azubis & Studis frei"
+  stream_label: "Vor Ort & im Stream"   # Etikett für Abende mit "stream: true"
+
+programm:
+  spalten: 4                  # 3 oder 4 Kacheln pro Reihe auf großen Bildschirmen
+  startseite_max: 12          # so viele Termine auf der Startseite, der Rest unter /programm/
+  weitere_termine: 4          # so viele Termine unter "Weitere Termine" auf einer Veranstaltungsseite
+  aus_der_reihe: 2            # davon höchstens so viele aus derselben Reihe – die stehen vorn
+
+# Reihen: Veranstaltungen, die zusammengehören. In der events/*.md mit "reihe: dark" zuordnen.
+# Wirkt auf "Weitere Termine" einer Veranstaltungsseite: Termine aus derselben Reihe stehen
+# vorn (Überschrift = "more"), danach der Rest des Programms.
+#   tag:   Kürzel, das in der .md bei "reihe:" steht (nur Kleinbuchstaben, Zahlen, Bindestrich)
+#   title: Name der Reihe
+#   more:  Überschrift über den Terminen aus dieser Reihe
+reihen:
+  - tag: dark
+    title: "Calavera Dark"
+    more: "Weitere Dunkelveranstaltungen"
+
+# Kellerfunk: liest live die config.yml von live.calavera.club
+# (dort muss der Server www.calavera.club per CORS erlauben, siehe README)
+kellerfunk:
+  url: "https://live.calavera.club"
+  config: "https://live.calavera.club/config.yml"
+  logo: "https://live.calavera.club/kellerfunk.png"   # erscheint mittig in der Karte, wenn gerade nicht gesendet wird
+  refresh_seconds: 60
+  default_hours: 6            # wie auf live.calavera.club: ohne end 6 h live
+
+# Der Gag: ein "Cookie-Banner", das keins ist. Erscheint beim Betreten der Seite
+# (nicht bei jedem Klick innerhalb der Seite) und verschwindet nach "sekunden" von selbst.
+# "SAFE SPACE" im Text wird automatisch zur Safe-Space-Seite verlinkt.
+no_cookie_banner:
+  anzeigen: true
+  titel: "No Cookies"
+  text: "Kein Tracking, keine Cookies hier. Auch im Digitalen ein SAFE SPACE. Sagt uns einfach direkt, wie ihr uns findet. Ehrlich. Damit können wir umgehen!"
+  sekunden: 10
+
+# Alte Adressen von calaverabremen.de → neue Seiten (es entstehen kleine Weiterleitungsseiten)
+redirects:
+  "privatveranstaltungen": "/calavera-mieten/"
+  "über-den-club": "/ueber-den-club/"
