@@ -604,7 +604,7 @@ def ics_for(events: list[Event], cfg: dict, stamp: datetime, calname: str) -> st
             desc += "\n\n" + ev.teaser
         if ev.stream_url:
             desc += f"\n\nAuch live im Stream: {ev.stream_url}"
-        desc += f"\n\n{site['url']}{ev.url}"
+        # Der Link zur Veranstaltungsseite steht im URL-Feld, nicht mehr in der Beschreibung.
         lines += ["BEGIN:VEVENT",
                   f"UID:{ev.slug}@{re.sub(r'^https?://', '', site['url'])}",
                   f"DTSTAMP:{fmt(stamp)}",
@@ -613,8 +613,17 @@ def ics_for(events: list[Event], cfg: dict, stamp: datetime, calname: str) -> st
                   f"SUMMARY:{ics_escape(ev.title + ' – Calavera')}",
                   f"DESCRIPTION:{ics_escape(desc)}",
                   f"LOCATION:{ics_escape('Calavera, ' + club['address'] + ', ' + club['city'])}",
-                  f"URL:{site['url']}{ev.url}",
-                  "END:VEVENT"]
+                  f"URL:{site['url']}{ev.url}"]
+        # Flyer als Anhang (Verweis auf das Bild, nicht das Bild selbst). Absolute Adresse nötig.
+        image = ev.visual_og
+        if image:
+            if not image.startswith(("http://", "https://")):
+                image = site["url"].rstrip("/") + image
+            ext = Path(image.split("?", 1)[0]).suffix.lower()
+            mime = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+                    ".webp": "image/webp", ".gif": "image/gif"}.get(ext)
+            lines.append(f"ATTACH;FMTTYPE={mime}:{image}" if mime else f"ATTACH:{image}")
+        lines.append("END:VEVENT")
     lines.append("END:VCALENDAR")
     return "\r\n".join(ics_fold(l) for l in lines) + "\r\n"
 
