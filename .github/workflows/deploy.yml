@@ -1,0 +1,145 @@
+# ------------------------------------------------------------------
+#  Calavera Bremen – Website bauen und per SFTP veröffentlichen
+#
+#  Läuft
+#    - bei jedem Push auf den Branch "main"
+#    - täglich nach Clubschluss (damit Vergangenes ins Archiv wandert)
+#    - von Hand: GitHub → Actions → "Bauen und veröffentlichen" → "Run workflow"
+#      (dort standardmäßig als Probelauf: zeigt nur an, was passieren würde)
+#
+#  Einrichtung siehe README, Abschnitt "Automatisch veröffentlichen".
+#  Benötigt im Repository (Settings → Secrets and variables → Actions):
+#    Variables:  SFTP_HOST, SFTP_USER, SFTP_REMOTE_DIR   (optional: SFTP_PORT)
+#    Secrets:    SFTP_PASSWORD                            (optional: SFTP_KNOWN_HOSTS)
+# ------------------------------------------------------------------
+
+name: Bauen und veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # GitHub rechnet in UTC: 04:17 UTC = 05:17 Uhr Winterzeit / 06:17 Uhr Sommerzeit.
+    # (Ungerade Minute, weil GitHub zur vollen Stunde oft stark verzögert.)
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Probelauf – nur anzeigen, was hochgeladen und gelöscht würde"
+        type: boolean
+        default: true
+
+# Nie zwei Veröffentlichungen gleichzeitig; eine laufende wird zu Ende gebracht.
+concurrency:
+  group: deploy-website
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      SFTP_HOST: ${{ vars.SFTP_HOST }}
+      SFTP_PORT: ${{ vars.SFTP_PORT || '22' }}
+      SFTP_USER: ${{ vars.SFTP_USER }}
+      SFTP_REMOTE_DIR: ${{ vars.SFTP_REMOTE_DIR }}
+      # Probelauf nur bei manuellem Start mit Häkchen; Push und Zeitplan veröffentlichen immer.
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+
+    steps:
+      - name: Projekt holen
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Pakete installieren
+        run: pip install -r requirements.txt
+
+      - name: Website bauen
+        # --strict: bricht ab, wenn eine Event-Datei fehlerhaft ist – dann wird nichts veröffentlicht
+        run: python build.py --strict
+
+      - name: Einstellungen prüfen
+        env:
+          HAS_PASSWORD: ${{ secrets.SFTP_PASSWORD != '' }}
+        run: |
+          missing=""
+          [ -n "$SFTP_HOST" ]       || missing="$missing SFTP_HOST"
+          [ -n "$SFTP_USER" ]       || missing="$missing SFTP_USER"
+          [ -n "$SFTP_REMOTE_DIR" ] || missing="$missing SFTP_REMOTE_DIR"
+          [ "$HAS_PASSWORD" = "true" ] || missing="$missing SFTP_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Es fehlen Einstellungen:$missing (siehe README, 'Automatisch veröffentlichen')"
+            exit 1
+          fi
+          # Schutz: niemals das Wurzelverzeichnis des Webspace spiegeln – dort liegen auch
+          # andere Seiten (z. B. live.calavera.club), die sonst gelöscht würden.
+          # shellcheck disable=SC2088  # "~" soll hier wörtlich verglichen werden
+          case "$SFTP_REMOTE_DIR" in
+            ""|"/"|"."|"./"|"~"|"~/")
+              echo "::error::SFTP_REMOTE_DIR zeigt auf das Wurzelverzeichnis. Bitte den Ordner von www.calavera.club angeben."
+              exit 1 ;;
+          esac
+          echo "Ziel: $SFTP_USER@$SFTP_HOST (Port $SFTP_PORT), Ordner: $SFTP_REMOTE_DIR  –  Probelauf: $DRY_RUN"
+
+      - name: lftp installieren
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Server-Schlüssel hinterlegen
+        env:
+          KNOWN_HOSTS: ${{ secrets.SFTP_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            # Sicher: fest hinterlegter Fingerabdruck des STRATO-Servers
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            # Bequem: Schlüssel beim ersten Kontakt abfragen (siehe README, wie man ihn fest hinterlegt)
+            echo "::warning::SFTP_KNOWN_HOSTS ist nicht gesetzt – Server-Schlüssel wird ungeprüft übernommen."
+            ssh-keyscan -p "$SFTP_PORT" -T 15 "$SFTP_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          chmod 600 ~/.ssh/known_hosts
+          test -s ~/.ssh/known_hosts || { echo "::error::Server-Schlüssel von $SFTP_HOST nicht erhalten"; exit 1; }
+
+      - name: Hochladen (SFTP)
+        env:
+          LFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+        run: |
+          DRY=""
+          [ "$DRY_RUN" = "true" ] && DRY="--dry-run"
+          # mirror --reverse: lädt dist/ hoch; --delete: entfernt auf dem Server, was es lokal nicht mehr gibt;
+          # --overwrite: Dateien direkt überschreiben statt erst löschen (sonst fehlen Seiten kurz).
+          # Ausgenommen (bleiben auf dem Server unangetastet): .htaccess, .well-known/ und alles unter _behalten/
+          lftp -c "
+            set cmd:fail-exit yes
+            set net:max-retries 3
+            set net:timeout 30
+            set net:reconnect-interval-base 5
+            set sftp:connect-program 'ssh -a -x -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts'
+            open --env-password -u '$SFTP_USER' -p $SFTP_PORT 'sftp://$SFTP_HOST'
+            mirror --reverse --delete --overwrite --verbose=1 --parallel=4 $DRY \
+              --exclude-glob .htaccess \
+              --exclude .well-known/ \
+              --exclude _behalten/ \
+              dist/ '$SFTP_REMOTE_DIR'
+          "
+
+      - name: Zusammenfassung
+        if: always()
+        run: |
+          {
+            echo "### Calavera-Website"
+            echo "- Anlass: \`${{ github.event_name }}\`"
+            echo "- Probelauf: \`$DRY_RUN\`"
+            if [ -f dist/build.json ]; then
+              echo "- Build:"; echo '```json'; cat dist/build.json; echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

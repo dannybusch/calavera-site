@@ -152,6 +152,44 @@ Damit „vorbei“ auch ohne neue Inhalte stimmt, den Build am besten einmal tä
 
 Der Server sollte für fehlende Seiten `404.html` ausliefern (Apache: `ErrorDocument 404 /404.html`).
 
+## Automatisch veröffentlichen (GitHub Actions → STRATO per SFTP)
+
+`.github/workflows/deploy.yml` baut die Website und lädt `dist/` per SFTP hoch:
+
+- bei jedem **Push auf `main`**,
+- **täglich** um 04:17 UTC (05:17 Uhr Winterzeit / 06:17 Uhr Sommerzeit), damit Vergangenes ins Archiv wandert,
+- **von Hand** unter Actions → „Bauen und veröffentlichen“ → „Run workflow“ – dort standardmäßig als
+  **Probelauf**, der nur anzeigt, was hochgeladen und gelöscht würde.
+
+Ist eine Event-Datei fehlerhaft, bricht der Build ab (`--strict`) und es wird **nichts** veröffentlicht.
+
+**Einrichten** (einmalig, im GitHub-Repository unter Settings → Secrets and variables → Actions):
+
+| Art | Name | Wert |
+|---|---|---|
+| Variable | `SFTP_HOST` | SFTP-Server aus dem STRATO-Kundenlogin (Ihr Paket → Datenbanken und Webspace → SFTP & SSH) |
+| Variable | `SFTP_USER` | SFTP-Benutzername von dort |
+| Variable | `SFTP_REMOTE_DIR` | Ordner von www.calavera.club auf dem Webspace, z. B. `www.calavera.club` – **nicht** `/` |
+| Variable | `SFTP_PORT` | optional, Standard 22 |
+| Secret | `SFTP_PASSWORD` | SFTP-Passwort |
+| Secret | `SFTP_KNOWN_HOSTS` | optional, empfohlen: Ausgabe von `ssh-keyscan <SFTP_HOST>` (einmal lokal ausführen) |
+
+Am besten legt man bei STRATO für GitHub einen **eigenen SFTP-Zugang** an, der nur auf den Ordner von
+www.calavera.club zugreifen darf. Dann kann ein falscher Ordnername nichts anderes treffen.
+
+**Wichtig – `SFTP_REMOTE_DIR`:** Der Upload spiegelt `dist/` in diesen Ordner und **löscht dort alles,
+was es in `dist/` nicht gibt**. Er muss also genau der Ordner sein, auf den www.calavera.club zeigt –
+niemals das Wurzelverzeichnis des Webspace, in dem auch live.calavera.club liegt (das verhindert der
+Workflow zusätzlich). Unangetastet bleiben im Zielordner: `.htaccess`, `.well-known/` und alles in einem
+Ordner `_behalten/` (für Dateien, die nicht aus dem Generator kommen).
+
+**Erster Start:** Workflow von Hand mit Häkchen „Probelauf“ starten und im Protokoll prüfen, dass
+Ordner und Dateien stimmen. Danach von Hand ohne Häkchen starten oder einfach pushen.
+
+Hinweise: GitHub startet geplante Läufe manchmal mit Verzögerung. In **öffentlichen** Repositories
+schaltet GitHub den täglichen Lauf nach 60 Tagen ohne Aktivität ab (Actions → Workflow → „Enable workflow“);
+in privaten Repositories nicht.
+
 ## No-Cookie-Banner
 
 Erscheint nur, wenn jemand von außen auf die Seite kommt, und verschwindet nach `sekunden` von selbst.

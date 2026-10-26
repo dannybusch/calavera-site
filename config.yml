@@ -50,7 +50,7 @@ events:
 
 programm:
   spalten: 4                  # 3 oder 4 Kacheln pro Reihe auf großen Bildschirmen
-  startseite_max: 12          # so viele Termine auf der Startseite, der Rest unter /programm/
+  startseite_max: 13          # so viele Termine auf der Startseite, der Rest unter /programm/
   weitere_termine: 4          # so viele Termine unter "Weitere Termine" auf einer Veranstaltungsseite
   aus_der_reihe: 2            # davon höchstens so viele aus derselben Reihe – die stehen vorn
 
@@ -64,6 +64,9 @@ reihen:
   - tag: dark
     title: "Calavera Dark"
     more: "Weitere Dunkelveranstaltungen"
+  - tag: honey
+    title: "Honey Café"
+    more: "Weitere Sonntage"
 
 # Kellerfunk: liest live die config.yml von live.calavera.club
 # (dort muss der Server www.calavera.club per CORS erlauben, siehe README)
@@ -79,9 +82,9 @@ kellerfunk:
 # "SAFE SPACE" im Text wird automatisch zur Safe-Space-Seite verlinkt.
 no_cookie_banner:
   anzeigen: true
-  titel: "No Cookies"
-  text: "Kein Tracking, keine Cookies hier. Auch im Digitalen ein SAFE SPACE. Sagt uns einfach direkt, wie ihr uns findet. Ehrlich. Damit können wir umgehen!"
-  sekunden: 10
+  titel: "Keine Cookies hier"
+  text: "Kein Trackingdienst, keine Cookies hier. Auch im Digitalen ein SAFE SPACE. Sagt uns einfach direkt, wie ihr uns findet. Ehrlich. Damit können wir umgehen!"
+  sekunden: 6
 
 # Alte Adressen von calaverabremen.de → neue Seiten (es entstehen kleine Weiterleitungsseiten)
 redirects:
