@@ -1,0 +1,13 @@
+# Seiten und Kalender nicht ungeprüft aus dem Zwischenspeicher nehmen
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|ics)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+# Kalenderdateien richtig ausliefern
+AddType text/calendar .ics
+AddCharset utf-8 .ics
+
+# Eigene Fehlerseite
+ErrorDocument 404 /404.html
