@@ -7,7 +7,7 @@ genres: ["80s", "Pop", "NDW", "Rock", "New Wave", "Synthpop"]
 tags: ["Rauchfrei"]
 teaser: "80s Pop & Rock & NDW - unser Flug auf dem Glücksdrachen"
 reihe: "honey"
-fans_of: ["Alphaville", "Madonna", "Ideal", "Andreas Dorau", "Paso Doble", "The Cure", "The Smith", "Roxette", "Tina Turner", "Grauzone", "Joachim Witt", "Simple Minds", "Sister of Mercy", "Camouflage", "Rheingold", "United Balls", "David Bowie", "Softcell", "Billy Idol", "u.v.a.m."]
+fans_of: ["Alphaville", "Madonna", "Ideal", "Andreas Dorau", "Paso Doble", "The Cure", "The Smith", "Roxette", "Toto", "R.E.M.", "Tina Turner", "Grauzone", "Joachim Witt", "Simple Minds", "Sister of Mercy", "Camouflage", "Rheingold", "United Balls", "David Bowie", "Softcell", "Billy Idol", "u.v.a.m."]
 visual_alt: "Honey Cafe - Flashdance"
 ---
 
