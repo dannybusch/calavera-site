@@ -152,6 +152,35 @@ Damit „vorbei“ auch ohne neue Inhalte stimmt, den Build am besten einmal tä
 
 Der Server sollte für fehlende Seiten `404.html` ausliefern (Apache: `ErrorDocument 404 /404.html`).
 
+### `.htaccess` für www.calavera.club
+
+Liegt direkt im Ordner von www.calavera.club auf dem Server und wird vom automatischen Upload nicht
+angefasst – also einmal von Hand anlegen bzw. ergänzen. **Als UTF-8 ohne BOM speichern und die
+Zeilen selbst tippen** (aus Chats kopierte Anführungszeichen/Leerzeichen führen zu Fehler 500).
+
+```apache
+# Seiten und Kalender nicht ungeprüft aus dem Zwischenspeicher nehmen
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|ics)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+# Kalenderdateien richtig ausliefern
+AddType text/calendar .ics
+AddCharset utf-8 .ics
+
+# Eigene Fehlerseite
+ErrorDocument 404 /404.html
+```
+
+`no-cache` heißt: Der Browser darf eine Kopie behalten, muss aber vor jeder Verwendung beim Server
+nachfragen, ob sie noch aktuell ist. Bilder, Schriften, CSS und JS bekommen ohnehin einen
+Fingerabdruck (`?v=…`) in der Adresse und dürfen lange zwischengespeichert werden.
+
+Zusätzlich bekommen alle Links auf `kalender.ics` und `termin.ics` einen Fingerabdruck des Inhalts
+(`/kalender.ics?v=…`). Er ändert sich nur, wenn sich ein Termin ändert – nicht bei jedem Build.
+
 ## Automatisch veröffentlichen (GitHub Actions → STRATO per SFTP)
 
 `.github/workflows/deploy.yml` baut die Website und lädt `dist/` per SFTP hoch. Variablen und Secrets liegen im GitHub-Environment `calavera-site.env` (Settings → Environments); der Name steht im Workflow unter `environment:`.

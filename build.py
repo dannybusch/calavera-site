@@ -593,6 +593,13 @@ def ics_fold(line: str) -> str:
     return "\r\n ".join(out)
 
 
+def ics_version(ics_text: str) -> str:
+    """Fingerabdruck einer Kalenderdatei für ?v=… in Links. Der Erstellungszeitpunkt (DTSTAMP)
+    zählt nicht mit – sonst bekäme der Link bei jedem Build einen neuen Wert, auch ohne Änderung."""
+    relevant = "\n".join(l for l in ics_text.splitlines() if not l.startswith("DTSTAMP:"))
+    return hashlib.sha1(relevant.encode("utf-8")).hexdigest()[:8]
+
+
 def ics_for(events: list[Event], cfg: dict, stamp: datetime, calname: str) -> str:
     site, club = cfg["site"], cfg["club"]
     fmt = lambda dt: dt.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")  # noqa: E731
@@ -708,6 +715,11 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
                        textpal=text_palette(cfg["site"].get("text", "#d1cabf")),
                        pages={p.slug: p for p in pages})
 
+    # Programm-Kalender vorab erzeugen: Links darauf bekommen ?v=…, damit Handys nach einer
+    # Änderung nicht die zwischengespeicherte alte Datei öffnen.
+    programm_ics = ics_for(upcoming, cfg, now, "Calavera Bremen – Programm")
+    env.globals["kalender_url"] = f"/kalender.ics?v={ics_version(programm_ics)}"
+
     def render(template: str, dest: str, **ctx) -> None:
         path = out / dest.lstrip("/")
         if dest.endswith("/"):
@@ -730,10 +742,11 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     more_reihe = int(cfg.get("programm", {}).get("aus_der_reihe", 2))
     for ev in events:
         more_same, more_rest = more_events(ev, upcoming, more_total, more_reihe)
+        termin_ics = ics_for([ev], cfg, now, ev.title)
         render("event.html", ev.url, page_path=ev.url, ev=ev,
-               more_same=more_same, more_rest=more_rest, reihe=reihen.get(ev.reihe))
-        (out / ev.url.lstrip("/") / "termin.ics").write_text(
-            ics_for([ev], cfg, now, ev.title), encoding="utf-8", newline="")
+               more_same=more_same, more_rest=more_rest, reihe=reihen.get(ev.reihe),
+               termin_url=f"termin.ics?v={ics_version(termin_ics)}")
+        (out / ev.url.lstrip("/") / "termin.ics").write_text(termin_ics, encoding="utf-8", newline="")
 
     for page in pages:
         process_page_images(page, out)
@@ -743,8 +756,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         render("redirect.html", f"/{str(old).strip('/')}/", target=new)
 
     render("404.html", "/404.html", page_path="/404.html")
-    (out / "kalender.ics").write_text(ics_for(upcoming, cfg, now, "Calavera Bremen – Programm"),
-                                      encoding="utf-8", newline="")
+    (out / "kalender.ics").write_text(programm_ics, encoding="utf-8", newline="")
 
     base = cfg["site"]["url"].rstrip("/")
     urls = ["/", "/programm/", "/programm/archiv/"] + [p.url for p in pages if p.in_sitemap] + [e.url for e in events]

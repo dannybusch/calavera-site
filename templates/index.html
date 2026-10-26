@@ -39,7 +39,7 @@
   <p class="program-empty"{% if events %} hidden{% endif %}>Gerade steht nichts im Programm – schaut bald wieder rein oder folgt uns auf Instagram.</p>
   <div class="section-foot">
     <a class="btn btn-ghost" href="/programm/">{% if more %}Alle Termine ({{ events|length + more }}){% else %}Ganzes Programm{% endif %} <span aria-hidden="true">→</span></a>
-    <a class="btn btn-ghost" href="/kalender.ics">Programm in den Kalender</a>
+    <a class="btn btn-ghost" href="{{ kalender_url }}">Programm in den Kalender</a>
   </div>
 </section>
 

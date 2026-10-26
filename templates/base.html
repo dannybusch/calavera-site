@@ -24,7 +24,7 @@
 <link rel="preload" href="/static/fonts/space-grotesk-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset('css/site.css') }}">
 <style>:root{--accent:{{ palette.accent }};--accent-rgb:{{ palette.accent_rgb }};--accent-display:{{ palette.accent_display }};--accent-text:{{ palette.accent_text }};--text:{{ textpal.text }};--text-2:{{ textpal.text_2 }};--text-3:{{ textpal.text_3 }};--muted:{{ textpal.muted }}}</style>
-<link rel="alternate" type="text/calendar" title="Calavera Programm" href="/kalender.ics">
+<link rel="alternate" type="text/calendar" title="Calavera Programm" href="{{ kalender_url }}">
 <script>document.documentElement.classList.add('js')</script>
 {% block head %}{% endblock %}
 </head>
@@ -65,7 +65,7 @@
     <p><a href="mailto:{{ club.email }}">{{ club.email }}</a><br>
       {% for s in social %}<a href="{{ s.url }}" rel="noopener">{{ s.label }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
     <p><a href="/kontakt/">Kontakt &amp; Impressum</a> · <a href="/datenschutz/">Datenschutz</a><br>
-      <a href="/kalender.ics">Programm als Kalender</a><br>© {{ year }} {{ site.name }}</p>
+      <a href="{{ kalender_url }}">Programm als Kalender</a><br>© {{ year }} {{ site.name }}</p>
   </div>
 </footer>
 

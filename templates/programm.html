@@ -16,7 +16,7 @@
   {% endif %}
   <p class="program-empty"{% if events %} hidden{% endif %}>Gerade steht nichts im Programm – schaut bald wieder rein.</p>
   <div class="section-foot">
-    <a class="btn btn-ghost" href="/kalender.ics">Programm in den Kalender</a>
+    <a class="btn btn-ghost" href="{{ kalender_url }}">Programm in den Kalender</a>
     {% if has_archive %}<a class="btn btn-ghost" href="/programm/archiv/">Vergangene Veranstaltungen</a>{% endif %}
   </div>
 </section>

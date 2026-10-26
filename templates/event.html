@@ -78,7 +78,7 @@
 
       <div class="actions">
         {% if not ev.is_past %}
-        <a class="btn btn-light" href="termin.ics" download="{{ ev.slug }}.ics">
+        <a class="btn btn-light" href="{{ termin_url }}" download="{{ ev.slug }}.ics">
           <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
           <span><span class="hide-sm">In den </span>Kalender</span></a>
         {% endif %}
