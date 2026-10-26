@@ -40,6 +40,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: calavera-site.env
     timeout-minutes: 20
 
     env:
