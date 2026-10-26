@@ -154,7 +154,9 @@ Der Server sollte für fehlende Seiten `404.html` ausliefern (Apache: `ErrorDocu
 
 ## Automatisch veröffentlichen (GitHub Actions → STRATO per SFTP)
 
-`.github/workflows/deploy.yml` baut die Website und lädt `dist/` per SFTP hoch:
+`.github/workflows/deploy.yml` baut die Website und lädt `dist/` per SFTP hoch. Variablen und Secrets liegen im GitHub-Environment `calavera-site.env` (Settings → Environments); der Name steht im Workflow unter `environment:`.
+
+Der Workflow läuft:
 
 - bei jedem **Push auf `main`**,
 - **täglich** um 04:17 UTC (05:17 Uhr Winterzeit / 06:17 Uhr Sommerzeit), damit Vergangenes ins Archiv wandert,
@@ -163,13 +165,14 @@ Der Server sollte für fehlende Seiten `404.html` ausliefern (Apache: `ErrorDocu
 
 Ist eine Event-Datei fehlerhaft, bricht der Build ab (`--strict`) und es wird **nichts** veröffentlicht.
 
-**Einrichten** (einmalig, im GitHub-Repository unter Settings → Secrets and variables → Actions):
+**Einrichten** (einmalig, im GitHub-Environment `calavera-site.env` unter Settings → Environments):
 
 | Art | Name | Wert |
 |---|---|---|
 | Variable | `SFTP_HOST` | SFTP-Server aus dem STRATO-Kundenlogin (Ihr Paket → Datenbanken und Webspace → SFTP & SSH) |
 | Variable | `SFTP_USER` | SFTP-Benutzername von dort |
-| Variable | `SFTP_REMOTE_DIR` | Ordner von www.calavera.club auf dem Webspace, z. B. `www.calavera.club` – **nicht** `/` |
+| Variable | `SFTP_REMOTE_DIR` | Ordner von www.calavera.club auf dem Webspace, z. B. `www.calavera.club` – oder `/` bei einem eigenen Zugang (nächste Zeile) |
+| Variable | `SFTP_USER_IS_WEBROOT` | `true`, wenn der SFTP-Zugang bei STRATO **nur** den Ordner von www.calavera.club sieht – dann ist `/` als Zielordner erlaubt |
 | Variable | `SFTP_PORT` | optional, Standard 22 |
 | Secret | `SFTP_PASSWORD` | SFTP-Passwort |
 | Secret | `SFTP_KNOWN_HOSTS` | optional, empfohlen: Ausgabe von `ssh-keyscan <SFTP_HOST>` (einmal lokal ausführen) |

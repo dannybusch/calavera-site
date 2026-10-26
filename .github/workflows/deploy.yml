@@ -40,6 +40,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Variablen und Secrets kommen aus diesem GitHub-Environment (Settings → Environments)
     environment: calavera-site.env
     timeout-minutes: 20
 
@@ -48,6 +49,9 @@ jobs:
       SFTP_PORT: ${{ vars.SFTP_PORT || '22' }}
       SFTP_USER: ${{ vars.SFTP_USER }}
       SFTP_REMOTE_DIR: ${{ vars.SFTP_REMOTE_DIR }}
+      # "true", wenn der SFTP-Zugang bei STRATO nur den Ordner von www.calavera.club sieht –
+      # dann ist SFTP_REMOTE_DIR "/" erlaubt (siehe README)
+      SFTP_USER_IS_WEBROOT: ${{ vars.SFTP_USER_IS_WEBROOT }}
       # Probelauf nur bei manuellem Start mit Häkchen; Push und Zeitplan veröffentlichen immer.
       DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
 
@@ -81,13 +85,19 @@ jobs:
             echo "::error::Es fehlen Einstellungen:$missing (siehe README, 'Automatisch veröffentlichen')"
             exit 1
           fi
-          # Schutz: niemals das Wurzelverzeichnis des Webspace spiegeln – dort liegen auch
-          # andere Seiten (z. B. live.calavera.club), die sonst gelöscht würden.
+          # Schutz: niemals das Wurzelverzeichnis eines Zugangs spiegeln, der den ganzen Webspace sieht –
+          # dort liegen auch andere Seiten (z. B. live.calavera.club), die sonst gelöscht würden.
+          # Ausnahme: eigener SFTP-Zugang, der nur den Ordner von www.calavera.club sieht
+          # (Variable SFTP_USER_IS_WEBROOT = true).
           # shellcheck disable=SC2088  # "~" soll hier wörtlich verglichen werden
           case "$SFTP_REMOTE_DIR" in
-            ""|"/"|"."|"./"|"~"|"~/")
-              echo "::error::SFTP_REMOTE_DIR zeigt auf das Wurzelverzeichnis. Bitte den Ordner von www.calavera.club angeben."
-              exit 1 ;;
+            "/"|"."|"./"|"~"|"~/")
+              if [ "$SFTP_USER_IS_WEBROOT" = "true" ]; then
+                echo "SFTP_USER_IS_WEBROOT=true: Zugang sieht nur www.calavera.club – Wurzelverzeichnis ist erlaubt."
+              else
+                echo "::error::SFTP_REMOTE_DIR zeigt auf das Wurzelverzeichnis. Entweder den Ordner von www.calavera.club angeben oder – wenn der SFTP-Zugang nur diesen Ordner sieht – die Variable SFTP_USER_IS_WEBROOT auf true setzen."
+                exit 1
+              fi ;;
           esac
           echo "Ziel: $SFTP_USER@$SFTP_HOST (Port $SFTP_PORT), Ordner: $SFTP_REMOTE_DIR  –  Probelauf: $DRY_RUN"
 
