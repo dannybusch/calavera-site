@@ -5,8 +5,8 @@
 .fx-rn { position: absolute; left: 0; right: 0; bottom: 0; height: var(--h, 55%); overflow: hidden; --z: 1; container-type: size; }
 /* Breite in Höhen-Einheiten (cqh): die Nebelbilder (4:1) behalten in jedem Rahmen ihre Proportionen –
    sonst werden sie in schmalen, hohen Kacheln zu senkrechten Streifen gestaucht */
-.fx-rn > span { position: absolute; left: 0; bottom: 0; width: calc(800cqh * var(--z)); height: 100%;
-  background-repeat: repeat-x; background-size: 50% 100%; animation: fx-drift var(--d) linear infinite; }
+.fx-rn > span { --kw: calc(400cqh * var(--z)); position: absolute; left: 0; bottom: 0; width: calc(100cqw + var(--kw)); height: 100%;
+  background-repeat: repeat-x; background-size: var(--kw) 100%; animation: fx-drift var(--d) linear infinite; }
 .fx-rn-hinten { --d: 140s; background-image: url("/static/img/fx/nebel-hinten.webp"); }
 .fx-rn-mitte  { --d: 85s;  background-image: url("/static/img/fx/nebel-mitte.webp"); animation-delay: -30s;
   animation: fx-drift var(--d) linear -30s infinite, fx-atmen 16s ease-in-out infinite !important; }

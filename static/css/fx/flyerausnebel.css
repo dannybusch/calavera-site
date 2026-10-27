@@ -4,6 +4,6 @@
 .fx-rn--dicht { --h: 52% !important; }
 .fx-rn--dicht .fx-rn-hinten { animation: fx-drift var(--d) linear infinite, fx-lichten 6s ease-out 1 both; }
 .fx-wisp { position: absolute; left: 0; right: 0; top: 30%; height: 30%; overflow: hidden; container-type: size; }
-.fx-wisp > span { position: absolute; left: 0; top: 0; width: 800cqh; height: 100%; background: url("/static/img/fx/nebel-vorn.webp") repeat-x 0 0 / 50% 100%;
+.fx-wisp > span { --kw: 400cqh; position: absolute; left: 0; top: 0; width: calc(100cqw + var(--kw)); height: 100%; background: url("/static/img/fx/nebel-vorn.webp") repeat-x 0 0 / var(--kw) 100%;
   opacity: .45; animation: fx-drift 60s linear -12s infinite; }
-@keyframes fx-lichten { from { opacity: 1; transform: translateY(-18%); } to { opacity: .8; transform: translateY(0); } }
+@keyframes fx-lichten { from { opacity: 1; translate: 0 -18%; } to { opacity: .8; translate: 0 0; } }   /* translate statt transform – sonst stünde die Drift danach still */

@@ -1,7 +1,7 @@
 /* buehnennebel (Kegel auch für spotlight) */
 /* Bühnennebel: Dunst + zwei Scheinwerferkegel, die langsam schwenken (nur Drehung → günstig) */
 .fx-haze { position: absolute; inset: 0; overflow: hidden; container-type: size; }
-.fx-haze > span { position: absolute; left: 0; top: 0; width: 800cqh; height: 100%; background: url("/static/img/fx/nebel-dunst.webp") repeat-x 0 0 / 50% 100%;
+.fx-haze > span { --kw: 400cqh; position: absolute; left: 0; top: 0; width: calc(100cqw + var(--kw)); height: 100%; background: url("/static/img/fx/nebel-dunst.webp") repeat-x 0 0 / var(--kw) 100%;
   opacity: .3; animation: fx-drift 120s linear infinite; }
 /* Kegel als vorberechnetes Bild (mit Dithering gegen Streifen), läuft im Bild nach unten ganz aus */
 .fx-beam { position: absolute; top: -2%; left: var(--bx); height: var(--bh, 125%); aspect-ratio: 1 / 2; translate: -50% 0; transform-origin: 50% 0;

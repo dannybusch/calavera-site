@@ -24,7 +24,9 @@
 .has-fx.fx-paused .fx *::before, .has-fx.fx-paused .fx *::after { animation-play-state: paused !important; }
 
 /* gemeinsam genutzte Bewegungen */
-@keyframes fx-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+/* Nebel-Schichten: Bild ist --kw breit (4:1 zur Rahmenhöhe), die Schicht ist Rahmenbreite + eine Bildbreite
+   und rutscht genau eine Bildbreite → nahtlos und nie eine Kante, egal wie breit der Rahmen ist */
+@keyframes fx-drift { from { transform: translateX(0); } to { transform: translateX(calc(var(--kw, 50%) * -1)); } }
 @keyframes fx-atmen { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 @keyframes fx-schwenk { from { transform: rotate(var(--von)); } to { transform: rotate(var(--bis)); } }
 
