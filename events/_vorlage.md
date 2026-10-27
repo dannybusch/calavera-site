@@ -12,6 +12,8 @@ start: "2026-12-04 22:00"        # oder nur "2026-12-04" → Standardbeginn aus 
 # art: "Konzert"                 # kleines Etikett über dem Datum, z. B. Konzert, Lesung, Special
 # highlight: "Live-Konzert"      # hebt die Kachel im Programm hervor (gleiche Größe, rotes Etikett, roter Schimmer);
 #                                # highlight: true → Etikett "Highlight"
+# effekte: [nebel]              # Animation auf Kachel + Seite: nebel, gewitter, fratzen – beliebig kombinierbar,
+#                                # z. B. effekte: [nebel, fratzen]
 # reihe: dark                    # gehört zu einer Reihe aus config.yml → reihen (z. B. Calavera Dark);
 #                                # wirkt auf "Weitere Termine": Termine derselben Reihe stehen dort vorn
 # subtitle: "Singer/Songwriter aus Berlin"   # ersetzt die DJ-Zeile unter dem Titel

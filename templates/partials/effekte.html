@@ -1,0 +1,74 @@
+{# Effekte für Kachel und Veranstaltungsseite – "effekte:" in der Event-Datei.
+   nebel    – Bodennebel zieht über Flyer und Seite, der Mond glimmt
+   gewitter – Doppelblitz alle 7 Sekunden (je Veranstaltung versetzt)
+   fratzen  – Schädel, Kürbisgrinsen und Geister tauchen auf und verschwinden
+   Nur CSS, keine Klicks abgefangen (pointer-events: none), aus bei "Bewegung reduzieren". #}
+
+{% macro skull(cls="") %}
+<svg class="fx-face-svg {{ cls }}" viewBox="0 0 100 120" aria-hidden="true" focusable="false">
+  <path class="fx-skull" d="M50 6C22 6 8 28 10 52c1 14 8 22 14 26l2 18c0 8 8 12 16 10h16c8 2 16-2 16-10l2-18c6-4 13-12 14-26C92 28 78 6 50 6Z"/>
+  <ellipse cx="34" cy="52" rx="11" ry="13" fill="#050505"/><ellipse cx="66" cy="52" rx="11" ry="13" fill="#050505"/>
+  <g class="fx-eyes"><circle cx="35" cy="54" r="3.2"/><circle cx="65" cy="54" r="3.2"/></g>
+  <path d="M50 64l-5 12h10Z" fill="#050505"/>
+  <path class="fx-jaw fx-teeth" d="M32 88h36M38 84v9M44 84v10M50 84v10M56 84v10M62 84v9"/>
+</svg>
+{% endmacro %}
+
+{% macro grimace(cls="") %}
+<svg class="fx-face-svg fx-grimace {{ cls }}" viewBox="0 0 100 90" aria-hidden="true" focusable="false">
+  <g class="fx-eyes"><path d="M18 34l16-16 10 20Z"/><path d="M82 34L66 18 56 38Z"/></g>
+  <path class="fx-jaw" d="M14 54c10 14 24 22 36 22s26-8 36-22l-8 4-6-6-7 8-7-7-8 9-8-9-7 7-7-8-6 6Z"/>
+</svg>
+{% endmacro %}
+
+{% macro ghost() %}
+<svg class="fx-face-svg fx-ghost" viewBox="0 0 100 110" aria-hidden="true" focusable="false">
+  <ellipse cx="34" cy="40" rx="9" ry="14"/><ellipse cx="66" cy="40" rx="9" ry="14"/>
+  <ellipse class="fx-jaw" cx="50" cy="78" rx="12" ry="20"/>
+</svg>
+{% endmacro %}
+
+{% macro fog() %}
+<span class="fx-fog"><span class="fx-fog-a"><i></i><i></i><i></i><i></i></span><span class="fx-fog-b"><i></i><i></i><i></i></span></span>
+{% endmacro %}
+
+{% macro bolt(cls="") %}
+<svg class="fx-bolt {{ cls }}" viewBox="0 0 100 220" aria-hidden="true" focusable="false"><path d="M58 0L40 70l18 4-30 66 16 4-22 76 46-92-18-4 26-62-18-4L82 0Z"/></svg>
+{% endmacro %}
+
+{# über dem Flyer (Kachel und Veranstaltungsseite) #}
+{% macro flyer_fx(ev) %}
+{% if ev.effekte %}
+<span class="fx fx-flyer" aria-hidden="true">
+  {% if "nebel" in ev.effekte %}<span class="fx-moon"></span>{{ fog() }}{% endif %}
+  {% if "gewitter" in ev.effekte %}<span class="fx-flash"></span><span class="fx-flash fx-flash--soft"></span>{{ bolt("fx-bolt--flyer") }}{% endif %}
+  {% if "fratzen" in ev.effekte %}<span class="fx-face fx-face--f1">{{ grimace() }}</span><span class="fx-face fx-face--f2">{{ ghost() }}</span>{% endif %}
+</span>
+{% endif %}
+{% endmacro %}
+
+{# Hintergrund der ganzen Kachel #}
+{% macro tile_fx(ev) %}
+{% if ev.effekte %}
+<span class="fx fx-tile" aria-hidden="true">
+  {% if "nebel" in ev.effekte %}{{ fog() }}{% endif %}
+  {% if "gewitter" in ev.effekte %}<span class="fx-flash fx-flash--sky"></span>{% endif %}
+  {% if "fratzen" in ev.effekte %}<span class="fx-face fx-face--t1">{{ skull() }}</span>{% endif %}
+</span>
+{% endif %}
+{% endmacro %}
+
+{# Hintergrund oben auf der Veranstaltungsseite #}
+{% macro page_fx(ev) %}
+{% if ev.effekte %}
+<div class="fx fx-page" aria-hidden="true">
+  {% if "nebel" in ev.effekte %}{{ fog() }}{% endif %}
+  {% if "gewitter" in ev.effekte %}<span class="fx-flash fx-flash--sky"></span>{{ bolt("fx-bolt--p1") }}{{ bolt("fx-bolt--p2") }}{% endif %}
+  {% if "fratzen" in ev.effekte %}
+  <span class="fx-face fx-face--p1">{{ skull() }}</span>
+  <span class="fx-face fx-face--p2">{{ skull() }}</span>
+  <span class="fx-face fx-face--p3">{{ grimace("fx-grimace--red") }}</span>
+  {% endif %}
+</div>
+{% endif %}
+{% endmacro %}

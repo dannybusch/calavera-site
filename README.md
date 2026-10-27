@@ -84,6 +84,24 @@ stream: true                # Abend läuft auch im Kellerfunk-Stream ("Vor Ort &
 Auf der Veranstaltungsseite erscheint dann eine Stream-Karte, die während der Veranstaltung von
 selbst auf „Jetzt live“ mit rotem „Jetzt reinhören“ umschaltet und danach verschwindet.
 
+## Effekte (Nebel, Gewitter, Fratzen)
+
+Für besondere Abende – Halloween, Calavera Dark – bekommt eine Veranstaltung Animationen auf ihrer
+Programm-Kachel und oben auf ihrer Seite:
+
+```yaml
+effekte: [nebel, gewitter, fratzen]   # eine, mehrere oder alle; auch "effekt: nebel"
+```
+
+- **nebel** – Bodennebel zieht in zwei Schichten über Flyer, Kachel und Seite; der Vollmond-Bereich des Flyers glimmt
+- **gewitter** – alle 7 Sekunden ein Doppelblitz: Flyer und Titel leuchten auf, Blitze zucken. Mehrere
+  Gewitter-Kacheln blitzen versetzt. Zwei Blitze in 7 Sekunden liegen weit unter der Grenze, die für
+  Menschen mit Epilepsie gefährlich werden kann (3 pro Sekunde).
+- **fratzen** – Calavera-Schädel mit roten Augen, Kürbisgrinsen und Geister tauchen auf und verschwinden
+
+Alles reines CSS, ohne JavaScript; Klicks gehen durch die Effekte hindurch. Wer am Gerät „Bewegung
+reduzieren“ eingestellt hat, sieht nur einen stehenden Nebel. Tippfehler im Effektnamen meldet der Build.
+
 ## Reihen
 
 Zusammengehörige Veranstaltungen (z. B. „Calavera Dark“) stehen als Reihe in `config.yml`:

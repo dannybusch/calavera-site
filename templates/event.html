@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "partials/effekte.html" import flyer_fx, page_fx %}
 {% set title = ev.title ~ " · " ~ (ev.start|ddmmyyyy) %}
 {% set description = (ev.start|wd_long) ~ ", " ~ (ev.start|ddmmyyyy) ~ ", " ~ (ev.start|hhmm) ~ " Uhr im Calavera Bremen" ~ ((": " ~ ev.teaser) if ev.teaser else ".") %}
 {% set og_type = "article" %}
@@ -10,7 +11,8 @@
 </script>
 {% endblock %}
 {% block content %}
-<div class="wrap event" data-end="{{ ev.end|iso }}">
+<div class="wrap event{% if ev.effekte %} {{ ev.fx_classes }}{% endif %}"{% if ev.effekte %} style="--fx-delay: {{ ev.fx_delay }}"{% endif %} data-end="{{ ev.end|iso }}">
+  {{ page_fx(ev) }}
   <p class="back"><a href="/programm/">← Zurück zum Programm</a></p>
 
   <p class="past-note" role="status"{% if not ev.is_past %} hidden{% endif %}>Diese Veranstaltung ist vorbei. <a href="/programm/">Zum aktuellen Programm →</a></p>
@@ -20,10 +22,11 @@
       {% if ev.visual_url %}
       <a href="{{ ev.visual_url }}" class="event-flyer">
         <img src="{{ ev.visual_og or ev.visual_url }}" alt="{{ ev.visual_alt }}" decoding="async">
+        {{ flyer_fx(ev) }}
       </a>
       <a class="small-link" href="{{ ev.visual_url }}">Flyer in voller Größe <span aria-hidden="true">↗</span></a>
       {% else %}
-      <div class="event-flyer t-placeholder" aria-hidden="true"><img src="{{ asset('img/calavera_logo.svg') }}" alt=""></div>
+      <div class="event-flyer t-placeholder" aria-hidden="true"><img src="{{ asset('img/calavera_logo.svg') }}" alt="">{{ flyer_fx(ev) }}</div>
       {% endif %}
     </div>
 

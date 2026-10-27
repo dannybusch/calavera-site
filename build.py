@@ -59,6 +59,9 @@ MONAT = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
 problems: list[str] = []
 
 
+EFFEKTE = ("nebel", "gewitter", "fratzen")   # Animationen für Kachel und Veranstaltungsseite
+
+
 def warn(msg: str) -> None:
     problems.append(msg)
     print(f"  ! {msg}")
@@ -236,6 +239,7 @@ class Event:
     visual_alt: str = ""
     links: list[dict] = field(default_factory=list)
     highlight: str = ""          # Etikett einer hervorgehobenen Veranstaltung, z. B. "Live-Konzert"
+    effekte: list[str] = field(default_factory=list)   # Animationen: nebel, gewitter, fratzen (beliebig kombinierbar)
     social_title: str = ""       # Titel für Facebook/Instagram, falls abweichend (z. B. "F*** Dich …")
     facebook: str = ""           # Link zum Facebook-Event, sobald angelegt (für /intern/)
     social_images: dict = field(default_factory=dict)   # Bilder für Facebook/Instagram (für /intern/)
@@ -249,6 +253,16 @@ class Event:
     @property
     def url(self) -> str:
         return f"/programm/{self.slug}/"
+
+    @property
+    def fx_classes(self) -> str:
+        """CSS-Klassen für die Effekte, z. B. "has-fx fx-nebel fx-fratzen"."""
+        return ("has-fx " + " ".join(f"fx-{fx}" for fx in self.effekte)) if self.effekte else ""
+
+    @property
+    def fx_delay(self) -> str:
+        """Versatz pro Veranstaltung, damit mehrere Gewitter-Kacheln nicht im Gleichtakt blitzen."""
+        return f"{int(hashlib.sha1(self.slug.encode()).hexdigest()[:4], 16) % 70 / 10:.1f}s"
 
     @property
     def lineup(self) -> str:
@@ -545,6 +559,13 @@ def load_events(cfg: dict, tz: ZoneInfo) -> list[Event]:
                 social_title=str(meta.get("social_title") or meta.get("titel_social") or "").strip(),
                 facebook=str(meta.get("facebook") or "").strip(),
             )
+            # effekte: nebel | [nebel, fratzen]  (auch "effekt:")
+            for fx in as_list(meta.get("effekte") or meta.get("effekt")):
+                fx = str(fx).strip().lower()
+                if fx in EFFEKTE and fx not in ev.effekte:
+                    ev.effekte.append(fx)
+                elif fx not in EFFEKTE:
+                    warn(f"{path.name}: Effekt \"{fx}\" gibt es nicht – möglich: {', '.join(EFFEKTE)}")
             if ev.facebook:   # öffentlich als Link "Facebook-Event" auf der Veranstaltungsseite
                 ev.links.append({"label": "Facebook-Event", "url": ev.facebook})
             if ev.reihe and ev.reihe not in reihen:

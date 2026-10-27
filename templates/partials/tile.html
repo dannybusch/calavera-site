@@ -3,9 +3,11 @@
                    falls der letzte Build schon etwas älter ist)
    - is-highlight: per "highlight:" in der .md hervorgehoben – normale Größe, abgehobene Fläche,
                    Etikett auf dem Flyer (Handy: über dem Titel) #}
+{% from "partials/effekte.html" import flyer_fx, tile_fx %}
 {% macro tile(ev, is_next=false) %}
-<article class="tile{% if is_next %} is-next{% endif %}{% if ev.highlight %} is-highlight{% endif %}" data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}">
+<article class="tile{% if is_next %} is-next{% endif %}{% if ev.highlight %} is-highlight{% endif %}{% if ev.effekte %} {{ ev.fx_classes }}{% endif %}"{% if ev.effekte %} style="--fx-delay: {{ ev.fx_delay }}"{% endif %} data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}">
   <a class="tile-link" href="{{ ev.url }}">
+    {{ tile_fx(ev) }}
     <span class="t-flags">
       <span class="t-badge" data-label>{{ relative_label(ev) }}</span>
       {% if ev.highlight %}<span class="t-hl">{{ ev.highlight }}</span>{% endif %}
@@ -21,6 +23,7 @@
       {% else %}
       <span class="t-placeholder" aria-hidden="true"><img src="{{ asset('img/calavera_logo.svg') }}" alt="" loading="lazy"></span>
       {% endif %}
+      {{ flyer_fx(ev) }}
     </span>
     <span class="t-title">{{ ev.title }}</span>
     {% if ev.byline %}<span class="t-by">{{ ev.byline }}</span>{% endif %}
