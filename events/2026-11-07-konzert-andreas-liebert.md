@@ -11,6 +11,7 @@ genres: ["Indie", "Singer/Songwriter"]
 tags: ["Rauchfrei"]
 eintritt: "Hutspende"
 visual_alt: "Konzert mit Singer/Songwriter Andreas Liebert aus Berlin"
+effekte: [spotlight, buehnennebel]
 ---
 
 Kennst du diese Momente, über die man kaum spricht? Die schlaflose Nacht. Das Gespräch, nach dem Fragen bleiben. Das Gefühl, einem Menschen nah zu sein und ihn trotzdem nicht ganz zu erreichen. **Andreas Liebert** macht aus genau diesen Momenten Lieder. Ehrlich, poetisch und mit einer Klarheit, die berührt.
