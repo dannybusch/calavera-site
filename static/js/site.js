@@ -164,6 +164,35 @@
     });
   });
 
+  /* ---------- Interne Seiten: Kopieren-Knöpfe + Zeichenzähler ---------- */
+  var copyText = function (el) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(el.value);
+    el.focus(); el.select();                         // Rückfall für http:// (lokal)
+    try { document.execCommand("copy"); } catch (e) {}
+    return Promise.resolve();
+  };
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    var label = btn.textContent;
+    btn.addEventListener("click", function () {
+      var el = document.getElementById(btn.getAttribute("data-copy"));
+      if (!el) return;
+      copyText(el).then(function () {
+        btn.textContent = "✓ Kopiert";
+        btn.classList.add("is-done");
+        setTimeout(function () { btn.textContent = label; btn.classList.remove("is-done"); }, 2000);
+      });
+    });
+  });
+  document.querySelectorAll("[data-count][data-limit]").forEach(function (c) {
+    var el = document.getElementById(c.getAttribute("data-count"));
+    var limit = parseInt(c.getAttribute("data-limit"), 10);
+    // Instagram zählt Zeichen wie JavaScript (Emojis = 2), daher hier nachzählen
+    if (el && el.value.length > limit) {
+      c.classList.add("is-over");
+      c.textContent = el.value.length + " Zeichen – " + (el.value.length - limit) + " zu viel (max. " + limit + ")";
+    }
+  });
+
   /* ---------- No-Cookie-Banner ----------
    * Erscheint nur, wenn jemand von außen kommt (Link, Suche, direkt eingetippt) – nicht bei
    * jedem Klick innerhalb der Seite. Gespeichert wird dafür nichts: kein Cookie, kein localStorage.

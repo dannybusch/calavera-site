@@ -68,6 +68,7 @@ reihen:
     title: "Honey Café"
     more: "Weitere Sonntage"
 
+
 # Kellerfunk: liest live die config.yml von live.calavera.club
 # (dort muss der Server www.calavera.club per CORS erlauben, siehe README)
 kellerfunk:
@@ -77,14 +78,35 @@ kellerfunk:
   refresh_seconds: 60
   default_hours: 6            # wie auf live.calavera.club: ohne end 6 h live
 
+# ------------------------------------------------------------------
+#  Texte für Facebook, Instagram und Veranstaltungskalender
+#  → interne Seiten unter /intern/ (nicht verlinkt, nicht für Suchmaschinen)
+# ------------------------------------------------------------------
+abbinder:
+  # Musik-Zeile: nimmt "fans_of:" aus der Event-Datei
+  musik_einleitung: "Was euch musikalisch (u. a.) erwarten könnte:"
+  musik_ende: ", ..."                       # wird an die Liste angehängt
+  # Eintritt im Abbinder, wenn die Event-Datei kein eigenes "eintritt:" hat
+  eintritt: "EUR 5,- / frei für Azubis+Studis"
+  # Zusatzzeilen je Tag aus der Event-Datei ("tags:")
+  zeilen_fuer_tags:
+    "Rauchfrei": "- rauchfreie Veranstaltung -"
+    # "Ab 18": "- ab 18 Jahren -"
+  # Hashtags für Instagram (Genres der Veranstaltung kommen automatisch dazu)
+  hashtags: ["calavera", "calaverabremen", "bremen", "bremenviertel", "clubbremen"]
+
+# Künstler:innen mit Instagram-Namen (ohne @). Der Name muss so geschrieben sein wie bei "djs:".
+kuenstler:
+  "DJ Alexis On Fire": { instagram: "dj_alexis_on_fire" }
+
 # Der Gag: ein "Cookie-Banner", das keins ist. Erscheint beim Betreten der Seite
 # (nicht bei jedem Klick innerhalb der Seite) und verschwindet nach "sekunden" von selbst.
 # "SAFE SPACE" im Text wird automatisch zur Safe-Space-Seite verlinkt.
 no_cookie_banner:
   anzeigen: true
-  titel: "Keine Cookies hier"
-  text: "Kein Trackingdienst, keine Cookies hier. Auch im Digitalen ein SAFE SPACE. Sagt uns einfach direkt, wie ihr uns findet. Ehrlich. Damit können wir umgehen!"
-  sekunden: 6
+  titel: "No Cookies"
+  text: "Kein Tracking, keine Cookies hier. Auch im Digitalen ein SAFE SPACE. Sagt uns einfach direkt, wie ihr uns findet. Ehrlich. Damit können wir umgehen!"
+  sekunden: 10
 
 # Alte Adressen von calaverabremen.de → neue Seiten (es entstehen kleine Weiterleitungsseiten)
 redirects:

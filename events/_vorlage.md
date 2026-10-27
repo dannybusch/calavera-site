@@ -23,7 +23,9 @@ tags: ["Ab 18"]                  # z. B. Ab 18, Rauchfrei
 #   url: "https://www.mixcloud.com/live/calaverabremen/"
 #   label: "Auch im Stream"
 # eintritt: "Hutspende"          # sonst Standard aus config.yml (5 € · Azubis & Studis frei)
-# fans_of: ["The Cure", "Joy Division"]      # "Für Freunde von"
+# fans_of: ["The Cure", "Joy Division"]      # "Für Freunde von" – zugleich die Musik-Zeile im Abbinder (/intern/)
+# social_title: "F*** Dich Ins Knie"         # anderer Titel für Facebook/Instagram (sonst: title)
+# facebook: "https://www.facebook.com/events/…"   # Link zum Facebook-Event, sobald angelegt
 teaser: "Ein, höchstens zwei Sätze für die Kachel im Programm."   # sonst: erster Absatz unten, gekürzt
 # visual: "mein-flyer.jpg"       # sonst automatisch: Bild mit gleichem Dateinamen wie diese .md
 # visual_alt: "Flyer: …"         # Bildbeschreibung für Screenreader

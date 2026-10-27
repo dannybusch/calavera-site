@@ -370,6 +370,54 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 .ar-date { font-family: var(--display); font-size: 24px; }
 .ar-title { font-family: var(--display); font-size: 22px; text-transform: uppercase; line-height: 1.05; }
 
+/* ---------- Interne Seiten (/intern/) ---------- */
+.intern { padding-bottom: 96px; display: flex; flex-direction: column; gap: 56px; }
+.intern-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.intern-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 14px 18px;
+  background: var(--surface-1); border-radius: var(--radius); color: var(--text); }
+.intern-row:hover { background: #1a1a1a; color: var(--text); }
+.ir-date { font-family: var(--display); font-size: 24px; }
+.ir-title { font-family: var(--display); font-size: 22px; text-transform: uppercase; line-height: 1.05; }
+.ir-status { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.status { padding: 3px 9px; border-radius: 999px; background: var(--chip); font-family: var(--mono); font-size: 11px; color: var(--text-3); white-space: nowrap; }
+.status--done { color: var(--text); box-shadow: inset 0 0 0 1px #4d6b4f; }
+.status--warn { color: var(--accent-text); }
+.intern-hint, .intern-note { margin: 0; font-size: 15px; line-height: 1.55; }
+.intern-note { padding: 12px 16px; background: var(--surface-2); border-radius: var(--radius); color: var(--text-2); }
+.intern-note--ok { color: var(--text); }
+.intern code { font-family: var(--mono); font-size: .9em; background: var(--chip); padding: 1px 6px; border-radius: 3px; }
+.isec { display: flex; flex-direction: column; gap: 20px; }
+.igrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.igrid--wide { grid-template-columns: minmax(0, 1fr); }
+.isplit { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; align-items: start; }
+.ifield { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ifield-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.ifield-count { font-family: var(--mono); font-size: 12px; }
+.ifield-count.is-over { color: var(--accent-text); }
+.ifield-row { display: flex; gap: 8px; }
+.ifield input, .ifield textarea { width: 100%; min-width: 0; background: var(--surface-1); color: var(--text); border: 1px solid #2a2a2a;
+  border-radius: var(--radius); padding: 12px 14px; font: 15px/1.5 var(--sans); }
+.ifield textarea { resize: vertical; white-space: pre-wrap; }
+.ifield input:focus, .ifield textarea:focus { outline: 2px solid var(--accent-text); outline-offset: 1px; }
+.ifield-row .btn-copy { flex: 0 0 auto; min-height: 46px; }
+.ifield > .btn-copy { align-self: flex-start; }
+.btn-copy.is-done { background: #2f4a32; color: var(--text); }
+.iimgs { display: flex; flex-direction: column; gap: 16px; }
+.iimg { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.iimg img { width: 100%; height: auto; border-radius: var(--radius); background: var(--surface-1); }
+.iimg figcaption { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-family: var(--mono); font-size: 12px; color: var(--text-3); }
+.iimgs .iimg:last-child img { max-width: 60%; }
+@media (max-width: 900px) { .isplit { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .intern { gap: 40px; }
+  .intern-row { grid-template-columns: 72px minmax(0, 1fr); padding: 12px; }
+  .ir-status { grid-column: 2; justify-content: flex-start; }
+  .ir-date { font-size: 20px; }
+  .ir-title { font-size: 19px; }
+  .igrid { grid-template-columns: minmax(0, 1fr); }
+  .ifield > .btn-copy { align-self: stretch; }
+}
+
 /* ---------- No-Cookie-Banner (der Gag) ---------- */
 .nocookie { position: fixed; z-index: 50; left: 24px; bottom: 24px; width: min(520px, calc(100vw - 48px)); overflow: hidden;
   display: flex; gap: 18px; align-items: flex-start; padding: 22px 22px 26px; background: var(--surface-2); color: var(--text);

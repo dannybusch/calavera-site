@@ -222,6 +222,53 @@ Hinweise: GitHub startet geplante Läufe manchmal mit Verzögerung. In **öffent
 schaltet GitHub den täglichen Lauf nach 60 Tagen ohne Aktivität ab (Actions → Workflow → „Enable workflow“);
 in privaten Repositories nicht.
 
+## Interne Seiten für Facebook, Instagram & Co. (`/intern/`)
+
+Für jede kommende Veranstaltung baut der Build unter **www.calavera.club/intern/** eine Seite mit
+fertigen Texten und Bildern – jeweils mit „Kopieren“-Knopf:
+
+- **Eckdaten**: Name, Ort, Beginn/Ende (Datum und Uhrzeit getrennt, wie Facebook sie abfragt), Link
+- **Facebook-Veranstaltung**: Beschreibung (Text der .md + Abbinder) und Titelbild 1920 × 1005
+- **Instagram**: Beitragstext (Teaser + Abbinder + „Link in Bio“ + Hashtags, mit Zeichenzähler bis 2200)
+  sowie Bilder für Beitrag (1080 × 1350) und Story (1080 × 1920)
+- **Veranstaltungskalender**: Kurztext, Langtext mit Link, nur der Abbinder
+
+Die Bilder entstehen automatisch aus dem Flyer (unscharfer, abgedunkelter Hintergrund, Flyer mittig).
+
+**Der Abbinder** steht am Ende jedes Textes und wird aus der Event-Datei zusammengesetzt:
+
+```
+Was euch musikalisch (u. a.) erwarten könnte: …   ← aus fans_of:
+--
+»F*** Dich Ins Knie, Melancholie«                ← social_title: (sonst title:)
+mit DJ Alexis On Fire / @dj_alexis_on_fire        ← djs: + Instagram-Namen aus config.yml → kuenstler
+7. November 2026 ab 22:00h                        ← start: (mit einlass: „Einlass … Beginn …“)
+Eintritt: EUR 5,- / frei für Azubis+Studis        ← eintritt: oder config.yml → abbinder.eintritt
+- rauchfreie Veranstaltung -                      ← tags: + config.yml → abbinder.zeilen_fuer_tags
+```
+
+Einstellungen dazu in `config.yml` unter `abbinder:` (Einleitungssatz, Eintritt, Zeilen je Tag, Hashtags)
+und `kuenstler:` (Instagram-Namen ohne @, Name genau wie bei `djs:`).
+
+Neue Felder in der Event-Datei:
+
+```yaml
+social_title: "F*** Dich Ins Knie, Melancholie"      # anderer Titel für Social Media
+facebook: "https://www.facebook.com/events/…"       # sobald das Facebook-Event angelegt ist
+```
+
+Mit `facebook:` zeigt die Übersicht „✓ Facebook“, und die öffentliche Veranstaltungsseite bekommt einen
+Link „Facebook-Event“.
+
+Die Seiten sind nirgends verlinkt, haben `noindex` und stehen in `robots.txt` unter `Disallow`.
+**Geheim sind sie nicht** – wer die Adresse kennt, kann sie öffnen. Es steht aber nichts darauf, was
+nicht ohnehin öffentlich wird. Wer sie trotzdem schützen will, richtet im STRATO-Kundenbereich einen
+Verzeichnisschutz für `/intern/` ein. Die `.htaccess`, die dabei entsteht, lässt der Deploy stehen;
+liegt die `.htpasswd` ebenfalls in `/intern/`, in `deploy.yml` ein `--exclude-glob .htpasswd` ergänzen.
+
+Tipp: Sternchen im Fließtext (z. B. `F***`) mit Backslash schreiben: `F\*\*\*` – sonst macht Markdown
+daraus Kursiv/Fett.
+
 ## No-Cookie-Banner
 
 Erscheint nur, wenn jemand von außen auf die Seite kommt, und verschwindet nach `sekunden` von selbst.

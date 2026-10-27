@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% set title = "Intern · " ~ s.title %}
+{% set noindex = true %}
+{% block body_class %}intern{% endblock %}
+
+{% macro field(id, label, value) %}
+<div class="ifield">
+  <label class="label" for="{{ id }}">{{ label }}</label>
+  <div class="ifield-row">
+    <input id="{{ id }}" type="text" value="{{ value }}" readonly>
+    <button class="btn btn-dark btn-copy" type="button" data-copy="{{ id }}">Kopieren</button>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro textblock(id, label, value, rows=12, limit=0) %}
+<div class="ifield">
+  <div class="ifield-head">
+    <label class="label" for="{{ id }}">{{ label }}</label>
+    <span class="ifield-count muted" data-count="{{ id }}"{% if limit %} data-limit="{{ limit }}"{% endif %}>{{ value|length }} Zeichen{% if limit %} von {{ limit }}{% endif %}</span>
+  </div>
+  <textarea id="{{ id }}" rows="{{ rows }}" readonly>{{ value }}</textarea>
+  <button class="btn btn-light btn-copy" type="button" data-copy="{{ id }}">Text kopieren</button>
+</div>
+{% endmacro %}
+
+{% macro image(key) %}
+{% set img = ev.social_images.get(key) %}
+{% if img %}
+<figure class="iimg">
+  <img src="{{ img.url }}" alt="Vorschau {{ img.label }}" width="{{ img.w }}" height="{{ img.h }}" loading="lazy">
+  <figcaption><span>{{ img.label }} · {{ img.w }} × {{ img.h }}</span>
+    <a class="btn btn-dark" href="{{ img.url }}" download="{{ img.file }}">Herunterladen</a></figcaption>
+</figure>
+{% endif %}
+{% endmacro %}
+
+{% block content %}
+<section class="page-head wrap">
+  <p class="kicker"><a href="/intern/">← Alle Veranstaltungen</a> · <a href="{{ ev.url }}">Öffentliche Seite ↗</a></p>
+  <h1 class="display display--page">{{ s.title }}</h1>
+  <p class="lead">{{ ev.start|wd_long }}, {{ ev.start|ddmmyyyy }} · {{ ev.start|hhmm }} Uhr</p>
+</section>
+
+<div class="wrap intern">
+  {% if not ev.fans_of %}<p class="intern-note">Hinweis: Keine Musikliste in der Event-Datei (<code>fans_of:</code>) – die Zeile „Was euch musikalisch … erwarten könnte“ fehlt deshalb im Abbinder.</p>{% endif %}
+  {% if ev.social_title and ev.social_title != ev.title %}<p class="intern-note">Titel für Social Media: „{{ ev.social_title }}“ (auf der Website: „{{ ev.title }}“).</p>{% endif %}
+
+  <section class="isec" aria-labelledby="h-daten">
+    <h2 class="h-section h-section--sm" id="h-daten">Eckdaten</h2>
+    <div class="igrid">
+      {{ field("f-name", "Name der Veranstaltung", s.title) }}
+      {{ field("f-ort", "Ort", s.ort) }}
+      {{ field("f-start-d", "Beginn – Datum", s.start_datum) }}
+      {{ field("f-start-z", "Beginn – Uhrzeit", s.start_zeit) }}
+      {{ field("f-ende-d", "Ende – Datum", s.ende_datum) }}
+      {{ field("f-ende-z", "Ende – Uhrzeit", s.ende_zeit) }}
+      {% if s.einlass %}{{ field("f-einlass", "Einlass", s.einlass) }}{% endif %}
+      {{ field("f-url", "Link (Website / Tickets)", s.url) }}
+    </div>
+  </section>
+
+  <section class="isec" aria-labelledby="h-fb">
+    <h2 class="h-section h-section--sm" id="h-fb">Facebook-Veranstaltung</h2>
+    {% if ev.facebook %}
+    <p class="intern-note intern-note--ok">✓ Angelegt: <a href="{{ ev.facebook }}" rel="noopener">{{ ev.facebook }}</a></p>
+    {% endif %}
+    <div class="isplit">
+      {{ textblock("t-facebook", "Beschreibung", s.facebook, 18) }}
+      <div>{{ image("facebook") }}</div>
+    </div>
+  </section>
+
+  <section class="isec" aria-labelledby="h-ig">
+    <h2 class="h-section h-section--sm" id="h-ig">Instagram</h2>
+    <div class="isplit">
+      {{ textblock("t-instagram", "Beitragstext", s.instagram, 14, 2200) }}
+      <div class="iimgs">{{ image("instagram") }}{{ image("story") }}</div>
+    </div>
+  </section>
+
+  <section class="isec" aria-labelledby="h-portal">
+    <h2 class="h-section h-section--sm" id="h-portal">Veranstaltungskalender &amp; andere Seiten</h2>
+    <div class="igrid igrid--wide">
+      {{ textblock("t-kurz", "Kurztext (1–2 Sätze)", s.kurz, 3) }}
+      {{ textblock("t-portal", "Langtext mit Abbinder und Link", s.portal, 16) }}
+      {{ textblock("t-abbinder", "Nur der Abbinder", s.abbinder, 8) }}
+    </div>
+  </section>
+</div>
+{% endblock %}

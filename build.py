@@ -236,6 +236,9 @@ class Event:
     visual_alt: str = ""
     links: list[dict] = field(default_factory=list)
     highlight: str = ""          # Etikett einer hervorgehobenen Veranstaltung, z. B. "Live-Konzert"
+    social_title: str = ""       # Titel für Facebook/Instagram, falls abweichend (z. B. "F*** Dich …")
+    facebook: str = ""           # Link zum Facebook-Event, sobald angelegt (für /intern/)
+    social_images: dict = field(default_factory=dict)   # Bilder für Facebook/Instagram (für /intern/)
     reihe: str = ""              # Kürzel der Reihe aus config.yml → reihen (z. B. "dark")
     stream_url: str = ""         # gesetzt, wenn der Abend auch im Stream läuft (hybrid)
     stream_label: str = ""
@@ -330,6 +333,151 @@ def more_events(ev: "Event", upcoming: list["Event"], total: int, from_reihe: in
     return same, rest
 
 
+# ------------------------------------------------------------------ Texte für Facebook, Instagram & Co.
+
+def html_to_plain(html_text: str) -> str:
+    """Event-Text (HTML aus dem Markdown) als Klartext mit Absätzen – Facebook und Instagram
+    können weder Markdown noch HTML. Fett/Kursiv fällt weg, Links werden zu "Text (Adresse)"."""
+    t = html_text
+    t = re.sub(r'<a\s[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
+               lambda m: m.group(2) if m.group(1) in m.group(2) else f"{m.group(2)} ({m.group(1)})", t, flags=re.S)
+    t = re.sub(r"<br\s*/?>", "\n", t)
+    t = re.sub(r"<li[^>]*>", "– ", t)
+    t = re.sub(r"</li>", "\n", t)
+    t = re.sub(r"</(p|h\d|blockquote|ul|ol)>", "\n\n", t)
+    t = html.unescape(re.sub(r"<[^>]+>", "", t))
+    lines = [re.sub(r"[ \t]+", " ", l).strip() for l in t.splitlines()]
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
+
+def datum_lang(dt: datetime) -> str:
+    """7. November 2026"""
+    return f"{dt.day}. {MONAT[dt.month - 1]} {dt.year}"
+
+
+def abbinder_text(ev: "Event", cfg: dict) -> str:
+    """
+    Der Abbinder unter jedem Text, z. B.
+
+        Was euch musikalisch (u. a.) erwarten könnte: Nina Chuba, KUMMER, …, ...
+
+        --
+        »F*** Dich Ins Knie, Melancholie«
+        mit DJ Alexis On Fire / @dj_alexis_on_fire
+        7. November 2026 ab 22:00h
+        Eintritt: EUR 5,- / frei für Azubis+Studis
+        - rauchfreie Veranstaltung -
+    """
+    ab = cfg.get("abbinder") or {}
+    kuenstler = cfg.get("kuenstler") or {}
+
+    def handle(name: str) -> str:
+        info = kuenstler.get(name) or {}
+        return str(info.get("instagram") or "").strip().lstrip("@") if isinstance(info, dict) else ""
+
+    blocks = []
+    if ev.fans_of:
+        blocks.append(f"{ab.get('musik_einleitung', 'Was euch musikalisch (u. a.) erwarten könnte:')} "
+                      f"{', '.join(ev.fans_of)}{ab.get('musik_ende', '')}")
+
+    sig = ["-- ", f"»{ev.social_title or ev.title}«"]
+    if ev.djs:
+        if len(ev.djs) == 1:
+            h = handle(ev.djs[0])
+            sig.append(f"mit {ev.djs[0]}" + (f" / @{h}" if h else ""))
+        else:
+            names = [f"{n} (@{handle(n)})" if handle(n) else n for n in ev.djs]
+            sig.append("mit " + ", ".join(names[:-1]) + " & " + names[-1])
+    elif ev.subtitle:
+        sig.append(ev.subtitle)
+    if ev.doors:
+        sig.append(f"{datum_lang(ev.start)}, Einlass {ev.doors:%H:%M}h, Beginn {ev.start:%H:%M}h")
+    else:
+        sig.append(f"{datum_lang(ev.start)} ab {ev.start:%H:%M}h")
+    # Eigener Eintritt aus der Event-Datei gewinnt; sonst die Schreibweise aus dem Abbinder
+    default_entry = str((cfg.get("events") or {}).get("default_entry", ""))
+    entry = ev.entry if ev.entry and ev.entry != default_entry else ab.get("eintritt") or ev.entry
+    if entry:
+        sig.append(f"Eintritt: {entry}")
+    tag_lines = {str(k).lower(): str(v) for k, v in (ab.get("zeilen_fuer_tags") or {}).items()}
+    sig += [tag_lines[t.lower()] for t in ev.tags if t.lower() in tag_lines]
+    if ev.stream_url:
+        sig.append(f"Auch live im Stream: {ev.stream_url}")
+    blocks.append("\n".join(sig))
+    return "\n\n".join(blocks)
+
+
+def hashtags_for(ev: "Event", cfg: dict) -> str:
+    base = [str(h) for h in ((cfg.get("abbinder") or {}).get("hashtags") or [])]
+    tags = []
+    for t in base + list(ev.genres):
+        slug = re.sub(r"[^0-9a-zäöüß]", "", t.lower())
+        if slug and slug not in tags:
+            tags.append(slug)
+    return " ".join("#" + t for t in tags)
+
+
+def social_texts(ev: "Event", cfg: dict) -> dict:
+    """Fertige Texte für die internen Seiten. Länge wird für Instagram (max. 2.200 Zeichen) mitgeliefert."""
+    site_url = cfg["site"]["url"].rstrip("/")
+    body = html_to_plain(ev.body_html)
+    abbinder = abbinder_text(ev, cfg)
+    title = ev.social_title or ev.title
+    intro = ev.teaser or (shorten(body.split("\n\n")[0], 300) if body else "")
+    facebook = "\n\n".join(x for x in [body, abbinder] if x)
+    instagram = "\n\n".join(x for x in [intro, abbinder, "Alle Infos: Link in Bio", hashtags_for(ev, cfg)] if x)
+    portal = "\n\n".join(x for x in [body, abbinder, f"Alle Infos: {site_url}{ev.url}"] if x)
+    ort = f"{cfg['site']['name'].replace(' Bremen', '')}, {cfg['club']['address']}, {cfg['club']['city']}"
+    return {
+        "title": title,
+        "facebook": facebook,
+        "instagram": instagram,
+        "instagram_len": len(instagram),
+        "portal": portal,
+        "kurz": ev.teaser or shorten(body, 200),
+        "abbinder": abbinder,
+        "ort": ort,
+        "url": f"{site_url}{ev.url}",
+        "start_datum": ev.start.strftime("%d.%m.%Y"), "start_zeit": ev.start.strftime("%H:%M"),
+        "ende_datum": ev.end.strftime("%d.%m.%Y"), "ende_zeit": ev.end.strftime("%H:%M"),
+        "einlass": ev.doors.strftime("%H:%M") if ev.doors else "",
+    }
+
+
+SOCIAL_FORMATS = {
+    "facebook":  (1920, 1005, "Facebook-Titelbild"),
+    "instagram": (1080, 1350, "Instagram-Beitrag (4:5)"),
+    "story":     (1080, 1920, "Instagram-Story (9:16)"),
+}
+
+
+def make_social_images(ev: "Event", out: Path) -> None:
+    """Flyer in die Formate von Facebook und Instagram bringen: Flyer vollständig sichtbar,
+    die Ränder mit einer abgedunkelten, unscharfen Fassung desselben Flyers gefüllt."""
+    if Image is None or not ev.visual_src:
+        return
+    from PIL import ImageEnhance, ImageFilter
+    target = out / "media" / "events" / ev.slug
+    target.mkdir(parents=True, exist_ok=True)
+    try:
+        with Image.open(ev.visual_src) as src:
+            im = ImageOps.exif_transpose(src).convert("RGB")
+        for key, (w, h, label) in SOCIAL_FORMATS.items():
+            bg = ImageOps.fit(im, (w, h), Image.LANCZOS).filter(ImageFilter.GaussianBlur(max(w, h) // 45))
+            bg = ImageEnhance.Brightness(bg).enhance(0.4)
+            margin = round(min(w, h) * 0.05)
+            scale = min((w - 2 * margin) / im.width, (h - 2 * margin) / im.height)
+            fg = im.resize((max(1, round(im.width * scale)), max(1, round(im.height * scale))), Image.LANCZOS)
+            bg.paste(fg, ((w - fg.width) // 2, (h - fg.height) // 2))
+            name = f"{key}-{w}x{h}.jpg"
+            bg.save(target / name, "JPEG", quality=88, optimize=True, progressive=True)
+            os.chmod(target / name, 0o644)
+            ev.social_images[key] = {"url": f"/media/events/{ev.slug}/{name}", "w": w, "h": h,
+                                     "label": label, "file": f"{ev.slug}-{key}.jpg"}
+    except Exception as exc:  # noqa: BLE001
+        warn(f"{ev.source.name}: Bilder für Facebook/Instagram nicht erzeugt ({exc})")
+
+
 def load_events(cfg: dict, tz: ZoneInfo) -> list[Event]:
     reihen = load_reihen(cfg)
     ev_cfg = cfg.get("events", {})
@@ -394,7 +542,11 @@ def load_events(cfg: dict, tz: ZoneInfo) -> list[Event]:
                 highlight=("Highlight" if meta.get("highlight") is True
                            else str(meta.get("highlight") or "").strip()),
                 reihe=str(meta.get("reihe") or "").strip().lower(),
+                social_title=str(meta.get("social_title") or meta.get("titel_social") or "").strip(),
+                facebook=str(meta.get("facebook") or "").strip(),
             )
+            if ev.facebook:   # öffentlich als Link "Facebook-Event" auf der Veranstaltungsseite
+                ev.links.append({"label": "Facebook-Event", "url": ev.facebook})
             if ev.reihe and ev.reihe not in reihen:
                 warn(f"{path.name}: Reihe \"{ev.reihe}\" steht nicht in config.yml unter reihen: – wird ignoriert")
                 ev.reihe = ""
@@ -656,6 +808,8 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     for ev in events:
         ev.is_past = ev.end <= now
         process_visual(ev, out)
+        if not ev.is_past:
+            make_social_images(ev, out)   # nur für kommende Veranstaltungen – spart Zeit beim Build
     upcoming = [e for e in events if not e.is_past]
     past = sorted((e for e in events if e.is_past), key=lambda e: e.start, reverse=True)
 
@@ -758,13 +912,21 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     render("404.html", "/404.html", page_path="/404.html")
     (out / "kalender.ics").write_text(programm_ics, encoding="utf-8", newline="")
 
+    # Interne Seiten: fertige Texte und Bilder für Facebook, Instagram und Veranstaltungskalender.
+    # Nicht verlinkt, nicht in der Sitemap, für Suchmaschinen gesperrt (robots.txt + noindex).
+    social = {ev.slug: social_texts(ev, cfg) for ev in upcoming}
+    render("intern_index.html", "/intern/", page_path="/intern/", events=upcoming, texts=social)
+    for ev in upcoming:
+        render("intern_event.html", f"/intern/{ev.slug}/", page_path=f"/intern/{ev.slug}/", ev=ev, s=social[ev.slug])
+
     base = cfg["site"]["url"].rstrip("/")
     urls = ["/", "/programm/", "/programm/archiv/"] + [p.url for p in pages if p.in_sitemap] + [e.url for e in events]
     (out / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "".join(f"  <url><loc>{html.escape(base + u)}</loc></url>\n" for u in urls)
         + "</urlset>\n", encoding="utf-8")
-    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n", encoding="utf-8")
+    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /intern/\nSitemap: {base}/sitemap.xml\n",
+                                    encoding="utf-8")
     (out / "build.json").write_text(json.dumps({
         "built_at": now.isoformat(), "upcoming": len(upcoming), "past": len(past), "pages": len(pages)
     }, ensure_ascii=False, indent=2), encoding="utf-8")

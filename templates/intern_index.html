@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% set title = "Intern · Social Media" %}
+{% set noindex = true %}
+{% block body_class %}intern{% endblock %}
+{% block content %}
+<section class="page-head wrap">
+  <p class="kicker">Intern · nicht verlinkt</p>
+  <h1 class="display display--page">Social Media</h1>
+  <p class="lead">Fertige Texte und Bilder für Facebook, Instagram und Veranstaltungskalender – pro Veranstaltung zum Kopieren.</p>
+</section>
+<section class="wrap intern">
+  {% if not events %}<p class="muted">Keine kommenden Veranstaltungen.</p>{% endif %}
+  <ol class="intern-list">
+    {% for ev in events %}
+    <li>
+      <a class="intern-row" href="/intern/{{ ev.slug }}/">
+        <span class="ir-date">{{ ev.start|ddmm }}<span class="muted"> {{ ev.start|wd }}</span></span>
+        <span class="ir-title">{{ texts[ev.slug].title }}</span>
+        <span class="ir-status">
+          {% if ev.facebook %}<span class="status status--done">✓ Facebook</span>{% else %}<span class="status">Facebook offen</span>{% endif %}
+          {% if not ev.social_images %}<span class="status status--warn">kein Flyer</span>{% endif %}
+          {% if not ev.fans_of %}<span class="status status--warn">keine Musikliste</span>{% endif %}
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="intern-hint muted">Sobald ein Facebook-Event angelegt ist, den Link in der Event-Datei eintragen:
+    <code>facebook: "https://www.facebook.com/events/…"</code> – dann steht hier „✓ Facebook“ und auf der
+    Veranstaltungsseite erscheint ein Link „Facebook-Event“.</p>
+</section>
+{% endblock %}
