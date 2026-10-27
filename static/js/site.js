@@ -164,6 +164,24 @@
     });
   });
 
+  /* ---------- Effekte nur animieren, wenn sie zu sehen sind ----------
+   * Jede Kachel bzw. Veranstaltungsseite mit Effekten (.has-fx) bekommt .fx-paused, solange keine ihrer
+   * Effekt-Ebenen (.fx) im Bild ist – und alle, solange der Tab im Hintergrund liegt. */
+  var fxOwners = document.querySelectorAll(".has-fx");
+  if (fxOwners.length && "IntersectionObserver" in window) {
+    var fxVisible = new Map();                      // Effekt-Ebene → gerade im Bild?
+    var fxUpdate = function (owner) {
+      var on = !document.hidden && Array.prototype.some.call(owner.querySelectorAll(".fx"), function (l) { return fxVisible.get(l); });
+      owner.classList.toggle("fx-paused", !on);
+    };
+    var fxObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { fxVisible.set(e.target, e.isIntersecting); });
+      entries.forEach(function (e) { var o = e.target.closest(".has-fx"); if (o) fxUpdate(o); });
+    }, { rootMargin: "150px 0px" });                 // kurz vor dem Hereinscrollen schon starten
+    fxOwners.forEach(function (o) { o.querySelectorAll(".fx").forEach(function (l) { fxObserver.observe(l); }); });
+    document.addEventListener("visibilitychange", function () { fxOwners.forEach(fxUpdate); });
+  }
+
   /* ---------- Interne Seiten: Kopieren-Knöpfe + Zeichenzähler ---------- */
   var copyText = function (el) {
     if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(el.value);
