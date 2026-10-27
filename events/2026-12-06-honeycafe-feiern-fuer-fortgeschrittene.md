@@ -7,7 +7,7 @@ genres: ["Pop", "Rock", "Wave", "Punk", "Dance", "Indie", "Alternative"]
 tags: ["Rauchfrei"]
 teaser: "Nikolaus-Special am 02. Advent - Feiern mit bester Musik aus sechs Generationen"
 reihe: "honey"
-# effekte: snow
+#effekte: rauschnebel
 ---
 
 <div class="placeholder">

@@ -1,5 +1,8 @@
 {# Effekte für Kachel und Veranstaltungsseite – "effekte:" in der Event-Datei.
-   nebel    – Bodennebel zieht über Flyer und Seite, der Mond glimmt
+   rauschnebel   – fasriger Nebel in drei Schichten (hinten langsam, vorn schnelle Fetzen)
+   buehnennebel  – Dunst mit zwei schwenkenden Scheinwerferkegeln (Calavera-Rot + warmweiß)
+   flyerausnebel – unterer Teil des Flyers verschwindet im Nebel, Fetzen ziehen davor durch
+   (Nebelbilder erzeugt der Build: static/img/fx/nebel-*.webp)
    gewitter – Doppelblitz alle 7 Sekunden (je Veranstaltung versetzt)
    fratzen  – Schädel, Kürbisgrinsen und Geister tauchen auf und verschwinden
    snow        – Schneeflocken rieseln, unterschiedlich groß, schaukelnd
@@ -30,8 +33,12 @@
 </svg>
 {% endmacro %}
 
-{% macro fog() %}
-<span class="fx-fog"><span class="fx-fog-a"><i></i><i></i><i></i><i></i></span><span class="fx-fog-b"><i></i><i></i><i></i></span></span>
+{% macro fog(cls="", vorn=true) %}
+<span class="fx-rn {{ cls }}"><span class="fx-rn-hinten"></span><span class="fx-rn-mitte"></span>{% if vorn %}<span class="fx-rn-vorn"></span>{% endif %}</span>
+{% endmacro %}
+
+{% macro buehne(beams=2) %}
+<span class="fx-haze"><span></span></span><span class="fx-beam fx-beam--a"></span>{% if beams > 1 %}<span class="fx-beam fx-beam--b"></span>{% endif %}
 {% endmacro %}
 
 {% macro bolt(cls="") %}
@@ -50,7 +57,9 @@
 {% macro flyer_fx(ev) %}
 {% if ev.effekte %}
 <span class="fx fx-flyer" aria-hidden="true">
-  {% if "nebel" in ev.effekte %}<span class="fx-moon"></span>{{ fog() }}{% endif %}
+  {% if "buehnennebel" in ev.effekte %}{{ buehne(1) }}{% endif %}
+  {% if "rauschnebel" in ev.effekte %}{{ fog() }}{% endif %}
+  {% if "flyerausnebel" in ev.effekte %}<span class="fx-wisp"><span></span></span>{{ fog("fx-rn--dicht") }}{% endif %}
   {% if "gewitter" in ev.effekte %}<span class="fx-flash"></span><span class="fx-flash fx-flash--soft"></span>{{ bolt("fx-bolt--flyer") }}{% endif %}
   {% if "fratzen" in ev.effekte %}<span class="fx-face fx-face--f1">{{ grimace() }}</span><span class="fx-face fx-face--f2">{{ ghost() }}</span>{% endif %}
   {% if "twinklestar" in ev.effekte %}{{ stars(6, ev.slug ~ "-flyer-stars") }}{% endif %}
@@ -63,7 +72,8 @@
 {% macro tile_fx(ev) %}
 {% if ev.effekte %}
 <span class="fx fx-tile" aria-hidden="true">
-  {% if "nebel" in ev.effekte %}{{ fog() }}{% endif %}
+  {% if "buehnennebel" in ev.effekte %}{{ buehne() }}{% endif %}
+  {% if "rauschnebel" in ev.effekte or "flyerausnebel" in ev.effekte %}{{ fog(vorn=false) }}{% endif %}
   {% if "gewitter" in ev.effekte %}<span class="fx-flash fx-flash--sky"></span>{% endif %}
   {% if "fratzen" in ev.effekte %}<span class="fx-face fx-face--t1">{{ skull() }}</span>{% endif %}
   {% if "twinklestar" in ev.effekte %}{{ stars(7, ev.slug ~ "-tile-stars") }}{% endif %}
@@ -76,7 +86,8 @@
 {% macro page_fx(ev) %}
 {% if ev.effekte %}
 <div class="fx fx-page" aria-hidden="true">
-  {% if "nebel" in ev.effekte %}{{ fog() }}{% endif %}
+  {% if "buehnennebel" in ev.effekte %}{{ buehne() }}{% endif %}
+  {% if "rauschnebel" in ev.effekte or "flyerausnebel" in ev.effekte %}{{ fog() }}{% endif %}
   {% if "gewitter" in ev.effekte %}<span class="fx-flash fx-flash--sky"></span>{{ bolt("fx-bolt--p1") }}{{ bolt("fx-bolt--p2") }}{% endif %}
   {% if "fratzen" in ev.effekte %}
   <span class="fx-face fx-face--p1">{{ skull() }}</span>

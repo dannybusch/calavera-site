@@ -45,7 +45,7 @@ except ImportError as exc:  # pragma: no cover
     sys.exit(f"Fehlendes Python-Paket: {exc.name}. Bitte einmal ausführen:  pip install -r requirements.txt")
 
 try:
-    from PIL import Image, ImageOps
+    from PIL import Image, ImageChops, ImageOps
 except ImportError:  # Pillow ist optional: ohne Pillow werden Visuals nur kopiert
     Image = None
 
@@ -59,8 +59,8 @@ MONAT = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
 problems: list[str] = []
 
 
-EFFEKTE = ("nebel", "gewitter", "fratzen", "snow", "twinklestar")   # Animationen für Kachel und Veranstaltungsseite
-EFFEKT_ALIAS = {"schnee": "snow", "sterne": "twinklestar", "twinkle": "twinklestar", "stars": "twinklestar"}
+EFFEKTE = ("rauschnebel", "buehnennebel", "flyerausnebel", "gewitter", "fratzen", "snow", "twinklestar")   # Animationen für Kachel und Veranstaltungsseite
+EFFEKT_ALIAS = {"bühnennebel": "buehnennebel", "flyer-aus-nebel": "flyerausnebel", "schnee": "snow", "sterne": "twinklestar", "twinkle": "twinklestar", "stars": "twinklestar"}
 
 
 def fx_particles(n: int, seed: str) -> list[dict]:
@@ -263,7 +263,7 @@ class Event:
     visual_alt: str = ""
     links: list[dict] = field(default_factory=list)
     highlight: str = ""          # Etikett einer hervorgehobenen Veranstaltung, z. B. "Live-Konzert"
-    effekte: list[str] = field(default_factory=list)   # Animationen: nebel, gewitter, fratzen (beliebig kombinierbar)
+    effekte: list[str] = field(default_factory=list)   # Animationen, siehe EFFEKTE (beliebig kombinierbar)
     social_title: str = ""       # Titel für Facebook/Instagram, falls abweichend (z. B. "F*** Dich …")
     facebook: str = ""           # Link zum Facebook-Event, sobald angelegt (für /intern/)
     social_images: dict = field(default_factory=dict)   # Bilder für Facebook/Instagram (für /intern/)
@@ -280,7 +280,7 @@ class Event:
 
     @property
     def fx_classes(self) -> str:
-        """CSS-Klassen für die Effekte, z. B. "has-fx fx-nebel fx-fratzen"."""
+        """CSS-Klassen für die Effekte, z. B. "has-fx fx-rauschnebel fx-fratzen"."""
         return ("has-fx " + " ".join(f"fx-{fx}" for fx in self.effekte)) if self.effekte else ""
 
     @property
@@ -489,6 +489,92 @@ SOCIAL_FORMATS = {
 }
 
 
+def _noise(w: int, h: int, cells: tuple[int, int], rnd) -> "Image.Image":
+    """Weiches Zufallsrauschen, das in beide Richtungen nahtlos kachelt (Raster wird 3×3 gekachelt und vergrößert)."""
+    cx, cy = cells
+    small = Image.new("L", (cx, cy))
+    small.putdata([rnd.randrange(256) for _ in range(cx * cy)])
+    big = Image.new("L", (cx * 3, cy * 3))
+    for i in range(3):
+        for j in range(3):
+            big.paste(small, (i * cx, j * cy))
+    big = big.resize((w * 3, h * 3), Image.BICUBIC)
+    return big.crop((w, h, 2 * w, 2 * h))
+
+
+def _fractal(w: int, h: int, base: tuple[int, int], octaves: int, seed: int) -> "Image.Image":
+    """Fraktales Rauschen: mehrere Rausch-Schichten, jede doppelt so fein und halb so stark."""
+    import random
+    rnd = random.Random(seed)
+    acc, total, weight = None, 0.0, 1.0
+    for o in range(octaves):
+        layer = _noise(w, h, (base[0] * 2 ** o, base[1] * 2 ** o), rnd)
+        total += weight
+        acc = layer if acc is None else Image.blend(acc, layer, weight / total)
+        weight *= .5
+    return ImageOps.autocontrast(acc, cutoff=1)
+
+
+def make_fog_textures(out: Path) -> None:
+    """Nebelbilder für rauschnebel, buehnennebel und flyerausnebel – einmal pro Build berechnet,
+    im Browser nur noch verschoben (keine Weichzeichnung zur Laufzeit). Waagerecht nahtlos."""
+    if Image is None:
+        warn("Pillow fehlt – Nebelbilder nicht erzeugt (pip install -r requirements.txt)")
+        return
+    target = out / "static" / "img" / "fx"
+    target.mkdir(parents=True, exist_ok=True)
+    w, h = 1024, 256
+
+    def profile(bottom: float, top: float, gamma: float) -> "Image.Image":
+        """Senkrechter Verlauf: oben 'top', unten 'bottom' (0–1), dazwischen gekrümmt."""
+        col = [int(255 * (top + (bottom - top) * (y / (h - 1)) ** gamma)) for y in range(h)]
+        g = Image.new("L", (1, h)); g.putdata(col)
+        return g.resize((w, h))
+
+    def curve(img, lo, hi, gamma):
+        return img.point(lambda v: 0 if v <= lo else int(255 * min(1, (v - lo) / (hi - lo)) ** gamma))
+
+    layers = {
+        # Name: (Grundraster, Oktaven, Zufall, Kontrast lo/hi/gamma, Verlauf unten/oben/Krümmung, Stärke)
+        "nebel-hinten": ((4, 2), 5, 11, (40, 215, 1.1), (1.0, 0.0, 1.6), .85),
+        "nebel-mitte":  ((6, 3), 5, 23, (70, 225, 1.3), (1.0, 0.0, 1.2), .75),
+        "nebel-vorn":   ((3, 6), 4, 37, (125, 235, 1.7), (0.9, 0.05, 0.8), .9),   # in die Länge gezogene Fetzen
+        "nebel-dunst":  ((5, 2), 4, 51, (30, 230, 1.0), (0.8, 0.35, 1.0), .6),    # gleichmäßiger Dunst (Bühne)
+    }
+    # Scheinwerferkegel (Bühnennebel): Spitze oben in der Mitte, weiche Ränder, läuft nach unten ganz aus.
+    # Feines Rauschen ("Dithering") verhindert Treppenstufen im sehr schwachen Verlauf.
+    import math
+    import random
+    bw, bh = 256, 512
+    rnd = random.Random(5)
+    for name, rgb, strength in (("kegel-rot", (214, 38, 70), .55), ("kegel-warm", (255, 228, 205), .32)):
+        data = []
+        for y in range(bh):
+            fy = y / (bh - 1)
+            vert = (1 - fy) ** 1.6 * min(1.0, fy / .03 + .35)       # oben hell, unten 0
+            for x in range(bw):
+                ang = math.degrees(math.atan2(x - bw / 2 + .5, y + 6))
+                cone = math.exp(-(ang / 6.5) ** 2)                    # Kegel ±≈7°
+                glow = math.exp(-((x - bw / 2) ** 2 + y ** 2) / 900)  # Lampe an der Spitze
+                v = 255 * strength * min(1.0, cone * vert + glow * .8)
+                data.append(max(0, min(255, int(v + rnd.uniform(-1.5, 1.5)))))
+        a = Image.new("L", (bw, bh)); a.putdata(data)
+        img = Image.new("RGBA", (bw, bh), rgb + (0,)); img.putalpha(a)
+        path = target / f"{name}.webp"
+        img.save(path, "WEBP", lossless=True)
+        path.chmod(0o644)
+
+    for name, (base, octv, seed, (lo, hi, gm), (pb, pt, pg), strength) in layers.items():
+        alpha = curve(_fractal(w, h, base, octv, seed), lo, hi, gm)
+        alpha = ImageChops.multiply(alpha, profile(pb, pt, pg))
+        alpha = alpha.point(lambda v: int(v * strength))
+        img = Image.new("RGBA", (w, h), (214, 209, 201, 0))
+        img.putalpha(alpha)
+        path = target / f"{name}.webp"
+        img.save(path, "WEBP", quality=80, method=3)
+        path.chmod(0o644)
+
+
 def make_social_images(ev: "Event", out: Path) -> None:
     """Flyer in die Formate von Facebook und Instagram bringen: Flyer vollständig sichtbar,
     die Ränder mit einer abgedunkelten, unscharfen Fassung desselben Flyers gefüllt."""
@@ -583,7 +669,7 @@ def load_events(cfg: dict, tz: ZoneInfo) -> list[Event]:
                 social_title=str(meta.get("social_title") or meta.get("titel_social") or "").strip(),
                 facebook=str(meta.get("facebook") or "").strip(),
             )
-            # effekte: nebel | [nebel, fratzen]  (auch "effekt:")
+            # effekte: rauschnebel | [buehnennebel, fratzen]  (auch "effekt:")
             for fx in as_list(meta.get("effekte") or meta.get("effekt")):
                 fx = str(fx).strip().lower()
                 fx = EFFEKT_ALIAS.get(fx, fx)
@@ -850,6 +936,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(ROOT / "static", out / "static", copy_function=copy_public)
+    make_fog_textures(out)
 
     for ev in events:
         ev.is_past = ev.end <= now

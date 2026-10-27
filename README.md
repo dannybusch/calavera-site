@@ -90,11 +90,17 @@ Für besondere Abende – Halloween, Calavera Dark – bekommt eine Veranstaltun
 Programm-Kachel und oben auf ihrer Seite:
 
 ```yaml
-effekte: [nebel, gewitter, fratzen]   # eine, mehrere oder alle; auch "effekt: nebel"
+effekte: [rauschnebel, gewitter, fratzen]   # eine, mehrere oder alle; auch "effekt: rauschnebel"
 effekte: [snow, twinklestar]          # Weihnachten
 ```
 
-- **nebel** – Bodennebel zieht in zwei Schichten über Flyer, Kachel und Seite; der Vollmond-Bereich des Flyers glimmt
+- **rauschnebel** – fasriger Nebel in drei Schichten: hinten dicht und langsam, vorn dünne Fetzen, schneller
+- **buehnennebel** – Dunst wie aus der Nebelmaschine, durch den zwei Scheinwerferkegel schwenken (Calavera-Rot und warmweiß)
+- **flyerausnebel** – der untere Teil des Flyers verschwindet im Nebel, beim Laden lichtet er sich etwas, Fetzen ziehen vor dem Flyer durch
+  (Achtung: Infos ganz unten auf dem Flyer werden etwas verschleiert)
+
+Die Nebel- und Scheinwerferbilder berechnet der Build einmal (`static/img/fx/`, zusammen ca. 270 KB, braucht Pillow) –
+im Browser werden sie nur verschoben, das hält die Last niedrig.
 - **gewitter** – alle 7 Sekunden ein Doppelblitz: Flyer und Titel leuchten auf, Blitze zucken. Mehrere
   Gewitter-Kacheln blitzen versetzt. Zwei Blitze in 7 Sekunden liegen weit unter der Grenze, die für
   Menschen mit Epilepsie gefährlich werden kann (3 pro Sekunde).
@@ -103,7 +109,7 @@ effekte: [snow, twinklestar]          # Weihnachten
 - **twinklestar** (auch `sterne`) – weiße und goldene Sterne erscheinen, funkeln und verschwinden wieder
 
 Alles reines CSS, ohne JavaScript; Klicks gehen durch die Effekte hindurch. Wer am Gerät „Bewegung
-reduzieren“ eingestellt hat, sieht nur stehenden Nebel und stillstehende Sterne. Tippfehler im Effektnamen meldet der Build.
+reduzieren“ eingestellt hat, sieht nur stehenden Nebel, stillstehende Scheinwerfer und Sterne. Tippfehler im Effektnamen meldet der Build.
 
 ## Reihen
 
