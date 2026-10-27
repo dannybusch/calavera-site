@@ -45,7 +45,7 @@ except ImportError as exc:  # pragma: no cover
     sys.exit(f"Fehlendes Python-Paket: {exc.name}. Bitte einmal ausführen:  pip install -r requirements.txt")
 
 try:
-    from PIL import Image, ImageChops, ImageOps
+    from PIL import Image, ImageChops, ImageFilter, ImageOps
 except ImportError:  # Pillow ist optional: ohne Pillow werden Visuals nur kopiert
     Image = None
 
@@ -59,8 +59,36 @@ MONAT = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
 problems: list[str] = []
 
 
-EFFEKTE = ("rauschnebel", "buehnennebel", "flyerausnebel", "gewitter", "fratzen", "snow", "twinklestar")   # Animationen für Kachel und Veranstaltungsseite
-EFFEKT_ALIAS = {"bühnennebel": "buehnennebel", "flyer-aus-nebel": "flyerausnebel", "schnee": "snow", "sterne": "twinklestar", "twinkle": "twinklestar", "stars": "twinklestar"}
+# Animationen für Kachel und Veranstaltungsseite ("effekte:" in der Event-Datei) – siehe README → Effekte
+EFFEKTE = (
+    "rauschnebel", "buehnennebel", "flyerausnebel",            # Nebel
+    "gewitter", "fratzen",                                       # Halloween
+    "snow", "twinklestar",                                       # Winter
+    "grunge", "vhs", "flanell",                                  # 90er
+    "konfetti", "regenbogenfolie", "seifenblasen", "discokugel", # Gute Laune
+    "bassboom", "spraydose",                                     # Hip-Hop
+    "glitch", "laser", "scanlines",                              # Dunkel / Elektronisch
+    "retrogrid", "neon", "vinyl", "schwerelos",                  # 80er
+    "lichterkette", "dampf", "kerzenlicht",                      # Advent / Honeycafé
+    "gluehwuermchen", "spotlight", "cempasuchil", "feuerwerk",   # passend zu Titel / Ort
+)
+EFFEKT_ALIAS = {"bühnennebel": "buehnennebel", "flyer-aus-nebel": "flyerausnebel", "schnee": "snow", "sterne": "twinklestar",
+                "twinkle": "twinklestar", "stars": "twinklestar", "glühwürmchen": "gluehwuermchen", "regenbogen": "regenbogenfolie",
+                "holo": "regenbogenfolie", "disco": "discokugel", "papelpicado": "cempasuchil", "kerze": "kerzenlicht",
+                "blasen": "seifenblasen", "graffiti": "spraydose", "synthwave": "retrogrid", "bass": "bassboom"}
+# CSS-Dateien je Effekt (static/css/fx/<datei>.css); ohne Eintrag: Datei heißt wie der Effekt
+EFFEKT_CSS = {"rauschnebel": ["nebel"], "flyerausnebel": ["nebel", "flyerausnebel"], "buehnennebel": ["buehnennebel"],
+              "spotlight": ["buehnennebel", "spotlight"], "vhs": ["grunge", "vhs"]}
+
+
+def fx_css_for(effekte) -> list[str]:
+    """CSS-Dateien, die eine Seite für diese Effekte braucht (basis zuerst, keine doppelt)."""
+    files = []
+    for fx in effekte:
+        for f in EFFEKT_CSS.get(fx, [fx]):
+            if f not in files:
+                files.append(f)
+    return ["basis"] + files if files else []
 
 
 def fx_particles(n: int, seed: str) -> list[dict]:
@@ -280,8 +308,9 @@ class Event:
 
     @property
     def fx_classes(self) -> str:
-        """CSS-Klassen für die Effekte, z. B. "has-fx fx-rauschnebel fx-fratzen"."""
-        return ("has-fx " + " ".join(f"fx-{fx}" for fx in self.effekte)) if self.effekte else ""
+        """CSS-Klassen für die Effekte, z. B. "has-fx fx-mit-rauschnebel fx-mit-fratzen".
+        ("fx-mit-…", damit die Namen nie mit den Klassen der Effekt-Ebenen wie .fx-laser kollidieren)"""
+        return ("has-fx " + " ".join(f"fx-mit-{fx}" for fx in self.effekte)) if self.effekte else ""
 
     @property
     def fx_delay(self) -> str:
@@ -515,9 +544,10 @@ def _fractal(w: int, h: int, base: tuple[int, int], octaves: int, seed: int) -> 
     return ImageOps.autocontrast(acc, cutoff=1)
 
 
-def make_fog_textures(out: Path) -> None:
-    """Nebelbilder für rauschnebel, buehnennebel und flyerausnebel – einmal pro Build berechnet,
-    im Browser nur noch verschoben (keine Weichzeichnung zur Laufzeit). Waagerecht nahtlos."""
+def make_fx_textures(out: Path) -> None:
+    """Bilder für die Effekte – einmal pro Build berechnet, im Browser nur noch verschoben/gedreht
+    (keine Weichzeichnung zur Laufzeit): Nebel (waagerecht nahtlos), Scheinwerferkegel, Filmkorn,
+    Staub & Kratzer, Discokugel-Lichtpunkte, Dampf."""
     if Image is None:
         warn("Pillow fehlt – Nebelbilder nicht erzeugt (pip install -r requirements.txt)")
         return
@@ -563,6 +593,59 @@ def make_fog_textures(out: Path) -> None:
         path = target / f"{name}.webp"
         img.save(path, "WEBP", lossless=True)
         path.chmod(0o644)
+
+    def save(img, name, **kw):
+        path = target / name
+        img.save(path, "WEBP", **(kw or {"quality": 80, "method": 3}))
+        path.chmod(0o644)
+
+    # Filmkorn (grunge, vhs): 256×256, nahtlos, helle und dunkle Körner
+    rnd = random.Random(8)
+    g = Image.new("L", (256, 256)); g.putdata([rnd.randrange(256) for _ in range(256 * 256)])
+    a = g.point(lambda v: min(255, int(abs(v - 128) * 1.6)))
+    img = Image.merge("RGBA", (g, g, g, a))
+    save(img, "korn.webp", lossless=True)
+
+    # Staub, Fusseln und Haare (grunge): 512×512, nahtlos (über die Ränder weitergezeichnet)
+    from PIL import ImageDraw
+    rnd = random.Random(12)
+    m = Image.new("L", (512, 512), 0); d = ImageDraw.Draw(m)
+    for _ in range(70):
+        x, y, r = rnd.uniform(0, 512), rnd.uniform(0, 512), rnd.choice([.6, .8, 1, 1.2, 1.6, 2.2])
+        for ox in (-512, 0, 512):
+            for oy in (-512, 0, 512):
+                d.ellipse([x - r + ox, y - r + oy, x + r + ox, y + r + oy], fill=rnd.randrange(120, 230))
+    for _ in range(6):                                    # Haare: kleine Bögen
+        x, y, hl = rnd.uniform(0, 470), rnd.uniform(0, 470), rnd.uniform(14, 40)
+        d.arc([x, y, x + hl, y + hl * rnd.uniform(.3, .8)], rnd.randrange(0, 180), rnd.randrange(200, 360), fill=200, width=1)
+    dark = Image.new("RGBA", (512, 512), (20, 18, 16, 0)); dark.putalpha(m)
+    save(dark, "staub.webp", lossless=True)
+
+    # Discokugel-Lichtpunkte wie die Kugel im Calavera: größere, verwaschene Fünfecke, nur blau-weiß.
+    # 1024×1024, nahtlos (über die Ränder weitergezeichnet); im CSS auf 360 px verkleinert.
+    rnd = random.Random(21)
+    pts = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0)); d = ImageDraw.Draw(pts)
+    for _ in range(20):
+        x, y, r = rnd.uniform(0, 1024), rnd.uniform(0, 1024), rnd.uniform(42, 72)
+        rot = rnd.uniform(0, 2 * math.pi)
+        stretch = rnd.uniform(.75, 1.15)            # leicht verzogen, wie auf schrägen Wänden
+        col = rnd.choice([(236, 242, 255), (236, 242, 255), (200, 220, 255), (165, 195, 255), (130, 165, 255)])
+        a = rnd.randrange(110, 200)
+        for ox in (-1024, 0, 1024):
+            for oy in (-1024, 0, 1024):
+                poly = [(x + ox + r * math.cos(rot + k * 2 * math.pi / 5), y + oy + r * stretch * math.sin(rot + k * 2 * math.pi / 5)) for k in range(5)]
+                d.polygon(poly, fill=col + (a,))
+    pts = Image.alpha_composite(pts.filter(ImageFilter.GaussianBlur(24)), pts.filter(ImageFilter.GaussianBlur(10)))   # verwaschen
+    save(pts.resize((512, 512), Image.LANCZOS), "lichtpunkte.webp", quality=82, method=3)   # weich genug für halbe Auflösung
+
+    # Dampf (dampf): 256×512, senkrechte Schwaden, oben/unten/seitlich ausgeblendet
+    dw, dh = 256, 512
+    st = curve(_fractal(dw, dh, (3, 3), 3, 64), 50, 230, 1.2).filter(ImageFilter.GaussianBlur(7))   # weiche Schwaden, keine Fäden
+    prof = Image.new("L", (dw, dh))
+    prof.putdata([int(255 * math.sin(math.pi * y / dh) ** 1.2 * math.sin(math.pi * (x + .5) / dw) ** 1.5) for y in range(dh) for x in range(dw)])
+    st = ImageChops.multiply(st, prof).point(lambda v: int(v * .8))
+    img = Image.new("RGBA", (dw, dh), (236, 230, 222, 0)); img.putalpha(st)
+    save(img, "dampf.webp")
 
     for name, (base, octv, seed, (lo, hi, gm), (pb, pt, pg), strength) in layers.items():
         alpha = curve(_fractal(w, h, base, octv, seed), lo, hi, gm)
@@ -936,7 +1019,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(ROOT / "static", out / "static", copy_function=copy_public)
-    make_fog_textures(out)
+    make_fx_textures(out)
 
     for ev in events:
         ev.is_past = ev.end <= now
@@ -1006,6 +1089,8 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     # Änderung nicht die zwischengespeicherte alte Datei öffnen.
     programm_ics = ics_for(upcoming, cfg, now, "Calavera Bremen – Programm")
     env.globals["fx_particles"] = fx_particles
+    # Effekte nur auf den vordersten Kacheln im Programm (Startseite und /programm/); Veranstaltungsseiten immer
+    env.globals["fx_kacheln"] = int(cfg.get("programm", {}).get("effekte_kacheln", 2))
     env.globals["kalender_url"] = f"/kalender.ics?v={ics_version(programm_ics)}"
 
     def render(template: str, dest: str, **ctx) -> None:
@@ -1019,9 +1104,12 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     cols = cols if cols in (3, 4) else 4
     home_max = int(cfg.get("programm", {}).get("startseite_max", 12))
 
-    render("index.html", "/", page_path="/", events=upcoming[:home_max],
+    fx_n = env.globals["fx_kacheln"]
+    def fx_list(evs):   # Effekte der vordersten Kacheln → nur deren CSS wird eingebunden
+        return fx_css_for([fx for ev in evs[:fx_n] for fx in ev.effekte])
+    render("index.html", "/", page_path="/", events=upcoming[:home_max], fx_css=fx_list(upcoming[:home_max]),
            more=max(0, len(upcoming) - home_max), cols=cols, span=months_span(upcoming[:home_max]))
-    render("programm.html", "/programm/", page_path="/programm/", events=upcoming, cols=cols,
+    render("programm.html", "/programm/", page_path="/programm/", events=upcoming, cols=cols, fx_css=fx_list(upcoming),
            span=months_span(upcoming), has_archive=bool(past))
     render("archiv.html", "/programm/archiv/", page_path="/programm/archiv/", events=past)
 
@@ -1031,7 +1119,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     for ev in events:
         more_same, more_rest = more_events(ev, upcoming, more_total, more_reihe)
         termin_ics = ics_for([ev], cfg, now, ev.title)
-        render("event.html", ev.url, page_path=ev.url, ev=ev,
+        render("event.html", ev.url, page_path=ev.url, ev=ev, fx_css=fx_css_for(ev.effekte),
                more_same=more_same, more_rest=more_rest, reihe=reihen.get(ev.reihe),
                termin_url=f"termin.ics?v={ics_version(termin_ics)}")
         (out / ev.url.lstrip("/") / "termin.ics").write_text(termin_ics, encoding="utf-8", newline="")

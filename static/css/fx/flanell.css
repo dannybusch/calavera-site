@@ -1,0 +1,12 @@
+/* flanell – rotes Holzfäller-Karo zieht langsam über den Hintergrund (Muster wiederholt sich alle 96 px) */
+.fx-karo { position: absolute; inset: 0; overflow: hidden; opacity: .2; }
+.fx-page .fx-karo { opacity: .12; }
+.fx-karo > span { position: absolute; inset: -96px 0 0 -96px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 70px, rgba(230,200,150,.28) 70px 72px, transparent 72px 96px),
+    repeating-linear-gradient(0deg, transparent 0 70px, rgba(230,200,150,.28) 70px 72px, transparent 72px 96px),
+    repeating-linear-gradient(90deg, transparent 0 40px, rgba(15,15,15,.55) 40px 58px, transparent 58px 96px),
+    repeating-linear-gradient(0deg, transparent 0 40px, rgba(15,15,15,.55) 40px 58px, transparent 58px 96px),
+    #8a1729;
+  animation: fx-karo 16s linear infinite; }
+@keyframes fx-karo { from { transform: translate(0, 0); } to { transform: translate(96px, 96px); } }

@@ -1,14 +1,11 @@
-{# Effekte für Kachel und Veranstaltungsseite – "effekte:" in der Event-Datei.
-   rauschnebel   – fasriger Nebel in drei Schichten (hinten langsam, vorn schnelle Fetzen)
-   buehnennebel  – Dunst mit zwei schwenkenden Scheinwerferkegeln (Calavera-Rot + warmweiß)
-   flyerausnebel – unterer Teil des Flyers verschwindet im Nebel, Fetzen ziehen davor durch
-   (Nebelbilder erzeugt der Build: static/img/fx/nebel-*.webp)
-   gewitter – Doppelblitz alle 7 Sekunden (je Veranstaltung versetzt)
-   fratzen  – Schädel, Kürbisgrinsen und Geister tauchen auf und verschwinden
-   snow        – Schneeflocken rieseln, unterschiedlich groß, schaukelnd
-   twinklestar – Sterne erscheinen, funkeln und verschwinden wieder
-   Nur CSS, keine Klicks abgefangen (pointer-events: none), aus bei "Bewegung reduzieren". #}
+{# Effekte für Kachel und Veranstaltungsseite – "effekte:" in der Event-Datei (beliebig kombinierbar).
+   Jeder Effekt ist ein Makro fx_<name>(ev, wo, img): wo = "flyer" (über dem Flyer), "tile" (Hintergrund
+   der Kachel) oder "page" (Hintergrund oben auf der Veranstaltungsseite). CSS je Effekt: static/css/fx/.
+   Bilder (Nebel, Kegel, Korn, Staub, Lichtpunkte, Dampf) erzeugt der Build in static/img/fx/.
+   Nur CSS-Animationen, keine Klicks abgefangen, angehalten außerhalb des Bildes (site.js),
+   aus bzw. stillstehend bei "Bewegung reduzieren". Übersicht aller Effekte: README → Effekte. #}
 
+{# ---------- Bausteine ---------- #}
 {% macro skull(cls="") %}
 <svg class="fx-face-svg {{ cls }}" viewBox="0 0 100 120" aria-hidden="true" focusable="false">
   <path class="fx-skull" d="M50 6C22 6 8 28 10 52c1 14 8 22 14 26l2 18c0 8 8 12 16 10h16c8 2 16-2 16-10l2-18c6-4 13-12 14-26C92 28 78 6 50 6Z"/>
@@ -45,57 +42,188 @@
 <svg class="fx-bolt {{ cls }}" viewBox="0 0 100 220" aria-hidden="true" focusable="false"><path d="M58 0L40 70l18 4-30 66 16 4-22 76 46-92-18-4 26-62-18-4L82 0Z"/></svg>
 {% endmacro %}
 
-{% macro snow(n, seed) %}
-<span class="fx-snowfall">{% for p in fx_particles(n, seed) %}<i style="--x:{{ p.x }}%;--s:{{ p.size }}px;--d:{{ p.dur }}s;--dl:{{ p.delay }}s;--dx:{{ p.drift }}px;--sw:{{ p.sway }}s;--o:{{ p.op }}"></i>{% endfor %}</span>
+{# fallende/steigende/schwebende Teilchen – Werte kommen fest aus dem Build (fx_particles), kein JavaScript #}
+{% macro particles(cls, n, seed, extra="") %}
+<span class="{{ cls }}">{% for p in fx_particles(n, seed) %}<i class="c{{ loop.index % 5 }}{{ ' is-gold' if p.gold }}" style="--x:{{ p.x }}%;--y:{{ p.y }}%;--s:{{ p.size }}px;--d:{{ p.dur }}s;--dl:{{ p.delay }}s;--dx:{{ p.drift }}px;--sw:{{ p.sway }}s;--o:{{ p.op }};--tw:{{ p.tw }}s;--td:{{ p.tdelay }}s;--r:{{ p.rot }}deg{{ extra }}"></i>{% endfor %}</span>
 {% endmacro %}
 
-{% macro stars(n, seed) %}
-<span class="fx-starfield">{% for p in fx_particles(n, seed) %}<i class="{{ 'is-gold' if p.gold }}" style="--x:{{ p.x }}%;--y:{{ p.y }}%;--s:{{ (p.size * 4)|round(1) }}px;--tw:{{ p.tw }}s;--td:{{ p.tdelay }}s;--r:{{ p.rot }}deg"></i>{% endfor %}</span>
+{# ---------- Nebel ---------- #}
+{% macro fx_rauschnebel(ev, wo, img) %}
+{% if wo == "tile" %}{{ fog(vorn=false) }}{% else %}{{ fog() }}{% endif %}
 {% endmacro %}
 
-{# über dem Flyer (Kachel und Veranstaltungsseite) #}
-{% macro flyer_fx(ev) %}
-{% if ev.effekte %}
-<span class="fx fx-flyer" aria-hidden="true">
-  {% if "buehnennebel" in ev.effekte %}{{ buehne(1) }}{% endif %}
-  {% if "rauschnebel" in ev.effekte %}{{ fog() }}{% endif %}
-  {% if "flyerausnebel" in ev.effekte %}<span class="fx-wisp"><span></span></span>{{ fog("fx-rn--dicht") }}{% endif %}
-  {% if "gewitter" in ev.effekte %}<span class="fx-flash"></span><span class="fx-flash fx-flash--soft"></span>{{ bolt("fx-bolt--flyer") }}{% endif %}
-  {% if "fratzen" in ev.effekte %}<span class="fx-face fx-face--f1">{{ grimace() }}</span><span class="fx-face fx-face--f2">{{ ghost() }}</span>{% endif %}
-  {% if "twinklestar" in ev.effekte %}{{ stars(6, ev.slug ~ "-flyer-stars") }}{% endif %}
-  {% if "snow" in ev.effekte %}{{ snow(18, ev.slug ~ "-flyer-snow") }}{% endif %}
+{% macro fx_buehnennebel(ev, wo, img) %}
+{# Kegel in beiden Ebenen angelegt; buehnennebel.css zeigt je nach Platz nur eine davon #}
+{{ buehne(2) }}
+{% endmacro %}
+
+{% macro fx_flyerausnebel(ev, wo, img) %}
+{% if wo == "flyer" %}<span class="fx-wisp"><span></span></span>{{ fog("fx-rn--dicht") }}
+{% elif wo == "tile" %}{{ fog(vorn=false) }}{% else %}{{ fog() }}{% endif %}
+{% endmacro %}
+
+{# ---------- Halloween ---------- #}
+{% macro fx_gewitter(ev, wo, img) %}
+{% if wo == "flyer" %}<span class="fx-flash"></span><span class="fx-flash fx-flash--soft"></span>{{ bolt("fx-bolt--flyer") }}
+{% elif wo == "tile" %}<span class="fx-flash fx-flash--sky"></span>
+{% else %}<span class="fx-flash fx-flash--sky"></span>{{ bolt("fx-bolt--p1") }}{{ bolt("fx-bolt--p2") }}{% endif %}
+{% endmacro %}
+
+{% macro fx_fratzen(ev, wo, img) %}
+{% if wo == "flyer" %}<span class="fx-face fx-face--f1">{{ grimace() }}</span><span class="fx-face fx-face--f2">{{ ghost() }}</span>
+{% elif wo == "tile" %}<span class="fx-face fx-face--t1">{{ skull() }}</span>
+{% else %}<span class="fx-face fx-face--p1">{{ skull() }}</span><span class="fx-face fx-face--p2">{{ skull() }}</span><span class="fx-face fx-face--p3">{{ grimace("fx-grimace--red") }}</span>{% endif %}
+{% endmacro %}
+
+{# ---------- Winter ---------- #}
+{% macro fx_snow(ev, wo, img) %}
+{{ particles("fx-snowfall", {"flyer": 18, "tile": 22, "page": 50}[wo], ev.slug ~ "-snow-" ~ wo) }}
+{% endmacro %}
+
+{% macro fx_twinklestar(ev, wo, img) %}
+{{ particles("fx-starfield", {"flyer": 6, "tile": 7, "page": 16}[wo], ev.slug ~ "-stars-" ~ wo) }}
+{% endmacro %}
+
+{# ---------- Grunge / 90er ---------- #}
+{% macro fx_grunge(ev, wo, img) %}
+<span class="fx-korn"></span>
+{% if wo == "flyer" %}<span class="fx-staub"></span><span class="fx-kratzer"></span><span class="fx-kratzer fx-kratzer--2"></span>{% endif %}
+{% endmacro %}
+
+{% macro fx_vhs(ev, wo, img) %}
+{# Der Flyer ist der "Bildschirm": nur er hat Zeilen und Störstreifen; drumherum nur ein Hauch Korn #}
+{% if wo == "flyer" %}<span class="fx-korn fx-korn--fein"></span><span class="fx-vhs-zeilen"></span><span class="fx-vhs-band"></span>
+{% else %}<span class="fx-korn fx-korn--hauch"></span>{% endif %}
+{% endmacro %}
+
+{% macro fx_flanell(ev, wo, img) %}
+{% if wo != "flyer" %}<span class="fx-karo"><span></span></span>{% endif %}
+{% endmacro %}
+
+{# ---------- Gute Laune ---------- #}
+{% macro fx_konfetti(ev, wo, img) %}
+{{ particles("fx-konfetti", {"flyer": 14, "tile": 18, "page": 40}[wo], ev.slug ~ "-konfetti-" ~ wo) }}
+{% endmacro %}
+
+{% macro fx_regenbogenfolie(ev, wo, img) %}
+{% if wo == "flyer" %}<span class="fx-holo"></span><span class="fx-holo fx-holo--2"></span>{% endif %}
+{% endmacro %}
+
+{% macro fx_seifenblasen(ev, wo, img) %}
+{{ particles("fx-blasen", {"flyer": 5, "tile": 6, "page": 12}[wo], ev.slug ~ "-blasen-" ~ wo) }}
+{% endmacro %}
+
+{% macro fx_discokugel(ev, wo, img) %}
+<span class="fx-disco"><span></span></span>
+{% if wo == "page" %}<span class="fx-kugel"></span>{% endif %}
+{% endmacro %}
+
+{# ---------- Hip-Hop ---------- #}
+{% macro fx_bassboom(ev, wo, img) %}{# nur CSS: der Flyer selbst pumpt im Takt, keine eigenen Ebenen #}{% endmacro %}
+
+{% macro fx_spraydose(ev, wo, img) %}
+{{ particles("fx-drips", {"flyer": 5, "tile": 6, "page": 12}[wo], ev.slug ~ "-drips-" ~ wo) }}
+{% endmacro %}
+
+{# ---------- Dunkel / Elektronisch ---------- #}
+{% macro fx_glitch(ev, wo, img) %}
+{% if wo == "flyer" and img %}<span class="fx-glitch" style="--img: url('{{ img }}')"><i></i><i></i><i></i><b></b></span>{% endif %}
+{% endmacro %}
+
+{% macro fx_laser(ev, wo, img) %}
+<span class="fx-laser"><i></i><i></i><i></i>{% if wo != "flyer" %}<i></i><i></i>{% endif %}</span>
+{% endmacro %}
+
+{% macro fx_scanlines(ev, wo, img) %}
+{% if wo == "flyer" %}<span class="fx-scan"></span>{% endif %}
+<span class="fx-scanband"></span>
+{% endmacro %}
+
+{# ---------- 80er ---------- #}
+{% macro fx_retrogrid(ev, wo, img) %}
+{% if wo != "flyer" %}<span class="fx-retro"><span class="fx-sonne"></span><span class="fx-boden"><i></i></span></span>{% endif %}
+{% endmacro %}
+
+{% macro fx_neon(ev, wo, img) %}
+{% if wo == "tile" %}<span class="fx-neonrahmen"></span>{% endif %}
+{% endmacro %}
+
+{% macro fx_vinyl(ev, wo, img) %}
+{% if wo == "flyer" %}<span class="fx-vinyl"><i></i><b></b></span>{% endif %}
+{% endmacro %}
+
+{% macro fx_schwerelos(ev, wo, img) %}
+{% if wo != "flyer" %}{{ particles("fx-weltraum", {"tile": 18, "page": 40}[wo], ev.slug ~ "-weltraum-" ~ wo) }}{% endif %}
+{% endmacro %}
+
+{# ---------- Advent / Honeycafé ---------- #}
+{% macro fx_lichterkette(ev, wo, img) %}
+{% if wo != "flyer" %}
+{% set n = 11 if wo == "tile" else 25 %}
+<span class="fx-kette">
+  <svg class="fx-kabel" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 1Q12.5 9 25 1Q37.5 9 50 1Q62.5 9 75 1Q87.5 9 100 1"/></svg>
+  {% for p in fx_particles(n, ev.slug ~ "-kette-" ~ wo) %}{% set x = (loop.index - 0.5) / n * 100 %}{% set t = (x % 25) / 25 %}
+  <i class="c{{ loop.index % 3 }}" style="--x:{{ x|round(2) }}%;--y:{{ (1 + 16 * t * (1 - t))|round(2) }};--tw:{{ p.tw }}s;--td:{{ p.tdelay }}s"></i>{% endfor %}
 </span>
 {% endif %}
+{% endmacro %}
+
+{% macro fx_dampf(ev, wo, img) %}
+<span class="fx-dampf"><i></i><i></i><i></i></span>
+{% endmacro %}
+
+{% macro fx_kerzenlicht(ev, wo, img) %}
+<span class="fx-kerze"></span><span class="fx-kerze fx-kerze--2"></span>
+{% endmacro %}
+
+{# ---------- Passend zum Titel / Ort ---------- #}
+{% macro fx_gluehwuermchen(ev, wo, img) %}
+{{ particles("fx-wuermchen", {"flyer": 5, "tile": 8, "page": 16}[wo], ev.slug ~ "-wuermchen-" ~ wo) }}
+{% endmacro %}
+
+{% macro fx_spotlight(ev, wo, img) %}
+{% if wo == "flyer" %}<span class="fx-lichtfleck"></span>{% else %}<span class="fx-beam fx-beam--spot"></span>{% endif %}
+{% endmacro %}
+
+{% macro fx_cempasuchil(ev, wo, img) %}
+{% if wo != "flyer" %}
+{% set n = 7 if wo == "tile" else 16 %}
+<span class="fx-picado">{% for i in range(n) %}<i class="c{{ i % 5 }}" style="--i:{{ i }};--n:{{ n }}"></i>{% endfor %}</span>
+{% endif %}
+{{ particles("fx-petals", {"flyer": 10, "tile": 12, "page": 26}[wo], ev.slug ~ "-petals-" ~ wo) }}
+{% endmacro %}
+
+{% macro fx_feuerwerk(ev, wo, img) %}
+{% set bursts = {"flyer": [(28, 22, 0), (70, 34, 1.9)], "tile": [(25, 12, 0.6), (74, 20, 2.5)], "page": [(16, 18, 0), (58, 10, 1.4), (86, 26, 2.8)]}[wo] %}
+<span class="fx-feuerwerk">{% for x, y, d in bursts %}<b class="c{{ loop.index % 3 }}" style="--x:{{ x }}%;--y:{{ y }}%;--bd:{{ d }}s">{% for k in range(12) %}<i style="--a:{{ k * 30 }}deg"></i>{% endfor %}</b>{% endfor %}</span>
+{% endmacro %}
+
+{# ---------- Zuordnung Name → Effekt (Reihenfolge der Ebenen = Reihenfolge in "effekte:") ---------- #}
+{% set FX = {
+  "rauschnebel": fx_rauschnebel, "buehnennebel": fx_buehnennebel, "flyerausnebel": fx_flyerausnebel,
+  "gewitter": fx_gewitter, "fratzen": fx_fratzen, "snow": fx_snow, "twinklestar": fx_twinklestar,
+  "grunge": fx_grunge, "vhs": fx_vhs, "flanell": fx_flanell,
+  "konfetti": fx_konfetti, "regenbogenfolie": fx_regenbogenfolie, "seifenblasen": fx_seifenblasen, "discokugel": fx_discokugel,
+  "bassboom": fx_bassboom, "spraydose": fx_spraydose,
+  "glitch": fx_glitch, "laser": fx_laser, "scanlines": fx_scanlines,
+  "retrogrid": fx_retrogrid, "neon": fx_neon, "vinyl": fx_vinyl, "schwerelos": fx_schwerelos,
+  "lichterkette": fx_lichterkette, "dampf": fx_dampf, "kerzenlicht": fx_kerzenlicht,
+  "gluehwuermchen": fx_gluehwuermchen, "spotlight": fx_spotlight, "cempasuchil": fx_cempasuchil, "feuerwerk": fx_feuerwerk,
+} %}
+
+{% macro layer(ev, wo, img="") %}{% for name in ev.effekte %}{% if name in FX %}{{ FX[name](ev, wo, img) }}{% endif %}{% endfor %}{% endmacro %}
+
+{# über dem Flyer (Kachel und Veranstaltungsseite); img = Flyer-Bild (für glitch) #}
+{% macro flyer_fx(ev, img="") %}
+{% if ev.effekte %}<span class="fx fx-flyer" aria-hidden="true">{{ layer(ev, "flyer", img) }}</span>{% endif %}
 {% endmacro %}
 
 {# Hintergrund der ganzen Kachel #}
 {% macro tile_fx(ev) %}
-{% if ev.effekte %}
-<span class="fx fx-tile" aria-hidden="true">
-  {% if "buehnennebel" in ev.effekte %}{{ buehne() }}{% endif %}
-  {% if "rauschnebel" in ev.effekte or "flyerausnebel" in ev.effekte %}{{ fog(vorn=false) }}{% endif %}
-  {% if "gewitter" in ev.effekte %}<span class="fx-flash fx-flash--sky"></span>{% endif %}
-  {% if "fratzen" in ev.effekte %}<span class="fx-face fx-face--t1">{{ skull() }}</span>{% endif %}
-  {% if "twinklestar" in ev.effekte %}{{ stars(7, ev.slug ~ "-tile-stars") }}{% endif %}
-  {% if "snow" in ev.effekte %}{{ snow(22, ev.slug ~ "-tile-snow") }}{% endif %}
-</span>
-{% endif %}
+{% if ev.effekte %}<span class="fx fx-tile" aria-hidden="true">{{ layer(ev, "tile") }}</span>{% endif %}
 {% endmacro %}
 
 {# Hintergrund oben auf der Veranstaltungsseite #}
 {% macro page_fx(ev) %}
-{% if ev.effekte %}
-<div class="fx fx-page" aria-hidden="true">
-  {% if "buehnennebel" in ev.effekte %}{{ buehne() }}{% endif %}
-  {% if "rauschnebel" in ev.effekte or "flyerausnebel" in ev.effekte %}{{ fog() }}{% endif %}
-  {% if "gewitter" in ev.effekte %}<span class="fx-flash fx-flash--sky"></span>{{ bolt("fx-bolt--p1") }}{{ bolt("fx-bolt--p2") }}{% endif %}
-  {% if "fratzen" in ev.effekte %}
-  <span class="fx-face fx-face--p1">{{ skull() }}</span>
-  <span class="fx-face fx-face--p2">{{ skull() }}</span>
-  <span class="fx-face fx-face--p3">{{ grimace("fx-grimace--red") }}</span>
-  {% endif %}
-  {% if "twinklestar" in ev.effekte %}{{ stars(16, ev.slug ~ "-page-stars") }}{% endif %}
-  {% if "snow" in ev.effekte %}{{ snow(50, ev.slug ~ "-page-snow") }}{% endif %}
-</div>
-{% endif %}
+{% if ev.effekte %}<div class="fx fx-page" aria-hidden="true">{{ layer(ev, "page") }}</div>{% endif %}
 {% endmacro %}

@@ -1,0 +1,16 @@
+/* laser – dünne rote (und eine grüne) Laserlinien fächern von oben durch den Raum */
+.fx-laser { position: absolute; left: 50%; top: -2%; width: 0; height: 0; }
+.fx-laser i { position: absolute; left: -1px; top: 0; width: 2px; height: var(--lh, 1400px); transform-origin: 50% 0; opacity: .85;
+  background: linear-gradient(to bottom, var(--lc, rgba(255,60,90,.95)), rgba(255,60,90,.4) 45%, transparent);
+  box-shadow: 0 0 6px var(--lg, rgba(255,40,80,.9)), 0 0 16px var(--lg, rgba(255,40,80,.5));
+  animation: fx-schwenk var(--ld) ease-in-out infinite alternate, fx-laser-an 3.1s steps(1) infinite; }
+.fx-laser i:nth-child(1) { --von: -58deg; --bis: -22deg; --ld: 5s; }
+.fx-laser i:nth-child(2) { --von: -24deg; --bis: 12deg; --ld: 6.3s; animation-delay: -2s, -.7s; }
+.fx-laser i:nth-child(3) { --von: 8deg; --bis: 38deg; --ld: 4.7s; animation-delay: -1s, -1.9s; }
+.fx-laser i:nth-child(4) { --von: 26deg; --bis: 60deg; --ld: 5.8s; animation-delay: -3s, -1.2s; }
+.fx-laser i:nth-child(5) { --von: -12deg; --bis: 18deg; --ld: 7.1s; animation-delay: -4s, -2.4s;
+  --lc: rgba(90,255,140,.9); --lg: rgba(60,255,120,.6);
+  background: linear-gradient(to bottom, var(--lc), rgba(90,255,140,.35) 45%, transparent); }
+.fx-tile .fx-laser i, .fx-flyer .fx-laser i { --lh: 760px; }
+.fx-flyer .fx-laser { opacity: .55; }
+@keyframes fx-laser-an { 0%, 41% { opacity: .85; } 42% { opacity: 0; } 46%, 78% { opacity: .85; } 79% { opacity: .1; } 81%, 100% { opacity: .85; } }

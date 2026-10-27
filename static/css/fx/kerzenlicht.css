@@ -1,0 +1,9 @@
+/* kerzenlicht – warmer Schein flackert ruhig von unten */
+.fx-kerze { position: absolute; left: 50%; bottom: -35%; width: 130%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,170,80,.34), rgba(255,140,60,.12) 55%, transparent); animation: fx-flackern 2.7s ease-in-out infinite; }
+.fx-kerze--2 { width: 90%; bottom: -25%; background: radial-gradient(closest-side, rgba(255,200,120,.28), transparent); animation-duration: 1.9s; animation-delay: -.7s; }
+.fx-page .fx-kerze { left: 22%; width: 70%; bottom: 0; }
+.fx-page .fx-kerze--2 { width: 46%; bottom: 6%; }
+@media (max-width: 960px) { .fx-page .fx-kerze { left: 50%; } }
+@keyframes fx-flackern { 0%, 100% { opacity: .85; transform: scale(1); } 20% { opacity: 1; transform: scale(1.03); } 35% { opacity: .7; transform: scale(.98); }
+  50% { opacity: .95; } 62% { opacity: .75; transform: scale(1.02); } 80% { opacity: 1; } }

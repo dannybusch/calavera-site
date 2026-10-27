@@ -1,0 +1,9 @@
+/* spotlight – ein warmer Lichtkegel auf den Flyer, ganz ruhig (Kegel aus buehnennebel.css) */
+.fx-beam--spot { --bx: 50%; --img: url("/static/img/fx/kegel-warm.webp"); --von: -5deg; --bis: 5deg; --d: 9s; --o: 1; }
+.fx-tile .fx-beam--spot { --bh: 85%; --o: 1; --von: -4deg; --bis: 4deg; }
+.fx-page .fx-beam--spot { --bx: 19%; --bh: 120%; }
+@media (max-width: 960px) { .fx-page .fx-beam--spot { --bx: 50%; } }
+.fx-mit-spotlight .fx-flyer { box-shadow: inset 0 0 70px 18px rgba(0,0,0,.45); }
+.fx-lichtfleck { position: absolute; left: 50%; top: 32%; width: 95%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,236,200,.22), transparent); animation: fx-lichtfleck 10s ease-in-out infinite alternate; }
+@keyframes fx-lichtfleck { from { transform: translate(-8%, -4%); } to { transform: translate(8%, 6%); } }

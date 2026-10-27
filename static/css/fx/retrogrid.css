@@ -1,0 +1,17 @@
+/* retrogrid – Synthwave: Neon-Gitterboden läuft auf den Horizont zu, gestreifte Sonne dahinter */
+.fx-retro { position: absolute; left: 0; right: 0; bottom: 0; height: var(--rh, 48%); overflow: hidden; opacity: var(--ro, .5); }
+.fx-page .fx-retro { --rh: 46%; --ro: .4; }
+.fx-tile .fx-retro { --rh: 26%; --ro: .4; }          /* Kachel: nur im unteren Drittel, Sonne klein – Text bleibt lesbar */
+.fx-tile .fx-sonne { width: 34%; }
+.fx-sonne { position: absolute; left: 50%; bottom: 46%; width: min(58%, 260px); aspect-ratio: 1; translate: -50% 50%; border-radius: 50%;
+  background: linear-gradient(to bottom, #ffd166, #ff6f91 55%, #b3122e);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 47%, transparent 47%), repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px);
+          mask-image: linear-gradient(to bottom, #000 0 47%, transparent 47%), repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px);
+  animation: fx-atmen 7s ease-in-out infinite; }
+.fx-boden { position: absolute; left: -60%; right: -60%; bottom: 0; height: 46%; perspective: 240px; perspective-origin: 50% 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 35%); mask-image: linear-gradient(to bottom, transparent, #000 35%); }
+.fx-boden i { position: absolute; left: 0; right: 0; top: 0; height: 400%; transform-origin: 50% 0;
+  background: linear-gradient(90deg, rgba(255,80,200,.85) 0 2px, transparent 2px) 0 0 / 40px 40px,
+              linear-gradient(0deg, rgba(80,220,255,.85) 0 2px, transparent 2px) 0 0 / 40px 40px;
+  transform: rotateX(70deg) translateY(-40px); animation: fx-gitter 1.3s linear infinite; }
+@keyframes fx-gitter { from { transform: rotateX(70deg) translateY(-40px); } to { transform: rotateX(70deg) translateY(0); } }

@@ -1,0 +1,13 @@
+/* vhs – Videokassette: der Flyer ist der Bildschirm (Zeilen, feines Korn, ein Störstreifen, ab und zu Ruckeln);
+   Kachel und Seite nur ein Hauch Korn. Korn aus grunge.css */
+.fx-korn--fein { --ko: .16; background-size: 110px 110px; animation-duration: .25s; }
+.fx-vhs-zeilen { position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(0,0,0,.2) 0 1px, transparent 1px 3px); }
+.fx-vhs-band { position: absolute; left: -5%; right: -5%; top: 0; height: 14%;
+  background: linear-gradient(to bottom, transparent, rgba(230,235,255,.1) 30%, rgba(230,235,255,.24) 50%, rgba(255,255,255,.08) 62%, transparent);
+  animation: fx-vhs-band 7s linear infinite; }
+.fx-korn--hauch { --ko: .08 !important; }   /* Kachel/Seite: nur leichtes Korn, kein eigener Streifen */
+.fx-mit-vhs .t-flyer img, .fx-mit-vhs .event-flyer img { animation: fx-vhs-ruck 8s steps(1) var(--fx-delay, 0s) infinite; }
+@keyframes fx-vhs-band { from { transform: translateY(720%); } to { transform: translateY(-100%); } }
+@keyframes fx-vhs-ruck { 0%, 90% { transform: none; } 91% { transform: translateX(-3px); } 92% { transform: translateX(4px) skewX(-1deg); }
+  93% { transform: none; } 96% { transform: translate(2px, 1px); } 97% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fx-vhs-band { display: none; } }

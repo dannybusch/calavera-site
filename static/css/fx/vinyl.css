@@ -1,0 +1,12 @@
+/* vinyl – Schallplatte in der Flyer-Ecke dreht sich mit 33⅓ Umdrehungen pro Minute */
+.fx-vinyl { position: absolute; right: -19%; bottom: -19%; width: 48%; aspect-ratio: 1; }
+.fx-vinyl i { position: absolute; inset: 0; border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255,255,255,.75) 0 1.4%, transparent 1.9%),
+    radial-gradient(circle, #e8e2d6 0 2.2%, #b3122e 2.7% 29%, #8e0e24 29.5% 30%, transparent 30.5%),
+    repeating-radial-gradient(circle, #121212 0 1.5px, #1d1d1d 1.5px 3px);
+  box-shadow: 0 0 0 2px #0a0a0a, 0 6px 22px rgba(0,0,0,.65);
+  animation: fx-dreh 1.8s linear infinite; }
+.fx-vinyl b { position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 20deg, transparent 0 20deg, rgba(255,255,255,.1) 35deg, transparent 50deg 200deg, rgba(255,255,255,.08) 215deg, transparent 230deg); }
+@keyframes fx-dreh { to { transform: rotate(360deg); } }

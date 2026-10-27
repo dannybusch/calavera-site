@@ -1,0 +1,18 @@
+/* Gewitter – zwei Blitze in 7 s, weit unter der Grenze von 3 Blitzen pro Sekunde */
+/* ohne mix-blend-mode: normale halbtransparente Flächen sind deutlich billiger zu zeichnen */
+.fx-flash { position: absolute; inset: 0; opacity: 0; background: rgba(225,230,255,.38); animation: fx-flash 7s linear var(--fx-delay, 0s) infinite; }
+.fx-flash--soft { background: #e1e6ff; animation-name: fx-flash-soft; }
+.fx-flash--sky { background: rgba(170,180,255,.55); animation-name: fx-flash-soft; }
+.fx-bolt { position: absolute; opacity: 0; fill: #eef0ff; filter: drop-shadow(0 0 8px rgba(200,210,255,.95)) drop-shadow(0 0 24px rgba(160,170,255,.7));
+  animation: fx-bolt 7s linear var(--fx-delay, 0s) infinite; }
+.fx-bolt--flyer { right: 8%; top: 4%; width: 21%; }
+.fx-bolt--p1 { right: 4%; top: 2%; width: 150px; }
+.fx-bolt--p2 { right: 22%; top: 0; width: 80px; transform: scaleX(-1); animation-delay: calc(var(--fx-delay, 0s) + .12s); }
+.fx-mit-gewitter .t-title, .fx-mit-gewitter .event-title { animation: fx-title 7s linear var(--fx-delay, 0s) infinite; }
+@keyframes fx-flash { 0%, 84% { opacity: 0; } 85% { opacity: .85; } 86.5% { opacity: 0; } 88% { opacity: .55; } 90%, 100% { opacity: 0; } }
+@keyframes fx-flash-soft { 0%, 84% { opacity: 0; } 85% { opacity: .18; } 86.5% { opacity: 0; } 88% { opacity: .1; } 90%, 100% { opacity: 0; } }
+@keyframes fx-bolt { 0%, 84% { opacity: 0; } 85% { opacity: 1; } 86.5% { opacity: 0; } 88% { opacity: .8; } 89.5%, 100% { opacity: 0; } }
+@keyframes fx-title { 0%, 84%, 90%, 100% { text-shadow: none; } 85% { text-shadow: 0 0 18px rgba(214,220,255,.9), 0 0 2px #fff; } 86.5% { text-shadow: none; } 88% { text-shadow: 0 0 12px rgba(214,220,255,.7); } }
+
+@media (max-width: 640px) { .fx-bolt--p2 { display: none; } .fx-bolt--p1 { width: 90px; } }
+@media (prefers-reduced-motion: reduce) { .fx-flash, .fx-bolt { display: none; } }

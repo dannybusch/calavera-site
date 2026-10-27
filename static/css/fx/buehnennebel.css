@@ -1,0 +1,35 @@
+/* buehnennebel (Kegel auch für spotlight) */
+/* Bühnennebel: Dunst + zwei Scheinwerferkegel, die langsam schwenken (nur Drehung → günstig) */
+.fx-haze { position: absolute; inset: 0; overflow: hidden; container-type: size; }
+.fx-haze > span { position: absolute; left: 0; top: 0; width: 800cqh; height: 100%; background: url("/static/img/fx/nebel-dunst.webp") repeat-x 0 0 / 50% 100%;
+  opacity: .3; animation: fx-drift 120s linear infinite; }
+/* Kegel als vorberechnetes Bild (mit Dithering gegen Streifen), läuft im Bild nach unten ganz aus */
+.fx-beam { position: absolute; top: -2%; left: var(--bx); height: var(--bh, 125%); aspect-ratio: 1 / 2; translate: -50% 0; transform-origin: 50% 0;
+  background: var(--img) center top / 100% 100% no-repeat; opacity: var(--o, 1);
+  animation: fx-schwenk var(--d) ease-in-out var(--dl, 0s) infinite alternate; }
+/* Bühnennebel-Kegel laufen pro Situation in GENAU EINER Ebene – sonst bricht der Strahl am Flyerrand:
+   - viel Platz (Detailseite und große erste Kachel ab 1024 px): nur im Hintergrund, der Flyer steht davor
+   - wenig Platz (normale Kacheln, Tablet/Handy): nur auf dem Flyer, zwei Kegel aus den oberen Ecken
+   Der Dunst hat keine Kanten und darf in beiden Ebenen bleiben. */
+.fx-beam--a { --img: url("/static/img/fx/kegel-rot.webp"); --d: 11s; }
+.fx-beam--b { --img: url("/static/img/fx/kegel-warm.webp"); --d: 14s; --dl: -5s; }
+
+/* auf dem Flyer (Standard) */
+.fx-flyer .fx-beam--a { --bx: 16%; --bh: 105%; --o: .7; --von: -8deg; --bis: 30deg; }
+.fx-flyer .fx-beam--b { --bx: 84%; --bh: 105%; --o: .95; --von: 8deg; --bis: -30deg; }
+.fx-flyer .fx-haze > span { opacity: .25; }
+
+/* im Hintergrund: Seite und große Kachel */
+.fx-page .fx-beam--a { --bx: 22%; --von: -24deg; --bis: 16deg; }
+.fx-page .fx-beam--b { --bx: 78%; --von: 20deg; --bis: -18deg; }
+.tile.is-next .fx-tile .fx-beam--a { --bx: 34%; --bh: 120%; --von: -26deg; --bis: 18deg; }
+.tile.is-next .fx-tile .fx-beam--b { --bx: 82%; --bh: 120%; --von: 22deg; --bis: -20deg; }
+
+/* wer zeigt die Kegel? */
+.fx-tile .fx-beam--a, .fx-tile .fx-beam--b, .fx-page .fx-beam--a, .fx-page .fx-beam--b { display: none; }
+@media (min-width: 1024px) {
+  .tile.is-next .fx-tile .fx-beam--a, .tile.is-next .fx-tile .fx-beam--b,
+  .fx-page .fx-beam--a, .fx-page .fx-beam--b { display: block; }
+  .tile.is-next .fx-flyer .fx-beam--a, .tile.is-next .fx-flyer .fx-beam--b,
+  .event .fx-flyer .fx-beam--a, .event .fx-flyer .fx-beam--b { display: none; }
+}

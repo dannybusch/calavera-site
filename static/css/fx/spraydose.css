@@ -1,0 +1,13 @@
+/* spraydose – frisches Graffiti: Sprühkante oben, Farbnasen laufen herunter */
+.fx-drips { position: absolute; left: 0; right: 0; top: 0; height: 72%; overflow: hidden; }
+.fx-drips::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 20px;
+  background: radial-gradient(circle, rgba(255,79,163,.85) 0 1.1px, transparent 1.6px) 0 4px / 7px 6px,
+              linear-gradient(to bottom, rgba(255,79,163,.9) 0 5px, transparent 14px); }
+.fx-drips i { position: absolute; top: 0; left: var(--x); width: calc(var(--s) * .55 + 2px); height: calc(7% + var(--s) * 5);
+  background: var(--c); border-radius: 0 0 99px 99px; opacity: .85;
+  animation: fx-tropfen calc(var(--d) * .9) cubic-bezier(.4,0,.6,1) var(--td) infinite; }
+.fx-drips i::after { content: ""; position: absolute; bottom: -2px; left: 50%; width: 160%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%; background: inherit; }
+.fx-drips .c0 { --c: #ff4fa3; } .fx-drips .c1 { --c: #39f0a0; } .fx-drips .c2 { --c: #ffe14d; } .fx-drips .c3 { --c: #4fc3ff; } .fx-drips .c4 { --c: #e23a5b; }
+@keyframes fx-tropfen { 0% { transform: translateY(-105%); opacity: 0; } 4% { opacity: .9; } 45% { transform: translateY(0); }
+  82% { transform: translateY(4%); opacity: .9; } 100% { transform: translateY(6%); opacity: 0; } }
+.fx-flyer .fx-drips i { height: calc(4% + var(--s) * 4); }   /* über dem Flyer kürzer */

@@ -1,0 +1,11 @@
+/* dampf – weicher Dampf steigt vom unteren Rand auf, wie von einer Tasse Glühwein */
+.fx-dampf { position: absolute; left: 0; right: 0; bottom: 0; height: var(--dh, 72%); opacity: var(--dop, 1); }
+.fx-flyer .fx-dampf { --dh: 55%; --dop: .6; }
+.fx-page .fx-dampf { --dh: 62%; --dop: .5; }
+.fx-dampf i { position: absolute; bottom: -15%; left: var(--l); width: min(var(--w, 44%), 240px); aspect-ratio: 1 / 2; opacity: 0;   /* Bild 1:2 – nie verzerren */
+  background: url("/static/img/fx/dampf.webp") center / 100% 100% no-repeat; animation: fx-dampf var(--dd) ease-in-out var(--dd2) infinite; }
+.fx-dampf i:nth-child(1) { --l: 8%; --dd: 8s; --dd2: 0s; }
+.fx-dampf i:nth-child(2) { --l: 36%; --w: 38%; --dd: 9.5s; --dd2: -3s; }
+.fx-dampf i:nth-child(3) { --l: 58%; --dd: 7.4s; --dd2: -5.5s; }
+@keyframes fx-dampf { 0% { transform: translateY(12%) scaleX(.8); opacity: 0; } 30% { opacity: .8; } 70% { opacity: .5; }
+  100% { transform: translateY(-28%) scaleX(1.25); opacity: 0; } }

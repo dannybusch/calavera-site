@@ -1,0 +1,11 @@
+/* konfetti – bunte Schnipsel fallen, drehen und flattern */
+.fx-konfetti { position: absolute; inset: 0; container-type: size; }
+.fx-konfetti i { position: absolute; top: 0; left: var(--x); width: calc(var(--s) * 1.6 + 3px); height: calc(var(--s) * .9 + 2px); margin-top: -12px;
+  background: var(--c); opacity: .92; border-radius: 1px;
+  animation: fx-konfetti calc(var(--d) * .8) linear var(--dl) infinite, fx-flatter calc(var(--sw) * .35) ease-in-out var(--dl) infinite alternate; }
+.fx-konfetti .c0 { --c: #e23a5b; } .fx-konfetti .c1 { --c: #f3c766; } .fx-konfetti .c2 { --c: #ff6fb5; }
+.fx-konfetti .c3 { --c: #5ec8ff; } .fx-konfetti .c4 { --c: #9ef08a; }
+@keyframes fx-konfetti { from { transform: translate(0, 0) rotate(var(--r)); } to { transform: translate(var(--dx), calc(100cqh + 24px)) rotate(calc(var(--r) + 720deg)); } }
+@keyframes fx-flatter { from { scale: 1 1; } to { scale: .2 1; } }
+@media (max-width: 640px) { .fx-page .fx-konfetti i:nth-child(n+22) { display: none; } }
+@media (prefers-reduced-motion: reduce) { .fx-konfetti { display: none; } }

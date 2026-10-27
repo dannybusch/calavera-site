@@ -1,0 +1,13 @@
+/* lichterkette – warme Lichterkette hängt an der Oberkante, Birnchen glimmen unregelmäßig */
+.fx-kette { position: absolute; left: 0; right: 0; top: 0; height: var(--kh, 30px); }
+.fx-page .fx-kette { --kh: 54px; top: 8px; }
+.fx-kabel { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.fx-kabel path { fill: none; stroke: #2e2a26; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.fx-kette i { position: absolute; left: var(--x); top: calc(var(--y) * 10%); width: 7px; height: 11px; margin-left: -3.5px; border-radius: 45% 45% 50% 50%;
+  background: var(--c); box-shadow: 0 0 6px 2px var(--g), 0 0 18px 6px var(--g2); animation: fx-gluehen var(--tw) ease-in-out var(--td) infinite alternate; }
+.fx-kette i::before { content: ""; position: absolute; left: 1px; right: 1px; top: -3px; height: 4px; border-radius: 1px; background: #3a342e; }
+.fx-kette .c0 { --c: #fff1c9; --g: rgba(255,214,140,.7); --g2: rgba(255,200,120,.25); }
+.fx-kette .c1 { --c: #ffb347; --g: rgba(255,170,60,.7); --g2: rgba(255,150,40,.25); }
+.fx-kette .c2 { --c: #ff5468; --g: rgba(255,70,90,.7); --g2: rgba(255,60,80,.25); }
+.fx-page .fx-kette i { width: 9px; height: 14px; margin-left: -4.5px; }
+@keyframes fx-gluehen { 0% { opacity: 1; } 40% { opacity: .85; } 55% { opacity: .35; } 70% { opacity: 1; } 100% { opacity: .75; } }

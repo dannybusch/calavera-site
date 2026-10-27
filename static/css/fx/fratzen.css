@@ -1,0 +1,31 @@
+/* Fratzen */
+.fx-face { position: absolute; opacity: 0; animation: fx-face 9s ease-in-out infinite; }
+.fx-face-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fx-skull { fill: rgba(209,202,191,.07); stroke: rgba(209,202,191,.42); stroke-width: 1.6; }
+.fx-teeth { fill: none; stroke: rgba(209,202,191,.42); stroke-width: 1.6; }
+.fx-eyes { fill: #ff3b55; filter: drop-shadow(0 0 4px #ff3b55); animation: fx-eyes 3.7s infinite; }
+.fx-jaw { animation: fx-jaw 1.6s ease-in-out infinite; }
+.fx-grimace { fill: #ff8a1f; filter: drop-shadow(0 0 6px #ff8a1f) drop-shadow(0 0 16px #ff8a1f); }
+.fx-grimace .fx-eyes { fill: inherit; filter: none; animation-duration: 2.9s; }
+.fx-grimace--red { fill: #c8213d; filter: drop-shadow(0 0 6px #c8213d) drop-shadow(0 0 16px #c8213d); }
+.fx-ghost { fill: rgba(225,220,255,.8); filter: blur(1.5px); }
+.fx-face--f1 { left: 6%; top: 47%; width: 21%; animation-duration: 8s; animation-delay: .5s; }
+.fx-face--f2 { right: 6%; top: 30%; width: 17%; animation-duration: 10s; animation-delay: 4.5s; }
+.fx-face--t1 { right: 14px; bottom: 54px; width: 64px; animation-delay: 2.5s; }
+.tile.is-next .fx-face--t1 { width: 96px; right: 28px; bottom: 28px; }
+.fx-face--p1 { right: 3%; top: 14%; width: clamp(140px, 16vw, 230px); opacity: 0; animation-duration: 12s; }
+.fx-face--p1 .fx-face-svg { opacity: .55; }
+.fx-face--p2 { right: 34%; top: 62%; width: 90px; animation-delay: 6s; }
+.fx-face--p3 { right: 22%; top: 8%; width: 90px; animation-duration: 10s; animation-delay: 3.2s; }
+@keyframes fx-face { 0% { opacity: 0; transform: translateY(14px) scale(.9); filter: blur(6px); }
+  25%, 55% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  75%, 100% { opacity: 0; transform: translateY(-12px) scale(1.06); filter: blur(5px); } }
+@keyframes fx-eyes { 0%, 47%, 50%, 74%, 100% { opacity: 1; } 48% { opacity: .15; } 72% { opacity: .6; } }
+@keyframes fx-jaw { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
+
+@media (max-width: 640px) {
+  .fx-face--p1 { top: 4%; right: 2%; width: 120px; }
+  .fx-face--p2, .fx-face--p3 { display: none; }
+  .tile:not(.is-next) .fx-face--t1 { display: none; }   /* kompakte Handy-Kachel: kein Platz */
+}
+@media (prefers-reduced-motion: reduce) { .fx-face { display: none; } }

@@ -1,0 +1,11 @@
+/* Schnee (snow) */
+.fx-snowfall { position: absolute; inset: 0; container-type: size; }
+.fx-snowfall i { position: absolute; top: 0; left: var(--x); width: var(--s); height: var(--s); margin: calc(var(--s) * -1) 0 0 calc(var(--s) / -2);
+  border-radius: 50%; background: #f4f1ec; opacity: var(--o); box-shadow: 0 0 calc(var(--s) * .8) rgba(255,255,255,.55);
+  animation: fx-fall var(--d) linear var(--dl) infinite, fx-sway var(--sw) ease-in-out var(--dl) infinite alternate; }
+.fx-flyer .fx-snowfall i { box-shadow: 0 0 calc(var(--s) * .8) rgba(255,255,255,.8), 0 0 1px rgba(0,0,0,.4); }
+@keyframes fx-fall { from { transform: translate(0, 0); } to { transform: translate(var(--dx), calc(100cqh + 2 * var(--s))); } }
+@keyframes fx-sway { from { translate: -6px 0; } to { translate: 6px 0; } }
+
+@media (max-width: 640px) { .fx-page .fx-snowfall i:nth-child(n+27) { display: none; } }
+@media (prefers-reduced-motion: reduce) { .fx-snowfall { display: none; } }

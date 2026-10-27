@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-{% set full_title = (title ~ " · " ~ site.name) if title is defined and title else site.name ~ " - Der kleine, aber feine Club im 1/4" %}
+{% set full_title = (title ~ " · " ~ site.name) if title is defined and title else site.name ~ " · Kellerclub im Viertel" %}
 <title>{{ full_title }}</title>
 <meta name="description" content="{{ description if description is defined and description else site.description }}">
 <meta name="theme-color" content="#0b0b0b">
@@ -23,7 +23,9 @@
 <link rel="preload" href="/static/fonts/bebas-neue-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/space-grotesk-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ asset('css/site.css') }}">
-<style>:root{--accent:{{ palette.accent }};--accent-rgb:{{ palette.accent_rgb }};--accent-display:{{ palette.accent_display }};--accent-text:{{ palette.accent_text }};--text:{{ textpal.text }};--text-2:{{ textpal.text_2 }};--text-3:{{ textpal.text_3 }};--muted:{{ textpal.muted }}}</style>
+{# Effekt-CSS nur für die Effekte, die auf dieser Seite tatsächlich vorkommen (setzt build.py) #}
+{% for f in fx_css|default([]) %}<link rel="stylesheet" href="{{ asset('css/fx/' ~ f ~ '.css') }}">
+{% endfor %}<style>:root{--accent:{{ palette.accent }};--accent-rgb:{{ palette.accent_rgb }};--accent-display:{{ palette.accent_display }};--accent-text:{{ palette.accent_text }};--text:{{ textpal.text }};--text-2:{{ textpal.text_2 }};--text-3:{{ textpal.text_3 }};--muted:{{ textpal.muted }}}</style>
 <link rel="alternate" type="text/calendar" title="Calavera Programm" href="{{ kalender_url }}">
 <script>document.documentElement.classList.add('js')</script>
 {% block head %}{% endblock %}

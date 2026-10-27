@@ -1,0 +1,8 @@
+/* regenbogenfolie – Schimmer wie Hologramm-Glitzerfolie zieht schräg über den Flyer */
+.fx-holo { position: absolute; inset: -50%;
+  background: linear-gradient(115deg, transparent 40%, rgba(255,90,170,.22) 44%, rgba(255,220,90,.24) 47.5%, rgba(120,255,170,.22) 51%,
+    rgba(90,180,255,.22) 54.5%, rgba(190,120,255,.22) 58%, transparent 62%);
+  transform: translateX(-45%); animation: fx-holo 6.5s ease-in-out infinite; }
+.fx-holo--2 { animation-delay: -3.2s; opacity: .55; }
+@keyframes fx-holo { 0% { transform: translateX(-45%); } 55%, 100% { transform: translateX(45%); } }
+@media (prefers-reduced-motion: reduce) { .fx-holo { display: none; } }

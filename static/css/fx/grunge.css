@@ -1,0 +1,18 @@
+/* grunge – Kopierer-Korn, Staub, Fusseln und Kratzer; Flyer leicht ausgeblichen (Korn auch für vhs) */
+.fx-korn { position: absolute; inset: -30%; background: url("/static/img/fx/korn.webp") 0 0 / 160px 160px; opacity: var(--ko, .3);
+  animation: fx-ruckeln .42s steps(1) infinite; }
+.fx-tile .fx-korn { --ko: .14; }
+.fx-page .fx-korn { --ko: .09; }
+.fx-staub { position: absolute; inset: -25%; background: url("/static/img/fx/staub.webp") 0 0 / 300px 300px; opacity: .9;
+  animation: fx-ruckeln 1.26s steps(1) infinite reverse; }
+.fx-kratzer { position: absolute; top: -5%; bottom: -5%; left: 31%; width: 1px; opacity: 0;
+  background: linear-gradient(transparent, rgba(240,235,225,.8) 15%, rgba(240,235,225,.5) 70%, transparent);
+  animation: fx-kratzer 4.3s steps(1) infinite; }
+.fx-kratzer--2 { left: 72%; animation-duration: 6.1s; animation-delay: -2s;
+  background: linear-gradient(transparent, rgba(10,10,10,.85) 20%, rgba(10,10,10,.6) 80%, transparent); }
+.fx-mit-grunge .t-flyer img, .fx-mit-grunge .event-flyer img { filter: contrast(1.08) saturate(.82) sepia(.12); }
+@keyframes fx-ruckeln { 0% { transform: translate(0, 0); } 20% { transform: translate(-7%, 4%); } 40% { transform: translate(5%, -9%); }
+  60% { transform: translate(-3%, 8%); } 80% { transform: translate(9%, 2%); } }
+@keyframes fx-kratzer { 0% { opacity: 0; } 10% { opacity: 1; transform: translateX(0); } 14% { transform: translateX(9px); } 18% { transform: translateX(-14px); }
+  22% { opacity: .6; transform: translateX(30px); } 26% { opacity: 0; } 55% { opacity: .8; transform: translateX(-60px); } 58% { transform: translateX(-52px); } 61% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .fx-kratzer { display: none; } }

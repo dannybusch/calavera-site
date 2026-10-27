@@ -11,7 +11,7 @@
 <section class="programm wrap" aria-label="Kommende Veranstaltungen">
   {% if events %}
   <div class="program-grid cols-{{ cols }}">
-    {% for ev in events %}{{ tile(ev, loop.first) }}{% endfor %}
+    {% for ev in events %}{{ tile(ev, loop.first, loop.index <= fx_kacheln) }}{% endfor %}
   </div>
   {% endif %}
   <p class="program-empty"{% if events %} hidden{% endif %}>Gerade steht nichts im Programm – schaut bald wieder rein.</p>

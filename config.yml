@@ -53,6 +53,7 @@ programm:
   startseite_max: 13          # so viele Termine auf der Startseite, der Rest unter /programm/
   weitere_termine: 4          # so viele Termine unter "Weitere Termine" auf einer Veranstaltungsseite
   aus_der_reihe: 2            # davon höchstens so viele aus derselben Reihe – die stehen vorn
+  effekte_kacheln: 2        # nur die obersten beiden kacheln zeigen einen effekt, wenn es einen gibt.
 
 # Reihen: Veranstaltungen, die zusammengehören. In der events/*.md mit "reihe: dark" zuordnen.
 # Wirkt auf "Weitere Termine" einer Veranstaltungsseite: Termine aus derselben Reihe stehen

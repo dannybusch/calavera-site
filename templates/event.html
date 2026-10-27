@@ -22,7 +22,7 @@
       {% if ev.visual_url %}
       <a href="{{ ev.visual_url }}" class="event-flyer">
         <img src="{{ ev.visual_og or ev.visual_url }}" alt="{{ ev.visual_alt }}" decoding="async">
-        {{ flyer_fx(ev) }}
+        {{ flyer_fx(ev, ev.visual_og or ev.visual_url) }}
       </a>
       <a class="small-link" href="{{ ev.visual_url }}">Flyer in voller Größe <span aria-hidden="true">↗</span></a>
       {% else %}

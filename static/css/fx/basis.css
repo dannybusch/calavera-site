@@ -1,0 +1,34 @@
+/* Effekte – Grundlage. Wird nur auf Seiten geladen, auf denen ein Effekt läuft. */
+.tile.has-fx .tile-link { position: relative; overflow: hidden; isolation: isolate; }
+.tile.has-fx .tile-link > :not(.fx) { position: relative; z-index: 1; }
+.event-flyer { position: relative; }
+.event.has-fx { position: relative; isolation: isolate; }
+.event.has-fx > :not(.fx) { position: relative; z-index: 1; }
+.fx { position: absolute; pointer-events: none; overflow: hidden; z-index: 0; }
+.fx-flyer { inset: 0; z-index: 2; }
+.fx-tile { inset: 0; }
+.fx-page { top: 0; left: 0; right: 0; height: min(100%, 1150px);
+  /* seitlich und unten weich ausblenden, damit keine Kante am Inhaltsrand sichtbar wird */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent), linear-gradient(to bottom, #000 62%, transparent);
+  -webkit-mask-composite: source-in;
+          mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent), linear-gradient(to bottom, #000 62%, transparent);
+          mask-composite: intersect; }
+.fx * { pointer-events: none; }
+.fx i, .fx b { font-style: normal; font-weight: normal; }
+
+/* Angehalten, solange nicht im Bild oder Tab im Hintergrund (site.js setzt .fx-paused).
+   Auch Titel und Flyer selbst – einige Effekte bewegen sie (gewitter, neon, bassboom, schwerelos, vhs). */
+.has-fx.fx-paused .fx, .has-fx.fx-paused .fx *, .has-fx.fx-paused .t-title, .has-fx.fx-paused .event-title,
+.has-fx.fx-paused .t-flyer, .has-fx.fx-paused .event-flyer, .has-fx.fx-paused .t-flyer img, .has-fx.fx-paused .event-flyer img,
+.has-fx.fx-paused .fx *::before, .has-fx.fx-paused .fx *::after { animation-play-state: paused !important; }
+
+/* gemeinsam genutzte Bewegungen */
+@keyframes fx-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes fx-atmen { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes fx-schwenk { from { transform: rotate(var(--von)); } to { transform: rotate(var(--bis)); } }
+
+/* "Bewegung reduzieren": alles steht still; was nur durch Bewegung sichtbar wird, blendet die Effekt-Datei aus */
+@media (prefers-reduced-motion: reduce) {
+  .fx, .fx *, .has-fx .t-title, .has-fx .event-title, .has-fx .t-flyer, .has-fx .event-flyer,
+  .has-fx .t-flyer img, .has-fx .event-flyer img, .fx *::before, .fx *::after { animation: none !important; }
+}

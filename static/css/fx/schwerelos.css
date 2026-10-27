@@ -1,0 +1,9 @@
+/* schwerelos – Flyer schwebt sanft, Sterne ziehen vorbei ("völlig losgelöst") */
+.fx-mit-schwerelos .t-flyer, .fx-mit-schwerelos .event-flyer { animation: fx-schweben 9s ease-in-out var(--fx-delay, 0s) infinite;
+  box-shadow: 0 18px 30px rgba(0,0,0,.5); }
+.fx-weltraum { position: absolute; inset: 0; container-type: size; }
+.fx-weltraum i { position: absolute; left: 100%; top: var(--y); width: calc(var(--s) * .55 + 1px); aspect-ratio: 1; border-radius: 50%;
+  background: #fff; opacity: calc(var(--o) * .8); animation: fx-vorbei calc(var(--d) * 3) linear calc(var(--dl) * 2) infinite; }
+.fx-weltraum i.is-gold { background: #ffe6a8; }
+@keyframes fx-schweben { 0%, 100% { transform: translateY(0) rotate(-.6deg); } 50% { transform: translateY(-8px) rotate(.8deg); } }
+@keyframes fx-vorbei { to { transform: translateX(calc(-100cqw - 20px)); } }

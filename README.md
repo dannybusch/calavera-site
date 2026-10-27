@@ -84,32 +84,74 @@ stream: true                # Abend läuft auch im Kellerfunk-Stream ("Vor Ort &
 Auf der Veranstaltungsseite erscheint dann eine Stream-Karte, die während der Veranstaltung von
 selbst auf „Jetzt live“ mit rotem „Jetzt reinhören“ umschaltet und danach verschwindet.
 
-## Effekte (Nebel, Gewitter, Fratzen)
+## Effekte
 
-Für besondere Abende – Halloween, Calavera Dark – bekommt eine Veranstaltung Animationen auf ihrer
-Programm-Kachel und oben auf ihrer Seite:
+Für besondere Abende bekommt eine Veranstaltung Animationen auf ihrer Programm-Kachel und oben auf
+ihrer Seite – eine, mehrere oder viele, Reihenfolge = Reihenfolge der Ebenen:
 
 ```yaml
-effekte: [rauschnebel, gewitter, fratzen]   # eine, mehrere oder alle; auch "effekt: rauschnebel"
-effekte: [snow, twinklestar]          # Weihnachten
+effekte: [rauschnebel, gewitter, fratzen]   # auch "effekt: rauschnebel"
+effekte: [snow, twinklestar]                # Weihnachten
 ```
 
-- **rauschnebel** – fasriger Nebel in drei Schichten: hinten dicht und langsam, vorn dünne Fetzen, schneller
-- **buehnennebel** – Dunst wie aus der Nebelmaschine, durch den zwei Scheinwerferkegel schwenken (Calavera-Rot und warmweiß)
-- **flyerausnebel** – der untere Teil des Flyers verschwindet im Nebel, beim Laden lichtet er sich etwas, Fetzen ziehen vor dem Flyer durch
-  (Achtung: Infos ganz unten auf dem Flyer werden etwas verschleiert)
+| Effekt | Was passiert | passt z. B. zu |
+|---|---|---|
+| **Nebel** | | |
+| `rauschnebel` | fasriger Nebel in drei Schichten: hinten dicht und langsam, vorn dünne Fetzen | Halloween, Calavera Dark |
+| `buehnennebel` | Dunst wie aus der Nebelmaschine, zwei Scheinwerferkegel schwenken (Calavera-Rot, warmweiß) – bei viel Platz (Detailseite, große erste Kachel ab 1024 px) im Hintergrund, sonst auf dem Flyer | jede Clubnacht |
+| `flyerausnebel` | unterer Teil des Flyers verschwindet im Nebel, Fetzen ziehen davor durch (verschleiert Infos ganz unten etwas) | Dark RIOT |
+| **Halloween** | | |
+| `gewitter` | alle 7 s ein Doppelblitz, Flyer und Titel leuchten auf (weit unter der Epilepsie-Grenze von 3 Blitzen/s) | Halloween |
+| `fratzen` | Calavera-Schädel mit roten Augen, Kürbisgrinsen und Geister tauchen auf und verschwinden | Halloween |
+| **Winter** | | |
+| `snow` (auch `schnee`) | Schneeflocken rieseln, unterschiedlich groß, leicht schaukelnd | Advent |
+| `twinklestar` (auch `sterne`) | weiße und goldene Sterne erscheinen, funkeln, verschwinden | Advent, Silvester |
+| **90er** | | |
+| `grunge` | Kopierer-Korn, Staub und Kratzer, Flyer leicht ausgeblichen | Take The Power Back |
+| `vhs` | Videokassette: Zeilen, Störstreifen läuft durch, Bild ruckelt ab und zu | Take The Power Back, 80s |
+| `flanell` | rotes Holzfäller-Karo zieht über den Hintergrund (Kachel + Seite) | Take The Power Back |
+| **Gute Laune** | | |
+| `konfetti` | buntes Konfetti fällt, dreht sich und flattert | Fick Dich Ins Knie, Melancholie, Neue Freunde |
+| `regenbogenfolie` (auch `holo`) | Hologramm-Schimmer zieht schräg über den Flyer | Gute-Laune-Partys („Einhörner“) |
+| `seifenblasen` | schillernde Blasen steigen auf und zerplatzen | Honeycafé, Sommer |
+| `discokugel` (auch `disco`) | verwaschene blau-weiße Lichtflecken (Fünfecke) wie von der Calavera-Kugel wandern im Kreis, auf der Seite hängt die Kugel | Feiern für Fortgeschrittene, Flashdance |
+| **Hip-Hop** | | |
+| `bassboom` | Flyer pumpt im Takt (90 BPM) | They call it HIP HOP |
+| `spraydose` (auch `graffiti`) | Sprühkante oben, bunte Farbnasen laufen herunter | They call it HIP HOP |
+| **Dunkel / Elektronisch** | | |
+| `glitch` | alle paar Sekunden springen Streifen des Flyers kurz zur Seite, mit Farbversatz | Dark RIOT, EBM |
+| `laser` | rote und eine grüne Laserlinie fächern von oben (schön mit `buehnennebel`) | Dark RIOT |
+| `scanlines` | Monitorzeilen, ein heller Streifen läuft durch | Electro, Wave |
+| **80er** | | |
+| `retrogrid` (auch `synthwave`) | Neon-Gitterboden läuft auf den Horizont zu, gestreifte Sonne | 80s SEX BEAT, Flashdance |
+| `neon` | Titel leuchtet wie eine Neonröhre und flackert ab und zu, Kachel mit Neonrahmen | 80er, Wave |
+| `vinyl` | Schallplatte in der Flyer-Ecke dreht sich mit 33⅓ (verdeckt die Ecke unten rechts) | Wave To The 80s („Vinyl only“) |
+| `schwerelos` | Flyer schwebt sanft, Sterne ziehen vorbei | Flashdance („völlig losgelöst“) |
+| **Advent / Honeycafé** | | |
+| `lichterkette` | Lichterkette an der Oberkante, Birnchen glimmen unregelmäßig | Honeycafé |
+| `dampf` | weicher Dampf steigt auf wie von einer Tasse Glühwein | Honeycafé |
+| `kerzenlicht` (auch `kerze`) | warmer Schein flackert ruhig von unten | Honeycafé, Konzerte |
+| **Titel / Ort** | | |
+| `gluehwuermchen` (auch `glühwürmchen`) | Leuchtpunkte schwirren umher, glimmen auf und verlöschen | Nachtschwärmer |
+| `spotlight` | ein warmer Lichtkegel auf den Flyer, ganz ruhig | Konzerte |
+| `cempasuchil` (auch `papelpicado`) | Papel-picado-Wimpel oben, Studentenblumen-Blätter fallen (Totenfest, 1./2. November) | Calavera selbst |
+| `feuerwerk` | Buketts zerplatzen in Calavera-Rot, Gold und Weiß | Silvester, Jubiläen |
 
-Die Nebel- und Scheinwerferbilder berechnet der Build einmal (`static/img/fx/`, zusammen ca. 270 KB, braucht Pillow) –
-im Browser werden sie nur verschoben, das hält die Last niedrig.
-- **gewitter** – alle 7 Sekunden ein Doppelblitz: Flyer und Titel leuchten auf, Blitze zucken. Mehrere
-  Gewitter-Kacheln blitzen versetzt. Zwei Blitze in 7 Sekunden liegen weit unter der Grenze, die für
-  Menschen mit Epilepsie gefährlich werden kann (3 pro Sekunde).
-- **fratzen** – Calavera-Schädel mit roten Augen, Kürbisgrinsen und Geister tauchen auf und verschwinden
-- **snow** (auch `schnee`) – Schneeflocken rieseln über Flyer, Kachel und Seite, unterschiedlich groß, leicht schaukelnd
-- **twinklestar** (auch `sterne`) – weiße und goldene Sterne erscheinen, funkeln und verschwinden wieder
+**Wo die Effekte laufen:** Im Programm (Startseite und `/programm/`) zeigen nur die **ersten zwei Kacheln**
+ihre Effekte – einstellbar in `config.yml` unter `programm.effekte_kacheln`. Auf der eigenen Seite einer
+Veranstaltung laufen sie immer.
 
-Alles reines CSS, ohne JavaScript; Klicks gehen durch die Effekte hindurch. Wer am Gerät „Bewegung
-reduzieren“ eingestellt hat, sieht nur stehenden Nebel, stillstehende Scheinwerfer und Sterne. Tippfehler im Effektnamen meldet der Build.
+**Wie sie gebaut sind:** reines CSS (`static/css/fx/<effekt>.css`, je 1–2 KB). Jede Seite lädt nur die
+Dateien der Effekte, die auf ihr vorkommen – Seiten ohne Effekt laden gar nichts davon. Bilder für Nebel,
+Scheinwerfer, Korn, Staub, Discopunkte und Dampf berechnet der Build einmal (`static/img/fx/`, braucht
+Pillow); geladen werden sie nur, wenn ein Effekt sie benutzt. Animiert werden nur Position, Größe,
+Drehung und Deckkraft. Effekte, die gerade nicht im Bild sind, und alle in einem Tab im Hintergrund
+werden angehalten. Klicks gehen durch die Effekte hindurch.
+
+**Bewegung reduzieren:** Wer das am Gerät eingestellt hat, sieht keine Bewegung – nur ruhige Teile
+(Nebel, Scheinwerfer, Lichterkette, Sterne, Neon …), Teilchen wie Schnee oder Konfetti werden ausgeblendet.
+
+Tippfehler im Effektnamen meldet der Build und lässt den Effekt weg.
 
 ## Reihen
 
