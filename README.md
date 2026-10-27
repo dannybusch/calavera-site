@@ -121,7 +121,7 @@ effekte: [snow, twinklestar]                # Weihnachten
 | **Dunkel / Elektronisch** | | |
 | `glitch` | alle paar Sekunden springen Streifen des Flyers kurz zur Seite, mit Farbversatz | Dark RIOT, EBM |
 | `laser` | rote und eine grüne Laserlinie fächern von oben (schön mit `buehnennebel`) | Dark RIOT |
-| `scanlines` | Monitorzeilen, ein heller Streifen läuft durch | Electro, Wave |
+| `scanlines` | der Flyer wird zum Monitor: Zeilen, ein heller Streifen läuft durch | Electro, Wave |
 | **80er** | | |
 | `retrogrid` (auch `synthwave`) | Neon-Gitterboden läuft auf den Horizont zu, gestreifte Sonne | 80s SEX BEAT, Flashdance |
 | `neon` | Titel leuchtet wie eine Neonröhre und flackert ab und zu, Kachel mit Neonrahmen | 80er, Wave |

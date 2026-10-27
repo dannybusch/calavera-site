@@ -1,10 +1,11 @@
 /* Effekte – Grundlage. Wird nur auf Seiten geladen, auf denen ein Effekt läuft. */
+/* Hintergrund-Ebenen liegen mit z-index -1 in einem eigenen Stapel (isolation) – damit hinter dem Inhalt,
+   aber über dem Kachel-Hintergrund. So muss kein anderes Element umpositioniert werden
+   (vorher brach das z. B. das absolut positionierte Etikett der großen Kachel auf dem Handy). */
 .tile.has-fx .tile-link { position: relative; overflow: hidden; isolation: isolate; }
-.tile.has-fx .tile-link > :not(.fx) { position: relative; z-index: 1; }
 .event-flyer { position: relative; }
 .event.has-fx { position: relative; isolation: isolate; }
-.event.has-fx > :not(.fx) { position: relative; z-index: 1; }
-.fx { position: absolute; pointer-events: none; overflow: hidden; z-index: 0; }
+.fx { position: absolute; pointer-events: none; overflow: hidden; z-index: -1; }
 .fx-flyer { inset: 0; z-index: 2; }
 .fx-tile { inset: 0; }
 .fx-page { top: 0; left: 0; right: 0; height: min(100%, 1150px);

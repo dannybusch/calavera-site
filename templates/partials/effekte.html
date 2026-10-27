@@ -135,8 +135,8 @@
 {% endmacro %}
 
 {% macro fx_scanlines(ev, wo, img) %}
-{% if wo == "flyer" %}<span class="fx-scan"></span>{% endif %}
-<span class="fx-scanband"></span>
+{# nur der Flyer ist der Monitor – ein Streifen, keine zweite Ebene drumherum (sonst laufen zwei versetzt) #}
+{% if wo == "flyer" %}<span class="fx-scan"></span><span class="fx-scanband"></span>{% endif %}
 {% endmacro %}
 
 {# ---------- 80er ---------- #}

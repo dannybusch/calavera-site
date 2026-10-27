@@ -1,8 +1,7 @@
-/* scanlines – Zeilen wie auf einem alten Monitor, ein heller Streifen läuft durch */
+/* scanlines – der Flyer wird zum alten Monitor: Zeilen, ein heller Streifen läuft durch */
 .fx-scan { position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(0,0,0,.3) 0 1px, transparent 1px 3px); }
 .fx-scanband { position: absolute; left: 0; right: 0; top: 0; height: 22%;
   background: linear-gradient(to bottom, transparent, rgba(150,255,220,.08) 40%, rgba(200,255,235,.17) 50%, rgba(150,255,220,.08) 60%, transparent);
   animation: fx-scanband 6s linear infinite; }
-.fx-tile .fx-scanband, .fx-page .fx-scanband { opacity: .65; }
 @keyframes fx-scanband { from { transform: translateY(-100%); } to { transform: translateY(460%); } }
 @media (prefers-reduced-motion: reduce) { .fx-scanband { display: none; } }

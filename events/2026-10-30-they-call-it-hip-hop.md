@@ -5,7 +5,6 @@ start: "2026-10-30 22:00"
 djs: ["Keine Kunst"]
 genres: ["Hip-Hop", "Oldschool bis heute"]
 tags: ["Ab 18"]
-# effekte: buehnennebel
 ---
 
 Die Hip-Hop-Primetime-Party-Nacht im Calavera – von oldschool bis heute!
