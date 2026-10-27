@@ -7,7 +7,6 @@ genres: ["EBM", "Darkwave", "Gothic", "EBM"]
 tags: ["Rauchfrei"]
 teaser: "Der dunkle Einstieg in den Advent - Untergrund-Musik für die dunkle Jahreszeit"
 reihe: "dark"
-effekte: [twinklestar]
 ---
 
 <div class="placeholder">
