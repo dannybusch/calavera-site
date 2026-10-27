@@ -9,7 +9,6 @@ teaser: "80s Pop & Rock & NDW - unser Flug auf dem Glücksdrachen"
 reihe: "honey"
 fans_of: ["Alphaville", "Extrabreit", "Madonna", "Ideal", "Andreas Dorau", "UKW", "Paso Doble", "Dolly Parton", "The Cure", "The Smith", "Roxette", "Toto", "R.E.M.", "Tina Turner", "Grauzone", "Joachim Witt", "Simple Minds", "Sister of Mercy", "Camouflage", "Rheingold", "United Balls", "David Bowie", "Softcell", "Billy Idol", "u.v.a.m."]
 visual_alt: "Honey Cafe - Flashdance"
-effekte: snow
 ---
 
 <div class="placeholder">

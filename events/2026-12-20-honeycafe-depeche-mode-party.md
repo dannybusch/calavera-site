@@ -8,7 +8,6 @@ tags: ["Rauchfrei"]
 teaser: "Der Depeche-Mode-Nachmittag am 04. Advent"
 reihe: "honey"
 fans_of: ["Depeche Mode", "Camouflage", "Muse", "The Cure", "Visage", "New Order", "Interpol", "Editors", "Mesh", "Joy Division", "Shock Therapy", "And One", "Front 242", "Anne Clark"]
-effekte: [snow, twinklestar]
 ---
 
 <div class="placeholder">
