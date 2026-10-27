@@ -105,7 +105,7 @@ kuenstler:
 # "SAFE SPACE" im Text wird automatisch zur Safe-Space-Seite verlinkt.
 no_cookie_banner:
   anzeigen: true
-  titel: "No Cookies"
+  titel: "HIER OHNE COOKIES"
   text: "Kein Tracking, keine Cookies hier. Auch im Digitalen ein SAFE SPACE. Sagt uns einfach direkt, wie ihr uns findet. Ehrlich. Damit können wir umgehen!"
   sekunden: 10
 
