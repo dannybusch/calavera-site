@@ -53,8 +53,8 @@
 {% endmacro %}
 
 {% macro fx_buehnennebel(ev, wo, img) %}
-{# Kegel in beiden Ebenen angelegt; buehnennebel.css zeigt je nach Platz nur eine davon #}
-{{ buehne(2) }}
+{# Strahler nur im Hintergrund (Kachel, Seite) – im Flyer nur ein Hauch Dunst, nie Licht #}
+{% if wo == "flyer" %}<span class="fx-haze"><span></span></span>{% else %}{{ buehne(2) }}{% endif %}
 {% endmacro %}
 
 {% macro fx_flyerausnebel(ev, wo, img) %}

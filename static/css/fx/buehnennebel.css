@@ -7,29 +7,18 @@
 .fx-beam { position: absolute; top: -2%; left: var(--bx); height: var(--bh, 125%); aspect-ratio: 1 / 2; translate: -50% 0; transform-origin: 50% 0;
   background: var(--img) center top / 100% 100% no-repeat; opacity: var(--o, 1);
   animation: fx-schwenk var(--d) ease-in-out var(--dl, 0s) infinite alternate; }
-/* Bühnennebel-Kegel laufen pro Situation in GENAU EINER Ebene – sonst bricht der Strahl am Flyerrand:
-   - viel Platz (Detailseite und große erste Kachel ab 1024 px): nur im Hintergrund, der Flyer steht davor
-   - wenig Platz (normale Kacheln, Tablet/Handy): nur auf dem Flyer, zwei Kegel aus den oberen Ecken
-   Der Dunst hat keine Kanten und darf in beiden Ebenen bleiben. */
+/* Bühnennebel: Die Strahler sind immer Licht im RAUM – nie im Flyer. Sie laufen im Hintergrund der Kachel
+   bzw. der Seite; der Flyer steht davor. Über dem Flyer liegt nur ein Hauch Dunst (keine Kanten, kein Licht). */
 .fx-beam--a { --img: url("/static/img/fx/kegel-rot.webp"); --d: 11s; }
 .fx-beam--b { --img: url("/static/img/fx/kegel-warm.webp"); --d: 14s; --dl: -5s; }
+.fx-flyer .fx-haze > span { opacity: .22; }
 
-/* auf dem Flyer (Standard) */
-.fx-flyer .fx-beam--a { --bx: 16%; --bh: 105%; --o: .7; --von: -8deg; --bis: 30deg; }
-.fx-flyer .fx-beam--b { --bx: 84%; --bh: 105%; --o: .95; --von: 8deg; --bis: -30deg; }
-.fx-flyer .fx-haze > span { opacity: .25; }
-
-/* im Hintergrund: Seite und große Kachel */
+/* Detailseite */
 .fx-page .fx-beam--a { --bx: 22%; --von: -24deg; --bis: 16deg; }
 .fx-page .fx-beam--b { --bx: 78%; --von: 20deg; --bis: -18deg; }
+/* normale Kachel: kürzer, endet vor dem unteren Rand */
+.fx-tile .fx-beam--a { --bx: 22%; --bh: 75%; --o: .85; --von: -18deg; --bis: 14deg; }
+.fx-tile .fx-beam--b { --bx: 78%; --bh: 75%; --o: .9; --von: 14deg; --bis: -14deg; }
+/* große erste Kachel: breiter Raum */
 .tile.is-next .fx-tile .fx-beam--a { --bx: 34%; --bh: 120%; --von: -26deg; --bis: 18deg; }
 .tile.is-next .fx-tile .fx-beam--b { --bx: 82%; --bh: 120%; --von: 22deg; --bis: -20deg; }
-
-/* wer zeigt die Kegel? */
-.fx-tile .fx-beam--a, .fx-tile .fx-beam--b, .fx-page .fx-beam--a, .fx-page .fx-beam--b { display: none; }
-@media (min-width: 1024px) {
-  .tile.is-next .fx-tile .fx-beam--a, .tile.is-next .fx-tile .fx-beam--b,
-  .fx-page .fx-beam--a, .fx-page .fx-beam--b { display: block; }
-  .tile.is-next .fx-flyer .fx-beam--a, .tile.is-next .fx-flyer .fx-beam--b,
-  .event .fx-flyer .fx-beam--a, .event .fx-flyer .fx-beam--b { display: none; }
-}

@@ -98,7 +98,7 @@ effekte: [snow, twinklestar]                # Weihnachten
 |---|---|---|
 | **Nebel** | | |
 | `rauschnebel` | fasriger Nebel in drei Schichten: hinten dicht und langsam, vorn dünne Fetzen | Halloween, Calavera Dark |
-| `buehnennebel` | Dunst wie aus der Nebelmaschine, zwei Scheinwerferkegel schwenken (Calavera-Rot, warmweiß) – bei viel Platz (Detailseite, große erste Kachel ab 1024 px) im Hintergrund, sonst auf dem Flyer | jede Clubnacht |
+| `buehnennebel` | Dunst wie aus der Nebelmaschine, zwei Scheinwerferkegel schwenken (Calavera-Rot, warmweiß) – immer im Raum hinter dem Flyer, nie auf ihm | jede Clubnacht |
 | `flyerausnebel` | unterer Teil des Flyers verschwindet im Nebel, Fetzen ziehen davor durch (verschleiert Infos ganz unten etwas) | Dark RIOT |
 | **Halloween** | | |
 | `gewitter` | alle 7 s ein Doppelblitz, Flyer und Titel leuchten auf (weit unter der Epilepsie-Grenze von 3 Blitzen/s) | Halloween |
