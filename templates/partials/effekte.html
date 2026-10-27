@@ -2,6 +2,8 @@
    nebel    – Bodennebel zieht über Flyer und Seite, der Mond glimmt
    gewitter – Doppelblitz alle 7 Sekunden (je Veranstaltung versetzt)
    fratzen  – Schädel, Kürbisgrinsen und Geister tauchen auf und verschwinden
+   snow        – Schneeflocken rieseln, unterschiedlich groß, schaukelnd
+   twinklestar – Sterne erscheinen, funkeln und verschwinden wieder
    Nur CSS, keine Klicks abgefangen (pointer-events: none), aus bei "Bewegung reduzieren". #}
 
 {% macro skull(cls="") %}
@@ -36,6 +38,14 @@
 <svg class="fx-bolt {{ cls }}" viewBox="0 0 100 220" aria-hidden="true" focusable="false"><path d="M58 0L40 70l18 4-30 66 16 4-22 76 46-92-18-4 26-62-18-4L82 0Z"/></svg>
 {% endmacro %}
 
+{% macro snow(n, seed) %}
+<span class="fx-snowfall">{% for p in fx_particles(n, seed) %}<i style="--x:{{ p.x }}%;--s:{{ p.size }}px;--d:{{ p.dur }}s;--dl:{{ p.delay }}s;--dx:{{ p.drift }}px;--sw:{{ p.sway }}s;--o:{{ p.op }}"></i>{% endfor %}</span>
+{% endmacro %}
+
+{% macro stars(n, seed) %}
+<span class="fx-starfield">{% for p in fx_particles(n, seed) %}<i class="{{ 'is-gold' if p.gold }}" style="--x:{{ p.x }}%;--y:{{ p.y }}%;--s:{{ (p.size * 4)|round(1) }}px;--tw:{{ p.tw }}s;--td:{{ p.tdelay }}s;--r:{{ p.rot }}deg"></i>{% endfor %}</span>
+{% endmacro %}
+
 {# über dem Flyer (Kachel und Veranstaltungsseite) #}
 {% macro flyer_fx(ev) %}
 {% if ev.effekte %}
@@ -43,6 +53,8 @@
   {% if "nebel" in ev.effekte %}<span class="fx-moon"></span>{{ fog() }}{% endif %}
   {% if "gewitter" in ev.effekte %}<span class="fx-flash"></span><span class="fx-flash fx-flash--soft"></span>{{ bolt("fx-bolt--flyer") }}{% endif %}
   {% if "fratzen" in ev.effekte %}<span class="fx-face fx-face--f1">{{ grimace() }}</span><span class="fx-face fx-face--f2">{{ ghost() }}</span>{% endif %}
+  {% if "twinklestar" in ev.effekte %}{{ stars(6, ev.slug ~ "-flyer-stars") }}{% endif %}
+  {% if "snow" in ev.effekte %}{{ snow(18, ev.slug ~ "-flyer-snow") }}{% endif %}
 </span>
 {% endif %}
 {% endmacro %}
@@ -54,6 +66,8 @@
   {% if "nebel" in ev.effekte %}{{ fog() }}{% endif %}
   {% if "gewitter" in ev.effekte %}<span class="fx-flash fx-flash--sky"></span>{% endif %}
   {% if "fratzen" in ev.effekte %}<span class="fx-face fx-face--t1">{{ skull() }}</span>{% endif %}
+  {% if "twinklestar" in ev.effekte %}{{ stars(7, ev.slug ~ "-tile-stars") }}{% endif %}
+  {% if "snow" in ev.effekte %}{{ snow(22, ev.slug ~ "-tile-snow") }}{% endif %}
 </span>
 {% endif %}
 {% endmacro %}
@@ -69,6 +83,8 @@
   <span class="fx-face fx-face--p2">{{ skull() }}</span>
   <span class="fx-face fx-face--p3">{{ grimace("fx-grimace--red") }}</span>
   {% endif %}
+  {% if "twinklestar" in ev.effekte %}{{ stars(16, ev.slug ~ "-page-stars") }}{% endif %}
+  {% if "snow" in ev.effekte %}{{ snow(50, ev.slug ~ "-page-snow") }}{% endif %}
 </div>
 {% endif %}
 {% endmacro %}

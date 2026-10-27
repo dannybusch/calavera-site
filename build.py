@@ -59,7 +59,31 @@ MONAT = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
 problems: list[str] = []
 
 
-EFFEKTE = ("nebel", "gewitter", "fratzen")   # Animationen für Kachel und Veranstaltungsseite
+EFFEKTE = ("nebel", "gewitter", "fratzen", "snow", "twinklestar")   # Animationen für Kachel und Veranstaltungsseite
+EFFEKT_ALIAS = {"schnee": "snow", "sterne": "twinklestar", "twinkle": "twinklestar", "stars": "twinklestar"}
+
+
+def fx_particles(n: int, seed: str) -> list[dict]:
+    """Feste Zufallswerte für Schneeflocken/Sterne (gleicher Build → gleiche Werte, kein JavaScript nötig)."""
+    import random
+    rnd = random.Random(seed)
+    out = []
+    for i in range(n):
+        out.append({
+            "x": round((i + rnd.random()) / n * 100, 1),      # gleichmäßig über die Breite verteilt
+            "y": round(rnd.uniform(4, 92), 1),
+            "size": round(rnd.choice([2, 2.5, 3, 3, 4, 5, 6]) * rnd.uniform(.85, 1.15), 1),
+            "dur": round(rnd.uniform(7, 15), 1),
+            "delay": round(-rnd.uniform(0, 15), 1),           # negativ: beim Laden schon mitten im Fall
+            "drift": round(rnd.uniform(-18, 18)),
+            "sway": round(rnd.uniform(2.5, 5), 1),
+            "op": round(rnd.uniform(.45, .95), 2),
+            "tw": round(rnd.uniform(3.5, 7.5), 1),             # Sterne: Dauer eines Funkelns
+            "tdelay": round(rnd.uniform(0, 8), 1),
+            "rot": rnd.choice([0, 15, 30, 45]),
+            "gold": rnd.random() < .45,
+        })
+    return out
 
 
 def warn(msg: str) -> None:
@@ -562,6 +586,7 @@ def load_events(cfg: dict, tz: ZoneInfo) -> list[Event]:
             # effekte: nebel | [nebel, fratzen]  (auch "effekt:")
             for fx in as_list(meta.get("effekte") or meta.get("effekt")):
                 fx = str(fx).strip().lower()
+                fx = EFFEKT_ALIAS.get(fx, fx)
                 if fx in EFFEKTE and fx not in ev.effekte:
                     ev.effekte.append(fx)
                 elif fx not in EFFEKTE:
@@ -893,6 +918,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     # Programm-Kalender vorab erzeugen: Links darauf bekommen ?v=…, damit Handys nach einer
     # Änderung nicht die zwischengespeicherte alte Datei öffnen.
     programm_ics = ics_for(upcoming, cfg, now, "Calavera Bremen – Programm")
+    env.globals["fx_particles"] = fx_particles
     env.globals["kalender_url"] = f"/kalender.ics?v={ics_version(programm_ics)}"
 
     def render(template: str, dest: str, **ctx) -> None:

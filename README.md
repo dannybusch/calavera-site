@@ -91,6 +91,7 @@ Programm-Kachel und oben auf ihrer Seite:
 
 ```yaml
 effekte: [nebel, gewitter, fratzen]   # eine, mehrere oder alle; auch "effekt: nebel"
+effekte: [snow, twinklestar]          # Weihnachten
 ```
 
 - **nebel** – Bodennebel zieht in zwei Schichten über Flyer, Kachel und Seite; der Vollmond-Bereich des Flyers glimmt
@@ -98,9 +99,11 @@ effekte: [nebel, gewitter, fratzen]   # eine, mehrere oder alle; auch "effekt: n
   Gewitter-Kacheln blitzen versetzt. Zwei Blitze in 7 Sekunden liegen weit unter der Grenze, die für
   Menschen mit Epilepsie gefährlich werden kann (3 pro Sekunde).
 - **fratzen** – Calavera-Schädel mit roten Augen, Kürbisgrinsen und Geister tauchen auf und verschwinden
+- **snow** (auch `schnee`) – Schneeflocken rieseln über Flyer, Kachel und Seite, unterschiedlich groß, leicht schaukelnd
+- **twinklestar** (auch `sterne`) – weiße und goldene Sterne erscheinen, funkeln und verschwinden wieder
 
 Alles reines CSS, ohne JavaScript; Klicks gehen durch die Effekte hindurch. Wer am Gerät „Bewegung
-reduzieren“ eingestellt hat, sieht nur einen stehenden Nebel. Tippfehler im Effektnamen meldet der Build.
+reduzieren“ eingestellt hat, sieht nur stehenden Nebel und stillstehende Sterne. Tippfehler im Effektnamen meldet der Build.
 
 ## Reihen
 
