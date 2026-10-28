@@ -1,0 +1,25 @@
+/* heartbubble – Herzen steigen aus der Ecke rechts unten des Flyers und driften leicht nach links oben,
+   wie Herzchen in einem Live-Stream. Nur auf dem Flyer (Kachel und Veranstaltungsseite).
+   Außen (i): steigt und driftet, ploppt am Anfang auf, verblasst. Innen (b): pendelt seitlich.
+   Größe in cqw → passt zur Flyerbreite. Nur translate/scale/rotate/opacity. */
+.fx-heartbubble { position: absolute; inset: 0; container-type: size; }
+.fx-heartbubble i { position: absolute; right: 5%; bottom: 3%; width: calc(5cqw + var(--s) * 1.15cqw); aspect-ratio: 1; opacity: 0;
+  animation: hb-steigen var(--d) cubic-bezier(.3, .1, .5, 1) var(--dl) infinite; will-change: transform, opacity; }
+.fx-heartbubble b { display: block; width: 100%; height: 100%; background: var(--hb);
+  -webkit-mask: var(--hb-form) center / contain no-repeat; mask: var(--hb-form) center / contain no-repeat;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
+  animation: hb-pendeln var(--sw) ease-in-out var(--dl) infinite alternate; }
+.fx-heartbubble { --hb-form: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M12 21.6 10.3 20C4.4 14.7.5 11.1.5 6.8.5 3.3 3.2.6 6.7.6c2 0 3.9.9 5.3 2.4C13.4 1.5 15.3.6 17.3.6c3.5 0 6.2 2.7 6.2 6.2 0 4.3-3.9 7.9-9.8 13.2z'/%3E%3C/svg%3E"); }
+.fx-heartbubble .c0 { --hb: #e0485e; }
+.fx-heartbubble .c1 { --hb: #ff7d96; }
+.fx-heartbubble .c2 { --hb: #b3122e; }
+.fx-heartbubble .c3 { --hb: #ffc2cf; }
+.fx-heartbubble .c4 { --hb: #ff4f7b; }
+@keyframes hb-steigen {
+  0%   { translate: 0 0; scale: .2; opacity: 0; }
+  8%   { scale: 1.15; opacity: .95; }
+  14%  { scale: 1; }
+  70%  { opacity: .85; }
+  100% { translate: calc(var(--dx) * -1) calc(var(--h) * -1); scale: .75; opacity: 0; } }
+@keyframes hb-pendeln { from { translate: -1.6cqw 0; rotate: -10deg; } to { translate: 1.6cqw 0; rotate: 10deg; } }
+@media (prefers-reduced-motion: reduce) { .fx-heartbubble { display: none; } }

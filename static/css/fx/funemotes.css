@@ -1,0 +1,24 @@
+/* funemotes – fröhliche Emojis steigen auf wie Reaktionen in einem Live-Stream.
+   Außen (i): steigt in einem Zug nach oben, ploppt am Anfang kurz auf, verblasst oben.
+   Innen (b): wackelt hin und her. Nur translate/scale/rotate/opacity. */
+.fx-funemotes { position: absolute; inset: 0; container-type: size; }
+.fx-funemotes i { position: absolute; left: var(--x); bottom: 0; line-height: 1; opacity: 0;
+  font-size: calc(var(--fe-min) + var(--s) * var(--fe-f)); font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  animation: fe-steigen var(--d) linear var(--dl) infinite; will-change: transform, opacity; }
+.fx-funemotes b { display: block; text-shadow: 0 4px 10px rgba(0,0,0,.35); animation: fe-wackeln var(--sw) ease-in-out var(--dl) infinite alternate; }
+@keyframes fe-steigen {
+  0%   { translate: 0 100%; scale: .3; opacity: 0; }
+  6%   { scale: 1.18; opacity: 1; }
+  10%  { scale: 1; }
+  78%  { opacity: .95; }
+  100% { translate: var(--dx) calc(-100cqh - 10%); scale: .92; opacity: 0; } }
+@keyframes fe-wackeln { from { rotate: -13deg; translate: -6px 0; } to { rotate: 13deg; translate: 6px 0; } }
+/* Flyer: ein Reaktions-Strom am rechten Rand, langsamer kurzer Weg */
+.fe-flyer { --fe-min: 16px; --fe-f: 3.4px; }
+.fe-flyer i { left: calc(66% + var(--x) * .28); animation-duration: calc(var(--d) * .55); animation-delay: calc(var(--dl) * .55); }
+/* Kachel: hinter dem Inhalt, klein */
+.fe-tile { --fe-min: 14px; --fe-f: 3px; }
+/* Seite: groß, über die ganze Breite, etwas zurückgenommen */
+.fe-page { --fe-min: 20px; --fe-f: 5px; }
+.fe-page b { opacity: .85; }
+@media (prefers-reduced-motion: reduce) { .fx-funemotes { display: none; } }

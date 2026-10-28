@@ -72,12 +72,16 @@ EFFEKTE = (
     "lichterkette", "dampf", "kerzenlicht",                      # Advent / Honeycafé
     "gluehwuermchen", "spotlight", "cempasuchil", "feuerwerk",   # passend zu Titel / Ort
     "superdark",                                                 # Darkwave: Dunkelheit übernimmt die Seite
+    "funemotes",                                                 # fröhliche Emojis steigen auf wie Live-Reaktionen
+    "heartbubble",                                               # Herzen steigen aus der Flyer-Ecke rechts unten
 )
 EFFEKT_ALIAS = {"bühnennebel": "buehnennebel", "flyer-aus-nebel": "flyerausnebel", "schnee": "snow", "sterne": "twinklestar",
                 "twinkle": "twinklestar", "stars": "twinklestar", "glühwürmchen": "gluehwuermchen", "regenbogen": "regenbogenfolie",
                 "holo": "regenbogenfolie", "disco": "discokugel", "papelpicado": "cempasuchil", "kerze": "kerzenlicht",
                 "blasen": "seifenblasen", "graffiti": "spraydose", "synthwave": "retrogrid", "bass": "bassboom",
-                "super-dark": "superdark", "darkwave": "superdark"}
+                "super-dark": "superdark", "darkwave": "superdark",
+                "emojis": "funemotes", "emoticons": "funemotes", "smileys": "funemotes", "emotes": "funemotes",
+                "herzen": "heartbubble", "hearts": "heartbubble", "heartbubbles": "heartbubble"}
 # CSS-Dateien je Effekt (static/css/fx/<datei>.css); ohne Eintrag: Datei heißt wie der Effekt
 EFFEKT_CSS = {"rauschnebel": ["nebel"], "flyerausnebel": ["nebel", "flyerausnebel"], "buehnennebel": ["buehnennebel"],
               "spotlight": ["buehnennebel", "spotlight"], "vhs": ["grunge", "vhs"]}
