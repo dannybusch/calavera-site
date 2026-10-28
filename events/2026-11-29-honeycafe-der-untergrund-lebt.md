@@ -15,5 +15,5 @@ In unserer Honeycafé-Reihe bieten wir jeden Sonntagnachmittag im Advent Glühwe
 </div>
 <br/>
 
-Die dunkelste Jahreszeit zu würdigen weiß auch DJ Warg mit seinem Programm »Der Untergrund lebt«. Mit Darkwave, Gothic, EBM und Industrial werden die schwarzen Seelen zum Tanz gebeten. 
+Die dunkelste Jahreszeit zu würdigen weiß auch DJ Warg mit seinem Programm »Der Untergrund lebt«. Mit **Darkwave**, **Gothic**, **EBM** und **Industrial** werden die schwarzen Seelen zum Tanz gebeten. 
 
