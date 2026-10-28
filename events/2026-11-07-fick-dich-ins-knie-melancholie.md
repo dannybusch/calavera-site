@@ -6,7 +6,7 @@ genres: ["Indie", "Feelgood"]
 tags: ["Rauchfrei"]
 teaser: "Die musikalische Rezeptur gegen den Novemberblues – gute Vibes und bunte Einhörner!"
 fans_of: ["The Killers", "Taylor Swift", "Bloc Party", "Daft Punk", "Arctic Monkeys", "David Bowie", "Bilderbuch", "Rihanna", "Peter Fox", "Kakkmaddafakka", "Beastie Boys", "Florence + The Machine", "Nina Chuba", "blond", "u.v.a.m."]
-effekte: []
+effekte: [holo]
 ---
 
 **Nach dem Konzert mit Andreas Liebert** und einer kleinen Umbaupause geht es direkt weiter mit der nächsten Party. 
