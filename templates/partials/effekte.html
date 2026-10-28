@@ -81,7 +81,8 @@
 {% endmacro %}
 
 {% macro fx_twinklestar(ev, wo, img) %}
-{{ particles("fx-starfield", {"flyer": 6, "tile": 7, "page": 16}[wo], ev.slug ~ "-stars-" ~ wo) }}
+{# genau wie die ursprünglichen Sterne: vierfache Teilchengröße (8–24 px), dieselben Positionen wie vor dem Umbau #}
+<span class="fx-starfield">{% for p in fx_particles({"flyer": 6, "tile": 7, "page": 16}[wo], ev.slug ~ "-" ~ wo ~ "-stars") %}<i class="{{ 'is-gold' if p.gold }}" style="--x:{{ p.x }}%;--y:{{ p.y }}%;--s:{{ (p.size * 4)|round(1) }}px;--tw:{{ p.tw }}s;--td:{{ p.tdelay }}s;--r:{{ p.rot }}deg"></i>{% endfor %}</span>
 {% endmacro %}
 
 {# ---------- Grunge / 90er ---------- #}
