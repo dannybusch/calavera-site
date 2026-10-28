@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 .DS_Store
+
+# Reels (reels.py): Ausgabe und Arbeitsordner
+reels/out/
+reels/.cache/

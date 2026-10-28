@@ -200,6 +200,11 @@
 {% endmacro %}
 
 {# ---------- Zuordnung Name → Effekt (Reihenfolge der Ebenen = Reihenfolge in "effekte:") ---------- #}
+{# superdark: das meiste macht die CSS-Datei (Seite verblasst, Schleier, Schimmer über allem) #}
+{% macro fx_superdark(ev, wo, img) %}
+{% if wo == "tile" %}<span class="fx-superdark-nacht"></span>{% elif wo == "flyer" %}<span class="fx-sd-glanz"></span>{% endif %}
+{% endmacro %}
+
 {% set FX = {
   "rauschnebel": fx_rauschnebel, "buehnennebel": fx_buehnennebel, "flyerausnebel": fx_flyerausnebel,
   "gewitter": fx_gewitter, "fratzen": fx_fratzen, "snow": fx_snow, "twinklestar": fx_twinklestar,
@@ -209,7 +214,7 @@
   "glitch": fx_glitch, "laser": fx_laser, "scanlines": fx_scanlines,
   "retrogrid": fx_retrogrid, "neon": fx_neon, "vinyl": fx_vinyl, "schwerelos": fx_schwerelos,
   "lichterkette": fx_lichterkette, "dampf": fx_dampf, "kerzenlicht": fx_kerzenlicht,
-  "gluehwuermchen": fx_gluehwuermchen, "spotlight": fx_spotlight, "cempasuchil": fx_cempasuchil, "feuerwerk": fx_feuerwerk,
+  "gluehwuermchen": fx_gluehwuermchen, "spotlight": fx_spotlight, "cempasuchil": fx_cempasuchil, "feuerwerk": fx_feuerwerk, "superdark": fx_superdark,
 } %}
 
 {% macro layer(ev, wo, img="") %}{% for name in ev.effekte %}{% if name in FX %}{{ FX[name](ev, wo, img) }}{% endif %}{% endfor %}{% endmacro %}

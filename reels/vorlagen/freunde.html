@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Reel · Für Freunde von</title><link rel="stylesheet" href="basis.css">
+<style>
+/* Für Freunde von – Takt 1: Datum riesig (Aufhänger) · Takt 2: "Was euch erwartet" Wort für Wort ·
+   dann ein Name aus "fans_of" pro Schlag (bis 12) · Flyer-Auftritt · Schlusstafel (Schleife zurück zum Datum) */
+.hook-kicker { top: 560px; font-size: 38px; color: var(--hell); }
+.hook-datum { top: 640px; color: var(--rot); text-shadow: 0 0 60px rgba(224,72,94,.35); }
+.hook-unter { top: 1080px; font-size: 34px; color: var(--text-2); }
+.wort { position: absolute; left: 90px; font-size: 250px; color: var(--hell); }
+.strich { position: absolute; left: 90px; top: 1230px; width: 900px; height: 10px; background: var(--akzent); transform-origin: 0 50%; }
+.name { position: absolute; left: 70px; right: 70px; top: 0; height: 1920px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--hell); line-height: .88; }
+.name.rot { color: var(--rot); }
+.zaehler { top: 1330px; font-size: 30px; color: var(--text-3); }
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="hg-unscharf" id="hg"></div><div class="hg-dunkel"></div>
+  <div class="ebene" id="atmo"></div>
+  <div class="ebene" id="hook">
+    <p class="mono mitte hook-kicker" id="hookKicker"></p>
+    <div class="mitte hook-datum" id="hookBox"></div>
+    <p class="mono mitte hook-unter" id="hookUnter"></p>
+  </div>
+  <div class="ebene" id="intro">
+    <p class="display wort" id="w1" style="top:560px">Was</p>
+    <p class="display wort" id="w2" style="top:780px">euch</p>
+    <p class="display wort rot" id="w3" style="top:1000px">erwartet</p>
+    <div class="strich" id="strich"></div>
+  </div>
+  <div class="ebene" id="namen"></div>
+  <p class="mono mitte zaehler" id="zaehler"></p>
+  <div class="ebene" id="bild"></div>
+  <div class="ebene" id="tafel"></div>
+  <div class="blitz" id="blitz"></div>
+</div>
+<script src="daten.js"></script>
+<script src="reel.js"></script>
+<script>
+const { D, prog, pulse, pump, set, $, letters, fit, textBlock, atmo, ende, endeZeigen, flyer } = Reel;
+set($("hg"), { backgroundImage: `url("${D.flyer_unscharf}")` });
+atmo($("atmo"), D.atmo === "nebel" ? "funken" : D.atmo);
+$("hookKicker").textContent = `${D.wochentag} · Calavera Bremen`;
+$("hookUnter").textContent = (D.genres || []).slice(0, 3).join(" · ");
+const hookTxt = document.createElement("span"); hookTxt.className = "display fit"; hookTxt.textContent = D.datum; $("hookBox").appendChild(hookTxt);
+fit(hookTxt, 960, 430); const hookChs = letters(hookTxt);
+
+// Namen: bis 12, Größe nach Länge, lange Namen zweizeilig
+const NAMEN = (D.fans || []).slice(0, 12);
+const namen = NAMEN.map((n, i) => {
+  const box = textBlock($("namen"), `display name${i % 2 ? " rot" : ""}`, n, { maxW: 900, maxPx: 340, minPx: 110 });
+  const chs = [...box.querySelectorAll(".fit")].flatMap(s => letters(s));
+  return { box, chs };
+});
+const N = NAMEN.length, NAMES_AT = 8, FLYER_AT = Math.ceil((NAMES_AT + N) / 4) * 4, ENDE_AT = FLYER_AT + 4, BEATS = ENDE_AT + 4;
+const bild = flyer($("bild")); const tafel = ende($("tafel"), 985, { datumPx: 210, titelPx: 110 });
+let FW = 640;
+
+window.REEL = { beats: BEATS, render(b, t) {
+  const bt = b - Math.floor(b), beat = Math.floor(b), pm = pump(b, t);
+  set($("hg"), { transform: `scale(${1.12 + b * .006 + pm * .02}) translateY(${-b * 3}px)` });
+  const starts = [0, 4, NAMES_AT, FLYER_AT, ENDE_AT];
+  set($("blitz"), { opacity: (starts.includes(beat) ? .36 : .05) * Math.exp(-bt * 9) });
+  // Takt 1: Datum
+  set($("hook"), { opacity: b < 4 ? 1 : 0, transform: `translateY(${-1400 * prog(b, 3.75, .25, "in")}px)` });
+  hookChs.forEach((c, i) => { const p = prog(b, i * .08, .22); set(c, { opacity: p, transform: `translateY(${(1 - p) * 120}px) scale(${1 + (1 - p) * .4})` }); });
+  set($("hookBox"), { transform: `scale(${1 + pm * .05})` });
+  set($("hookKicker"), { opacity: prog(b, .5, .5, "out") }); set($("hookUnter"), { opacity: prog(b, 1.5, .5, "out") });
+  // Takt 2: Was euch erwartet
+  set($("intro"), { opacity: b >= 4 && b < 8 ? 1 : 0, transform: `translateY(${-1500 * prog(b, 7.8, .2, "in")}px)` });
+  ["w1", "w2", "w3"].forEach((id, i) => { const p = prog(b, 4 + i, .2); set($(id), { opacity: p, transform: `translateX(${(1 - p) * -260}px)` }); });
+  set($("strich"), { transform: `scaleX(${prog(b, 7, .4)})` });
+  // Namen, einer pro Schlag
+  namen.forEach((n, i) => {
+    const at = NAMES_AT + i, on = b >= at && b < at + 1, st = Math.min(.025, .3 / n.chs.length);
+    set(n.box, { opacity: on ? 1 : 0, transform: `scale(${on ? 1 + pulse(b - at, 8) * .07 : 1})` });
+    if (on) n.chs.forEach((c, k) => { const p = prog(b, at + k * st, .14); set(c, { opacity: p, transform: `translateY(${(1 - p) * 90}px) rotate(${(1 - p) * (k % 2 ? 6 : -6)}deg)` }); });
+  });
+  $("zaehler").textContent = b >= NAMES_AT && b < NAMES_AT + N ? `${String(beat - NAMES_AT + 1).padStart(2, "0")} / ${N}  ·  und viele mehr` : "";
+  // Flyer
+  const fIn = prog(b, FLYER_AT, .3), fUp = prog(b, FLYER_AT + 2, 1.2, "inOut");
+  const w = FW + (500 - FW) * fUp, top = 300 + (240 - 300) * fUp;
+  set(bild, { opacity: b >= FLYER_AT ? fIn : 0, left: (540 - w / 2) + "px", top: top + "px", width: w + "px",
+    transform: `perspective(1400px) translateY(${(1 - fIn) * 500}px) rotateX(${(1 - fIn) * 35}deg) rotateZ(${(1 - fIn) * -6 + Math.sin(b * .9) * .6}deg) scale(${(1 + (1 - fIn) * .3) * (1 + (b >= FLYER_AT ? pm * .025 : 0))})` });
+  endeZeigen(tafel, b, ENDE_AT, pm);
+} };
+</script>
+</body></html>

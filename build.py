@@ -71,11 +71,13 @@ EFFEKTE = (
     "retrogrid", "neon", "vinyl", "schwerelos",                  # 80er
     "lichterkette", "dampf", "kerzenlicht",                      # Advent / Honeycafé
     "gluehwuermchen", "spotlight", "cempasuchil", "feuerwerk",   # passend zu Titel / Ort
+    "superdark",                                                 # Darkwave: Dunkelheit übernimmt die Seite
 )
 EFFEKT_ALIAS = {"bühnennebel": "buehnennebel", "flyer-aus-nebel": "flyerausnebel", "schnee": "snow", "sterne": "twinklestar",
                 "twinkle": "twinklestar", "stars": "twinklestar", "glühwürmchen": "gluehwuermchen", "regenbogen": "regenbogenfolie",
                 "holo": "regenbogenfolie", "disco": "discokugel", "papelpicado": "cempasuchil", "kerze": "kerzenlicht",
-                "blasen": "seifenblasen", "graffiti": "spraydose", "synthwave": "retrogrid", "bass": "bassboom"}
+                "blasen": "seifenblasen", "graffiti": "spraydose", "synthwave": "retrogrid", "bass": "bassboom",
+                "super-dark": "superdark", "darkwave": "superdark"}
 # CSS-Dateien je Effekt (static/css/fx/<datei>.css); ohne Eintrag: Datei heißt wie der Effekt
 EFFEKT_CSS = {"rauschnebel": ["nebel"], "flyerausnebel": ["nebel", "flyerausnebel"], "buehnennebel": ["buehnennebel"],
               "spotlight": ["buehnennebel", "spotlight"], "vhs": ["grunge", "vhs"]}
@@ -1107,8 +1109,17 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     fx_n = env.globals["fx_kacheln"]
     def fx_list(evs):   # Effekte der vordersten Kacheln → nur deren CSS wird eingebunden
         return fx_css_for([fx for ev in evs[:fx_n] for fx in ev.effekte])
-    render("index.html", "/", page_path="/", events=upcoming[:home_max], fx_css=fx_list(upcoming[:home_max]),
-           more=max(0, len(upcoming) - home_max), cols=cols, span=months_span(upcoming[:home_max]))
+    # Startseiten-Übernahme: die Veranstaltung des Tages ersetzt ab X Stunden vor Beginn den Claim
+    # (site.startseite_uebernahme: false schaltet das ab). Mitgegeben werden die nächsten 8 als
+    # <template> – welche gerade dran ist, entscheidet site.js im Browser (der Build kann älter sein).
+    site_cfg = cfg.get("site", {}) or {}
+    uebernahme_an = site_cfg.get("startseite_uebernahme", True) is not False
+    uebernahme = upcoming[:8] if uebernahme_an else []
+    uebernahme_h = float(site_cfg.get("startseite_uebernahme_stunden", 6) or 6)
+    render("index.html", "/", page_path="/", events=upcoming[:home_max],
+           fx_css=fx_css_for([fx for ev in upcoming[:home_max][:fx_n] + uebernahme for fx in ev.effekte]),
+           more=max(0, len(upcoming) - home_max), cols=cols, span=months_span(upcoming[:home_max]),
+           uebernahme=uebernahme, uebernahme_h=uebernahme_h)
     render("programm.html", "/programm/", page_path="/programm/", events=upcoming, cols=cols, fx_css=fx_list(upcoming),
            span=months_span(upcoming), has_archive=bool(past))
     render("archiv.html", "/programm/archiv/", page_path="/programm/archiv/", events=past)

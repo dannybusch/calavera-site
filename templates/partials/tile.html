@@ -6,9 +6,12 @@
 {% from "partials/effekte.html" import flyer_fx, tile_fx %}
 {#   - fx=false:     Effekte aus "effekte:" hier nicht zeigen (nur die vordersten Kacheln bekommen
                    welche, siehe config.yml → programm.effekte_kacheln) #}
-{% macro tile(ev, is_next=false, fx=true) %}
+{#   - takeover=true: Fassung für die Startseiten-Übernahme (größeres Bild, Countdown) – steckt in einem
+                   <template>, site.js setzt sie an die Stelle des Claims #}
+{% macro tile(ev, is_next=false, fx=true, takeover=false) %}
 {% set use_fx = fx and ev.effekte %}
-<article class="tile{% if is_next %} is-next{% endif %}{% if ev.highlight %} is-highlight{% endif %}{% if use_fx %} {{ ev.fx_classes }}{% endif %}"{% if use_fx %} style="--fx-delay: {{ ev.fx_delay }}"{% endif %} data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}">
+{% set bild = (ev.visual_og or ev.visual_thumb) if takeover else ev.visual_thumb %}
+<article class="tile{% if takeover %} is-takeover{% endif %}{% if is_next %} is-next{% endif %}{% if ev.highlight %} is-highlight{% endif %}{% if use_fx %} {{ ev.fx_classes }}{% endif %}"{% if use_fx %} style="--fx-delay: {{ ev.fx_delay }}"{% endif %} data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}">
   <a class="tile-link" href="{{ ev.url }}">
     {% if use_fx %}{{ tile_fx(ev) }}{% endif %}
     <span class="t-flags">
@@ -22,11 +25,11 @@
     <span class="t-flyer">
       {% if ev.highlight %}<span class="t-hl">{{ ev.highlight }}</span>{% endif %}
       {% if ev.visual_thumb %}
-      <img src="{{ ev.visual_thumb }}" alt="{{ ev.visual_alt }}" loading="lazy" decoding="async">
+      <img src="{{ bild }}" alt="{{ ev.visual_alt }}" loading="lazy" decoding="async">
       {% else %}
       <span class="t-placeholder" aria-hidden="true"><img src="{{ asset('img/calavera_logo.svg') }}" alt="" loading="lazy"></span>
       {% endif %}
-      {% if use_fx %}{{ flyer_fx(ev, ev.visual_thumb) }}{% endif %}
+      {% if use_fx %}{{ flyer_fx(ev, bild) }}{% endif %}
     </span>
     <span class="t-title">{{ ev.title }}</span>
     {% if ev.byline %}<span class="t-by">{{ ev.byline }}</span>{% endif %}
@@ -36,7 +39,8 @@
       {% if ev.genres %}<span class="chip chip--genre">{{ ev.genres|join(" · ") }}</span>{% endif %}
       {% for t in ev.tags %}<span class="chip">{{ t }}</span>{% endfor %}
     </span>
-    <span class="t-more">Mehr erfahren <span aria-hidden="true">→</span></span>
+    {% if takeover %}<span class="t-count" data-count{% if ev.doors %} data-doors="{{ ev.doors|iso }}"{% endif %}></span>{% endif %}
+    <span class="t-more">{% if takeover %}Alle Infos{% else %}Mehr erfahren{% endif %} <span aria-hidden="true">→</span></span>
   </a>
 </article>
 {% endmacro %}

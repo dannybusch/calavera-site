@@ -53,6 +53,8 @@
       <section class="ev-stream{% if ev.start <= now < ev.end %} is-live{% endif %}" aria-labelledby="stream-titel"
         data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}"{% if ev.is_past %} hidden{% endif %}>
         <span class="evs-rings" aria-hidden="true"><span class="kf-ring"></span><span class="kf-ring"></span><span class="kf-ring"></span></span>
+        {# Studio-Leuchtschild: aus, solange nicht gesendet wird – leuchtet, wenn der Abend läuft #}
+        <span class="onair-schild" aria-hidden="true">On Air</span>
         <div class="evs-copy">
           <p class="evs-status"><span class="kf-dot" aria-hidden="true"></span><span data-evs-status>{% if ev.start <= now < ev.end %}Jetzt live{% else %}Auch im Stream{% endif %}</span></p>
           <h2 class="evs-title" id="stream-titel">Nicht dabei? Hör live mit.</h2>

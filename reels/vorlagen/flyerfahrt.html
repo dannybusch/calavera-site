@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Reel · Flyer-Fahrt</title><link rel="stylesheet" href="basis.css">
+<style>
+/* Flyer-Fahrt – 6 Takte (24 Schläge). Harter Einstieg in die Nahaufnahme (Punkt 1), Reißschwenks zu
+   Punkt 2 und 3, Aufziehen mit Kippen im Raum, Flyer nach oben, Schlusstafel Zeile für Zeile.
+   Die drei Punkte kommen aus "reel_fokus" in der Event-Datei (x/y in Prozent des Flyers). */
+.raum { position: absolute; inset: 0; perspective: 1700px; }
+.kamera { position: absolute; left: 50%; top: 50%; transform-origin: 50% 50%; will-change: transform; }
+.kamera .flyer { position: static; width: 100%; height: 100%; }
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="ebene" id="hinten"></div>
+  <div class="raum"><div class="kamera" id="kamera"></div></div>
+  <div class="ebene" id="vorn"></div>
+  <div class="ebene" id="tafel"></div>
+  <div class="blitz" id="blitz"></div>
+</div>
+<script src="daten.js"></script>
+<script src="reel.js"></script>
+<script>
+const { D, track, prog, pump, set, $, atmo, blitz, ende, endeZeigen, flyer, clamp } = Reel;
+// Flyergröße: 930 px breit (bei sehr hohen Flyern auf 1500 px Höhe begrenzt)
+let W = 930, H = W * D.flyer_ratio; if (H > 1500) { H = 1500; W = H / D.flyer_ratio; }
+set($("kamera"), { width: W + "px", height: H + "px", marginLeft: -W / 2 + "px", marginTop: -H / 2 + "px" });
+flyer($("kamera"));
+atmo($("hinten"), D.atmo); if (D.atmo === "nebel") atmo($("vorn"), "nebel", { vorn: true }); else atmo($("vorn"), D.atmo === "konfetti" ? "funken" : D.atmo, { dichte: .5, vorn: true });
+const tafel = ende($("tafel"), 1000);
+
+// Kamera auf einen Punkt des Flyers richten: Punkt landet bei Bildschirmhöhe 880, Flyer füllt das Bild
+// (oben/unten darf er nur in die Instagram-Bedienflächen hinein freigeben)
+const Z = 1.55;
+function shot([fx, fy], z = Z) {
+  const rx = (fx / 100 - .5) * W, ry = (fy / 100 - .5) * H;
+  let tx = -z * rx, ty = 880 - 960 - z * ry;
+  const mx = Math.max(0, z * W / 2 - 540), myTop = z * H / 2 - 960 + 220, myBot = z * H / 2 - 960 + 400;
+  return [clamp(tx, -mx, mx), clamp(ty, -myBot, myTop), z];
+}
+const [p1, p2, p3] = D.fokus;
+const s1 = shot(p1), s2 = shot(p2), s3 = shot(p3, Z * 1.08);
+const KAM = [
+  [0,    [...s1, 0, 0]], [1.95, [s1[0], s1[1] + 20, Z * 1.03, -2, 1], "linear"],
+  [2.0,  [s1[0], s1[1] + 20, Z * 1.03, -2, 1]], [2.3, [...s2, 3, -2], "snap"], [5.95, [s2[0] + 12, s2[1] - 15, Z * 1.05, 1, -1], "linear"],
+  [6.0,  [s2[0] + 12, s2[1] - 15, Z * 1.05, 1, -1]], [6.3, [...s3, -3, 2], "snap"], [9.95, [s3[0] - 15, s3[1] + 10, s3[2] * 1.04, -1, 1], "linear"],
+  [10.0, [s3[0] - 15, s3[1] + 10, s3[2] * 1.04, -1, 1]], [11.5, [0, 0, 1, -9, 4], "inOut"], [13.9, [0, 0, 1.02, 6, -2], "inOut"],
+  [15.4, [0, -330 * (H / 1315), .5, 0, 0], "inOut"], [24, [0, -330 * (H / 1315), .5, 0, 0]],
+];
+
+window.REEL = { beats: 24, render(b, t) {
+  const [x, y, z, ry, rx] = track(KAM, b), pm = pump(b, t);
+  set($("kamera"), { transform: `translate(${x}px, ${y}px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${z * (1 + (b >= 16 ? pm * .015 : pm * .006))})` });
+  // Blitz: bei "gewitter" Doppelblitze auf Takt 1/3/5, sonst ein heller Akzent auf jedem Schnitt
+  const bl = D.blitz ? blitz(b, 0) + blitz(b, 8) + blitz(b, 16) : [0, 2, 6, 16].reduce((a, at) => a + blitz(b, at, .22), 0);
+  set($("blitz"), { opacity: Math.min(.8, bl) });
+  endeZeigen(tafel, b, 16, pm);
+} };
+</script>
+</body></html>

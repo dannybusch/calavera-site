@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Reel · Teaser</title><link rel="stylesheet" href="basis.css">
+<style>
+/* Teaser in Bewegung – der Teaser-Satz erscheint in Häppchen zu 1–3 Wörtern, je 2 Schläge,
+   Wort für Wort auf dem halben Schlag; das wichtigste (längste) Wort rot. Dahinter der Flyer unscharf,
+   am Ende wird er scharf, dann die Schlusstafel. Länge richtet sich nach dem Text (immer ganze Takte). */
+.happen { position: absolute; left: 60px; right: 60px; top: 0; height: 1920px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--hell); line-height: .92; }
+.happen .w { display: inline-block; }
+.happen .w.rot { color: var(--rot); }
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="hg-unscharf" id="hg"></div><div class="hg-dunkel"></div>
+  <div class="ebene" id="atmo"></div>
+  <div class="ebene" id="text"></div>
+  <div class="ebene" id="bild"></div>
+  <div class="ebene" id="tafel"></div>
+  <div class="blitz" id="blitz"></div>
+</div>
+<script src="daten.js"></script>
+<script src="reel.js"></script>
+<script>
+const { D, prog, pump, set, $, fit, atmo, blitz, ende, endeZeigen, flyer } = Reel;
+set($("hg"), { backgroundImage: `url("${D.flyer_unscharf}")` });
+atmo($("atmo"), D.atmo);
+// Teaser in Häppchen: Satzzeichen und kurze Wörter bleiben am Nachbarn hängen
+const worte = (D.teaser || D.titel).replace(/\s+[–—-]\s+/g, " – ").split(/\s+/).filter(Boolean);
+const happen = []; let cur = [];
+worte.forEach(w => { cur.push(w); const len = cur.join(" ").length; if (cur.length === 3 || len > 16 || /[.,!?:;–]$/.test(w) || w === "–") { happen.push(cur); cur = []; } });
+if (cur.length) happen.push(cur);
+const H = happen.slice(0, 16);   // höchstens 16 Häppchen (~ 16 s Text)
+const laengstes = worte.reduce((a, w) => w.replace(/[^\p{L}]/gu, "").length > a.replace(/[^\p{L}]/gu, "").length ? w : a, "");
+const els = H.map(ws => {
+  const box = document.createElement("div"); box.className = "display happen"; $("text").appendChild(box);
+  const line = document.createElement("span"); line.className = "fit"; box.appendChild(line);
+  const spans = ws.map((w, i) => { const s = document.createElement("span"); s.className = "w" + (w === laengstes ? " rot" : ""); s.textContent = w; line.appendChild(s); if (i < ws.length - 1) line.appendChild(document.createTextNode(" ")); return s; });
+  const px = fit(line, 940, 260, 110);
+  if (px < 170 && ws.length > 1) {   // lange Häppchen: zweizeilig, größer
+    line.innerHTML = ""; const half = Math.ceil(ws.length / 2);
+    spans.forEach((s, i) => { line.appendChild(s); line.appendChild(i === half - 1 ? document.createElement("br") : document.createTextNode(" ")); });
+    line.style.whiteSpace = "normal"; line.style.fontSize = Math.min(240, Math.floor(940 / (0.37 * Math.max(...[ws.slice(0, half), ws.slice(half)].map(x => x.join(" ").length))))) + "px";
+  }
+  return { box, spans };
+});
+const TEXT_END = H.length * 2, FLYER_AT = Math.ceil(TEXT_END / 4) * 4, ENDE_AT = FLYER_AT + 4, BEATS = ENDE_AT + 4;
+const bild = flyer($("bild")); const tafel = ende($("tafel"), 985, { datumPx: 220, titelPx: 120 });
+
+window.REEL = { beats: BEATS, render(b, t) {
+  const pm = pump(b, t);
+  set($("hg"), { transform: `scale(${1.1 + b * .004 + pm * .015})`, opacity: .6 - .25 * prog(b, FLYER_AT, 1, "out") });
+  set($("blitz"), { opacity: Math.min(.6, blitz(b, 0, .3) + blitz(b, FLYER_AT, .35) + blitz(b, ENDE_AT, .3)) });
+  els.forEach((e, i) => {
+    const at = i * 2, on = b >= at && b < at + 2;
+    set(e.box, { opacity: on ? 1 : 0, transform: `translateY(${-prog(b, at + 1.85, .15, "in") * 200}px)` });
+    e.spans.forEach((s, k) => { const p = prog(b, at + k * .5, .2); set(s, { opacity: p, transform: `translateY(${(1 - p) * 80}px) scale(${1 + (1 - p) * .3})` }); });
+  });
+  const fIn = prog(b, FLYER_AT, .35), fUp = prog(b, FLYER_AT + 2, 1.2, "inOut"), w = 680 + (500 - 680) * fUp, top = 330 + (240 - 330) * fUp;
+  set(bild, { opacity: b >= FLYER_AT ? fIn : 0, left: (540 - w / 2) + "px", top: top + "px", width: w + "px",
+    filter: `blur(${(1 - fIn) * 30}px)`, transform: `scale(${1 + (1 - fIn) * .25 + (b >= FLYER_AT ? pm * .02 : 0)})` });
+  endeZeigen(tafel, b, ENDE_AT, pm);
+} };
+</script>
+</body></html>

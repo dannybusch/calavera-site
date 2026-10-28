@@ -1,0 +1,2 @@
+Hier können Musikdateien für die Reels liegen (z. B. von Pixabay).
+In der Event-Datei: musik: "dateiname.mp3" – siehe README, Abschnitt "Reels für Instagram".

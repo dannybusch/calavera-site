@@ -7,9 +7,11 @@
  *  3. Teilen-Knopf auf Veranstaltungsseiten
  *  4. Kellerfunk: liest die config.yml von live.calavera.club und zeigt, ob gerade
  *     gesendet wird – mit derselben Logik wie live.calavera.club (site.live: auto|an|aus,
- *     Sendungen ohne end laufen 6 Stunden)
+ *     Sendungen ohne end laufen 6 Stunden). Auf jeder Seite: schmales Band oben, wenn live
+ *     (oder dezent mit Countdown, wenn eine Sendung in weniger als 60 Minuten beginnt).
+ *  Startseite: die Veranstaltung des Tages übernimmt ab ein paar Stunden vor Beginn den Claim.
  *
- *  Testen:  ?now=2026-10-23T23:00  tut so, als wäre es diese Bremer Uhrzeit.
+ *  Testen:  ?now=2026-10-23T23:00  tut so, als wäre es diese Bremer Uhrzeit (die Uhr läuft von dort weiter).
  */
 (function () {
   "use strict";
@@ -56,7 +58,13 @@
 
   var nowParam = new URLSearchParams(location.search).get("now");
   var fixedNow = nowParam ? bremen(nowParam) : null;
-  function now() { return fixedNow ? new Date(fixedNow.getTime()) : new Date(); }
+  var loadedAt = Date.now();
+  function now() { return fixedNow ? new Date(fixedNow.getTime() + Date.now() - loadedAt) : new Date(); }
+  function countdown(ms) {         // 2:14:05 bzw. 42:10
+    var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+    var mm = (h ? String(m).padStart(2, "0") : String(m)) + ":" + String(sec).padStart(2, "0");
+    return h ? h + ":" + mm : mm;
+  }
 
   /* ---------- 1. Menü ---------- */
   var toggle = document.querySelector(".menu-toggle");
@@ -82,6 +90,46 @@
     if (dayKey(start) === dayKey(new Date(n.getTime() + 864e5))) return "Morgen";
     return "Als Nächstes";
   }
+  /* Startseiten-Übernahme: Veranstaltung, die in weniger als X Stunden beginnt oder gerade läuft,
+     ersetzt den Claim (Vorlagen im <template>, siehe index.html). Im Programm darunter wird dann
+     keine Kachel mehr extra groß gezeigt – das wäre doppelt. */
+  var heroEl = document.querySelector(".hero");
+  var tkVorlagen = Array.prototype.slice.call(document.querySelectorAll("template.takeover-vorlage"));
+  var tkAktiv = null;
+  function tkWahl() {
+    var n = now();
+    return tkVorlagen.filter(function (t) {
+      var st = new Date(t.getAttribute("data-start")), en = new Date(t.getAttribute("data-end"));
+      return st.getTime() - (parseFloat(t.getAttribute("data-stunden")) || 6) * 36e5 <= n && n < en;
+    })[0] || null;
+  }
+  function tkZeigen() {
+    var t = tkWahl();
+    if (t === (tkAktiv && tkAktiv.vorlage)) return;
+    if (tkAktiv) { tkAktiv.el.remove(); tkAktiv = null; }
+    heroEl.classList.toggle("is-takeover", !!t);
+    if (!t) return;
+    var el = t.content.querySelector(".tile").cloneNode(true);
+    heroEl.querySelector(".hero-claim").appendChild(el);
+    tkAktiv = { vorlage: t, el: el, start: new Date(t.getAttribute("data-start")), end: new Date(t.getAttribute("data-end")),
+                lab: el.querySelector("[data-label]"), count: el.querySelector("[data-count]") };
+    var d = tkAktiv.count && tkAktiv.count.getAttribute("data-doors");
+    tkAktiv.doors = d ? new Date(d) : null;
+  }
+  function tkTick() {
+    tkZeigen();
+    if (!tkAktiv) return;
+    var n = now(), a = tkAktiv, live = a.start <= n && n < a.end;
+    if (a.lab) a.lab.textContent = live ? "Läuft gerade" : relLabel(a.start, a.end, n) + " · " + fmtTime(a.start);
+    if (a.count) {
+      a.count.classList.toggle("is-live", live);
+      a.count.innerHTML = live ? '<span class="tc-dot" aria-hidden="true"></span>Jetzt geöffnet · bis ' + fmtTime(a.end) + " Uhr"
+        : a.doors && n < a.doors ? "Einlass in <b>" + countdown(a.doors - n) + "</b>"
+        : "Beginn in <b>" + countdown(a.start - n) + "</b>";
+    }
+  }
+  if (heroEl && tkVorlagen.length) { tkTick(); setInterval(tkTick, 1000); }
+
   document.querySelectorAll(".program-grid").forEach(function (grid) {
     var n = now();
     var tiles = Array.prototype.slice.call(grid.querySelectorAll(".tile"));
@@ -91,7 +139,13 @@
       t.classList.remove("is-next");
       return true;
     });
-    if (left.length) {
+    left.forEach(function (t) {     // Stream-Kennzeichen leuchtet, solange der Abend läuft
+      var c = t.querySelector(".chip--stream");
+      if (c) c.classList.toggle("is-live", new Date(t.getAttribute("data-start")) <= n);
+    });
+    if (left.length && heroEl && heroEl.classList.contains("is-takeover")) {
+      /* Übernahme aktiv: kein zweites großes Bild im Programm */
+    } else if (left.length) {
       var first = left[0];
       first.classList.add("is-next");
       var start = new Date(first.getAttribute("data-start"));
@@ -256,10 +310,13 @@
 
   /* ---------- 4. Kellerfunk ---------- */
   var card = document.querySelector(".kf-card[data-config]");
-  if (!card) return;
-  var base = (card.getAttribute("data-url") || "https://live.calavera.club").replace(/\/+$/, "") + "/";
-  var hours = parseFloat(card.getAttribute("data-hours")) || 6;
-  var refresh = Math.max(20, parseInt(card.getAttribute("data-refresh"), 10) || 60) * 1000;
+  var band = document.querySelector(".onair-band[data-config]");
+  var src = card || band;
+  if (!src) return;
+  var base = (src.getAttribute("data-url") || "https://live.calavera.club").replace(/\/+$/, "") + "/";
+  var hours = parseFloat(src.getAttribute("data-hours")) || 6;
+  var refresh = Math.max(20, parseInt(src.getAttribute("data-refresh"), 10) || 60) * 1000;
+  card = card || document.createElement("div");     // ohne Karte (alle Seiten außer Start): nur das Band
   var el = {
     status: card.querySelector(".kf-status-text"),
     show: card.querySelector(".kf-show"),
@@ -296,7 +353,37 @@
     return { live: live, show: live ? running : next };
   }
 
+  /* Band oben auf jeder Seite: live → rot; beginnt in < 60 Minuten → dezent mit Countdown.
+     Wegklicken gilt für diese Sendung, bis der Tab geschlossen wird (sessionStorage). */
+  var bandEl = band && {
+    status: band.querySelector(".ob-status"), show: band.querySelector(".ob-show"), go: band.querySelector(".ob-go"),
+    close: band.querySelector(".ob-close")
+  };
+  var bandKey = "";
+  function bandZu(key) { try { return sessionStorage.getItem("onair-zu") === key; } catch (e) { return false; } }
+  if (bandEl && bandEl.close) bandEl.close.addEventListener("click", function () {
+    try { sessionStorage.setItem("onair-zu", bandKey); } catch (e) {}
+    band.hidden = true;
+  });
+  function renderBand(state) {
+    if (!band) return;
+    var show = state.show, n = now();
+    var bald = !state.live && show && show.start - n > 0 && show.start - n <= 36e5;
+    var mode = state.live && show ? "live" : bald ? "bald" : "";
+    bandKey = mode ? mode + ":" + show.start.getTime() : "";
+    if (!mode || bandZu(bandKey)) { band.hidden = true; return; }
+    band.classList.toggle("is-live", mode === "live");
+    band.classList.toggle("is-soon", mode === "bald");
+    var who = show.djs.length ? " · " + show.djs.join(" & ") : "";
+    bandEl.status.textContent = mode === "live" ? "Live im Kellerfunk" : "Kellerfunk";
+    bandEl.show.textContent = (mode === "live" ? "" : "Gleich auf Sendung: ") + show.title + who;
+    bandEl.go.innerHTML = mode === "live" ? 'Reinhören <span aria-hidden="true">↗</span>' : "in " + countdown(show.start - n);
+    band.hidden = false;
+  }
+
   function render(state) {
+    renderBand(state);
+    if (!el.show) return;                             // keine Kellerfunk-Karte auf dieser Seite
     var show = state.show;
     card.classList.toggle("is-live", state.live);
     if (el.status) el.status.textContent = state.live ? "Jetzt live" : (show ? "Off Air" : "Kellerfunk");
@@ -335,11 +422,15 @@
   var lastCfg = null;
   function load() {
     if (!window.jsyaml) return;  // js-yaml fehlt → statischer Inhalt bleibt
-    fetch(card.getAttribute("data-config"), { cache: "no-store", credentials: "omit" })
+    fetch(src.getAttribute("data-config"), { cache: "no-store", credentials: "omit" })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
       .then(function (txt) { lastCfg = window.jsyaml.load(txt) || {}; render(evaluate(lastCfg)); })
       .catch(function () { if (lastCfg) render(evaluate(lastCfg)); /* sonst bleibt der statische Inhalt */ });
   }
-  function start() { load(); setInterval(load, refresh); }
+  function start() {
+    load(); setInterval(load, refresh);
+    // Countdown im Band sekundengenau (und pünktlich auf "live" umschalten)
+    if (band) setInterval(function () { if (lastCfg && (band.classList.contains("is-soon") || band.hidden)) renderBand(evaluate(lastCfg)); }, 1000);
+  }
   if (window.jsyaml) start(); else window.addEventListener("load", start);
 })();

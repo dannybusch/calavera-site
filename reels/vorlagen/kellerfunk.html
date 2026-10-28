@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Reel · Kellerfunk</title><link rel="stylesheet" href="basis.css">
+<style>
+/* Kellerfunk – Sendeplan eines Monats im Look eines Senders.
+   Takt 1–2: Rauschen → Logo glimmt auf, "Live aus dem Calavera-Keller" tippt sich, dann Monat + Anzahl, Zeiger stimmt ein
+   je Sendung ein Takt: Kanalwechsel (Rauschen, Farbversatz), Datum, Visual im Monitor, Titel, DJs; der Zeiger der
+   Senderskala springt auf den nächsten Kanal · 2 Takte Sendeplan zum Lesen/Anhalten · 1 Takt "Einschalten". */
+:root { --monitor-top: 548px; }
+.rauschen { position: absolute; inset: 0; background: url("assets/rauschen.png") 0 0 / 1080px 1920px; image-rendering: pixelated; opacity: 0; mix-blend-mode: screen; pointer-events: none; }
+.zeilen { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, rgba(0,0,0,.22) 0 3px, transparent 3px 6px); }
+.rollbalken { position: absolute; left: 0; right: 0; height: 260px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,.05) 45%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.05) 55%, transparent); pointer-events: none; }
+.glut { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 38% at 50% 100%, rgba(179,18,46,.32), transparent 70%), radial-gradient(ellipse 60% 40% at 50% 40%, rgba(255,255,255,.035), transparent 70%); }
+
+/* Kopfzeile: ON AIR + Senderkennung */
+.hud { position: absolute; left: 70px; right: 70px; top: 248px; display: flex; justify-content: space-between; align-items: center; font-size: 30px; color: var(--text-2); }
+.onair { display: flex; align-items: center; gap: 16px; color: var(--hell); }
+.onair i { width: 26px; height: 26px; border-radius: 50%; background: #ff2a44; box-shadow: 0 0 18px 4px rgba(255,42,68,.7); }
+.kanal { color: var(--text-3); }
+
+/* Senderskala unten */
+.skala { position: absolute; left: 90px; right: 90px; top: 1446px; height: 64px; }
+.skala .striche { position: absolute; left: 0; right: 0; top: 0; height: 30px;
+  background: repeating-linear-gradient(to right, rgba(241,235,226,.9) 0 3px, transparent 3px 150px) 0 0 / 100% 30px no-repeat,
+              repeating-linear-gradient(to right, rgba(241,235,226,.45) 0 2px, transparent 2px 30px) 0 100% / 100% 14px no-repeat; }
+.skala .striche::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: rgba(241,235,226,.35); }
+.skala .zahlen { position: absolute; left: 0; right: 0; top: 38px; display: flex; justify-content: space-between; font-size: 22px; color: var(--text-3); letter-spacing: .1em; }
+.skala .nadel { position: absolute; top: -18px; width: 6px; height: 66px; margin-left: -3px; background: #ff2a44; box-shadow: 0 0 16px 3px rgba(255,42,68,.75); border-radius: 3px; }
+
+/* Vorspann */
+.logo-gross { position: absolute; left: 50%; top: 430px; width: 700px; margin-left: -350px; max-height: 470px; object-fit: contain; }
+.logo-text { top: 520px; color: var(--hell); }
+.claim { top: 1010px; font-size: 40px; color: var(--text-2); white-space: pre; }
+.claim b { color: var(--hell); font-weight: 500; }
+.cursor { display: inline-block; width: .6em; height: 1em; background: var(--rot); vertical-align: -.12em; margin-left: .1em; }
+.monat { top: 620px; color: var(--rot); text-shadow: 0 0 70px rgba(224,72,94,.45); }
+.anzahl { top: 960px; color: var(--hell); }
+.anzahl2 { top: 1140px; font-size: 36px; color: var(--text-2); }
+
+/* Sendung */
+.sendung { position: absolute; inset: 0; }   /* sichtbar beim Aufbau (fit() misst), render() blendet ein/aus */
+.s-datum { top: 372px; color: var(--hell); }
+.s-datum .r { color: var(--rot); }
+.monitor { position: absolute; left: 130px; top: var(--monitor-top); width: 820px; height: 560px; border-radius: 22px; overflow: hidden; background: #050505;
+  box-shadow: 0 0 0 3px #262626, 0 0 0 10px #0f0f0f, 0 0 0 12px #2b2b2b, 0 40px 100px rgba(0,0,0,.8), 0 0 120px rgba(179,18,46,.18); }
+.monitor .fuell { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(26px) saturate(1.3) brightness(.55); }
+.monitor img.vis { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.monitor .test { position: absolute; inset: 0; background: repeating-linear-gradient(135deg, #171717 0 16px, #0f0f0f 16px 32px); display: flex; align-items: center; justify-content: center; }
+.monitor .test img { max-width: 70%; max-height: 62%; object-fit: contain; }
+.monitor .test .display { font-size: 150px; color: var(--hell); }
+.monitor .glas { position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(0,0,0,.25) 0 2px, transparent 2px 5px), radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.10), transparent 45%), radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0,0,0,.55)); }
+.monitor .m-rauschen { position: absolute; inset: 0; background: url("assets/rauschen.png") 0 0 / 1080px 1920px; image-rendering: pixelated; opacity: 0; }
+.s-titel { top: 1146px; color: var(--hell); }
+.s-djs { font-size: 32px; color: var(--text-2); }
+.s-djs b { color: var(--rot); font-weight: 500; }
+
+/* Sendeplan */
+.plan-kopf1 { top: 330px; font-size: 32px; color: var(--rot); }
+.plan-kopf2 { top: 380px; color: var(--hell); }
+.zeile { position: absolute; left: 80px; right: 80px; display: flex; align-items: center; gap: 34px; border-top: 2px solid rgba(241,235,226,.12); }
+.zeile .z-datum { flex: 0 0 250px; }
+.zeile .z-datum .display { color: var(--rot); line-height: .95; }
+.zeile .z-datum .mono { color: var(--text-3); margin-top: 6px; }
+.zeile .z-text { flex: 1; min-width: 0; }
+.zeile .z-titel { color: var(--hell); }
+.zeile .z-djs { color: var(--text-2); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Schluss */
+.logo-ende { position: absolute; left: 50%; top: 470px; width: 560px; margin-left: -280px; max-height: 400px; object-fit: contain; }
+.ende-text { top: 560px; color: var(--hell); }
+.ende1 { top: 960px; font-size: 38px; color: var(--text-2); }
+.ende2 { top: 1030px; color: var(--hell); }
+.ende3 { top: 1230px; font-size: 32px; color: var(--rot); }
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="hg-unscharf" id="hg" style="opacity:0"></div><div class="hg-dunkel"></div><div class="glut"></div>
+  <div class="ebene" id="vorspann"></div>
+  <div class="ebene" id="sendungen"></div>
+  <div class="ebene" id="plan"></div>
+  <div class="ebene" id="schluss"></div>
+  <div class="ebene" id="rahmen">
+    <div class="mono hud" id="hud"><span class="onair"><i id="lampe"></i>On Air</span><span class="kanal" id="kanal"></span></div>
+    <div class="mono skala" id="skala"><div class="striche"></div><div class="zahlen"><span>UKW</span><span>88</span><span>92</span><span>96</span><span>100</span><span>104</span><span>108</span></div><div class="nadel" id="nadel"></div></div>
+  </div>
+  <div class="zeilen"></div><div class="rollbalken" id="roll"></div>
+  <div class="rauschen" id="rauschen"></div>
+</div>
+<script src="daten.js"></script>
+<script src="reel.js"></script>
+<script>
+const { D, prog, pulse, pump, set, $, letters, fit, textBlock, clamp } = Reel;
+const S = D.sendungen || [], N = S.length;
+const el = (parent, tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; parent.appendChild(e); return e; };
+// Feste Pseudo-Zufallszahl je Bild (Rauschen springt pro Videobild, nicht pro Unterbild)
+const hash = n => { let x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
+
+// ---------- Vorspann ----------
+const V = $("vorspann");
+let logoV;
+if (D.logo) { logoV = el(V, "img", "logo-gross"); logoV.src = D.logo; }
+else { logoV = textBlock(V, "display mitte logo-text", "Kellerfunk", { maxPx: 260, zweizeilig: false }); }
+const claim = el(V, "p", "mono mitte claim"); const CLAIM = D.claim || "Live aus dem Calavera-Keller";
+const monat = textBlock(V, "display mitte monat", D.monat, { maxPx: 330, zweizeilig: false });
+const monatChs = letters(monat.querySelector(".fit"));
+const anzahl = textBlock(V, "display mitte anzahl", N === 1 ? "1 Live-Sendung" : `${N} Live-Sendungen`, { maxPx: 150, zweizeilig: false });
+const anzahl2 = el(V, "p", "mono mitte anzahl2", D.unterzeile || "Im Stream · aus dem Keller");
+
+// ---------- Sendungen ----------
+const SE = S.map((s, i) => {
+  const box = el($("sendungen"), "div", "sendung");
+  const dat = el(box, "div", "display mitte s-datum");
+  const line = el(dat, "span", "fit"); el(line, "span", "r", `${s.wt} ${s.datum}`); line.appendChild(document.createTextNode("  ")); el(line, "span", "", s.zeit);
+  fit(line, 940, 150, 80);
+  const mon = el(box, "div", "monitor");
+  if (s.visual) {
+    const f = el(mon, "div", "fuell"); f.style.backgroundImage = `url("${s.unscharf || s.visual}")`;
+    const img = el(mon, "img", "vis"); img.src = s.visual;
+  } else {
+    const t = el(mon, "div", "test");
+    if (D.logo) { const im = el(t, "img"); im.src = D.logo; } else el(t, "span", "display", "Kellerfunk");
+  }
+  const mr = el(mon, "div", "m-rauschen"); el(mon, "div", "glas");
+  const tit = textBlock(box, "display mitte s-titel", s.titel, { maxPx: 112, minPx: 60 });
+  const djs = el(box, "p", "mono mitte s-djs"); if (s.djs) { const z = el(djs, "span", "fit"); el(z, "span", "", "An den Decks · "); el(z, "b", "", s.djs); fit(z, 900, 32, 20); }
+  djs.style.top = (1146 + tit.offsetHeight + 16) + "px";
+  return { box, dat, mon, vis: mon.firstChild, mr, tit, djs };
+});
+
+// ---------- Sendeplan ----------
+const P = $("plan");
+el(P, "p", "mono mitte plan-kopf1", `Kellerfunk · ${D.monat} ${D.jahr}`);
+const pk = textBlock(P, "display mitte plan-kopf2", "Sendeplan", { maxPx: 170, zweizeilig: false });
+const oben = 620, unten = 1405, rh = Math.min(170, (unten - oben) / Math.max(1, N));
+const ZE = S.map((s, i) => {
+  const z = el(P, "div", "zeile"); set(z, { top: (oben + i * rh) + "px", height: rh + "px" });
+  const d = el(z, "div", "z-datum"); const dd = el(d, "div", "display", `${s.wt} ${s.datum}`); dd.style.fontSize = Math.round(rh * .42) + "px";
+  const dz = el(d, "div", "mono", s.zeit); dz.style.fontSize = Math.round(clamp(rh * .17, 18, 26)) + "px";
+  const tx = el(z, "div", "z-text"); const tt = el(tx, "div", "display z-titel"); const ts = el(tt, "span", "fit", s.titel); fit(ts, 630, Math.round(rh * .4), 30);
+  if (s.djs) { const dj = el(tx, "div", "mono z-djs", s.djs); dj.style.fontSize = Math.round(clamp(rh * .15, 17, 24)) + "px"; }
+  return z;
+});
+
+// ---------- Schluss ----------
+const E = $("schluss");
+let logoE;
+if (D.logo) { logoE = el(E, "img", "logo-ende"); logoE.src = D.logo; }
+else { logoE = textBlock(E, "display mitte ende-text", "Kellerfunk", { maxPx: 220, zweizeilig: false }); }
+const e1 = el(E, "p", "mono mitte ende1", "Einschalten");
+const e2 = textBlock(E, "display mitte ende2", D.url, { maxPx: 190, zweizeilig: false });
+const e3 = el(E, "p", "mono mitte ende3", D.hinweis || "Link in Bio");
+
+const SHOW_AT = 8, PLAN_AT = SHOW_AT + N * 4, ENDE_AT = PLAN_AT + 8, BEATS = ENDE_AT + 4;
+// Zeigerstellung: Vorspann ganz links, je Sendung ein Kanal, Sendeplan/Schluss ganz rechts
+const nadelX = i => 4 + (i + 1) / (N + 1) * 92;   // in % der Skala
+
+window.REEL = { beats: BEATS, cover: 7.6, render(b, t) {
+  const pm = pump(b, t), bild = Math.floor(t * 15 + 1e-6);   // Rauschen springt 15× pro Sekunde (spart Datenrate, wirkt analoger)
+  // Kanalwechsel: kurzes Rauschen um jeden Abschnittsbeginn
+  const wechsel = [SHOW_AT, ...S.map((_, i) => SHOW_AT + i * 4).slice(1), PLAN_AT, ENDE_AT];
+  let glitch = 0; wechsel.forEach(at => { const d = b - at; if (d > -.22 && d < .4) glitch = Math.max(glitch, d < 0 ? (d + .22) / .22 : Math.exp(-d * 9)); });
+  const anfang = b < 1 ? 1 - prog(b, .15, .7, "out") * .9 : 0;   // Vorspann: aus dem Rauschen heraus
+  const rausch = Math.max(glitch * .85, anfang, .035);
+  // nur beim Kanalwechsel springt das Rauschen; sonst steht es als feines Korn still (kostet kaum Datenrate)
+  const springt = rausch > .05;
+  set($("rauschen"), { opacity: rausch, backgroundPosition: springt ? `${Math.floor(hash(bild) * 270) * 4}px ${Math.floor(hash(bild + 99) * 480) * 4}px` : "0px 0px" });
+  set($("roll"), { top: (((t * 260) % 2300) - 300) + "px" });
+  const versatz = glitch * 14;
+  const glitchCss = glitch > .02 ? { filter: `drop-shadow(${-versatz}px 0 rgba(255,30,70,.75)) drop-shadow(${versatz}px 0 rgba(40,200,255,.6))`, transform: `translate(${(hash(bild + 7) - .5) * 40 * glitch}px, ${(hash(bild + 3) - .5) * 26 * glitch}px) skewX(${(hash(bild + 5) - .5) * 10 * glitch}deg)` } : { filter: "none", transform: "none" };
+
+  // Rahmen: Lampe, Kanal, Zeiger
+  set($("lampe"), { opacity: .3 + .7 * pulse(b, 4) });
+  set($("hud"), { opacity: prog(b, 1, .5, "out") });
+  const idx = Math.floor((b - SHOW_AT) / 4);
+  $("kanal").textContent = b < SHOW_AT ? `${D.monat} ${D.jahr}` : b < PLAN_AT ? `Kanal ${String(idx + 1).padStart(2, "0")} / ${String(N).padStart(2, "0")}` : b < ENDE_AT ? "Sendeplan" : "Kellerfunk";
+  let nx = b < 6 ? 4 : b < SHOW_AT ? 4 + prog(b, 6, 2, "inOut") * (nadelX(0) - 4) + Math.sin(b * 9) * 2 * (1 - prog(b, 7.6, .4)) : nadelX(N);
+  if (b >= SHOW_AT && b < PLAN_AT) { const p = prog(b, SHOW_AT + idx * 4 - .25, .5, "inOut"); nx = nadelX(idx - 1) + (nadelX(idx) - nadelX(idx - 1)) * (idx === 0 ? 1 : p); }
+  if (b >= PLAN_AT) nx = nadelX(N - 1) + (96 - nadelX(N - 1)) * prog(b, PLAN_AT - .25, .6, "inOut");
+  set($("nadel"), { left: nx + "%" });
+  set($("skala"), { opacity: prog(b, 1.5, .6, "out") });
+
+  // Vorspann
+  const vAn = b < SHOW_AT;
+  set(V, { display: vAn ? "block" : "none", ...(b > SHOW_AT - .3 ? glitchCss : {}) });
+  if (vAn) {
+    const glimm = b < .5 ? 0 : b < 1.1 ? [0, 1, .2, 1, .5, 1][Math.floor((b - .5) / .1)] ?? 1 : 1;   // Röhre glimmt flackernd auf
+    const weg = prog(b, 3.8, .3, "in");
+    set(logoV, { opacity: glimm * (1 - weg), transform: `scale(${(1.12 - .12 * prog(b, .5, .6)) * (1 + pm * .03)}) translateY(${-weg * 140}px)`, filter: `drop-shadow(0 0 ${30 + pm * 40}px rgba(255,42,68,${.25 + pm * .35}))` });
+    const n = Math.floor(clamp((b - 1.5) / 1.5) * CLAIM.length);
+    claim.innerHTML = ""; claim.appendChild(document.createTextNode(CLAIM.slice(0, n)));
+    const cur = el(claim, "span", "cursor"); cur.style.opacity = b >= 1.5 && b < 3.9 && (b * 2) % 1 < .6 ? 1 : 0;
+    set(claim, { opacity: 1 - weg });
+    monatChs.forEach((c, i) => { const p = prog(b, 4 + i * .06, .22); set(c, { opacity: p, transform: `translateY(${(1 - p) * 120}px) scale(${1 + (1 - p) * .4})` }); });
+    set(monat, { transform: `scale(${1 + (b >= 4 ? pm * .05 : 0)})` });
+    const a = prog(b, 5, .25); set(anzahl, { opacity: a, transform: `translateY(${(1 - a) * 60}px) scale(${1 + (b >= 5 ? pm * .03 : 0)})` });
+    set(anzahl2, { opacity: prog(b, 6, .4, "out"), letterSpacing: (.3 - .14 * prog(b, 6, .4, "out")) + "em" });
+  }
+
+  // Sendungen
+  let hgSrc = "";
+  SE.forEach((e, i) => {
+    const at = SHOW_AT + i * 4, an = b >= at - .02 && b < at + 4.02;
+    set(e.box, { display: an ? "block" : "none" });
+    if (!an) return;
+    hgSrc = S[i].unscharf || "";
+    const nah = b - at < .5 || b > at + 3.7;
+    set(e.box, nah ? glitchCss : { filter: "none", transform: "none" });
+    const d = prog(b, at, .22); set(e.dat, { opacity: d, transform: `scale(${(1 + (1 - d) * .5) * (1 + pm * .04)})` });
+    const m = prog(b, at, .3);
+    set(e.mon, { opacity: m, transform: `scale(${(.92 + .08 * m) * (1 + pm * .015)})` });
+    set(e.mr, { opacity: Math.max(1 - prog(b, at + .05, .45, "out"), b > at + 3.75 ? (b - at - 3.75) * 4 : 0), backgroundPosition: `${Math.floor(hash(bild + 11) * 270) * 4}px ${Math.floor(hash(bild + 13) * 480) * 4}px` });
+    set(e.vis, { transform: `scale(${1.08 - .08 * clamp((b - at) / 4)})` });
+    const tp = prog(b, at + 1, .25); set(e.tit, { opacity: tp, transform: `translateY(${(1 - tp) * 60}px)` });
+    const dp = prog(b, at + 1.5, .35, "out"); set(e.djs, { opacity: dp, letterSpacing: (.3 - .14 * dp) + "em" });
+  });
+  set($("hg"), { opacity: hgSrc ? .35 : 0, backgroundImage: hgSrc ? `url("${hgSrc}")` : "none", transform: `scale(${1.15 + pm * .02})` });
+
+  // Sendeplan
+  const pAn = b >= PLAN_AT - .02 && b < ENDE_AT + .02;
+  set(P, { display: pAn ? "block" : "none", ...(b - PLAN_AT < .5 || b > ENDE_AT - .3 ? glitchCss : { filter: "none", transform: "none" }) });
+  if (pAn) {
+    const k = prog(b, PLAN_AT, .25); set(pk, { opacity: k, transform: `scale(${(1 + (1 - k) * .4) * (1 + pm * .03)})` });
+    ZE.forEach((z, i) => { const p = prog(b, PLAN_AT + .5 + i * .5, .3); set(z, { opacity: p, transform: `translateX(${(1 - p) * 900}px)` }); });
+  }
+
+  // Schluss
+  const eAn = b >= ENDE_AT - .02;
+  set(E, { display: eAn ? "block" : "none", ...(b - ENDE_AT < .5 ? glitchCss : { filter: "none", transform: "none" }) });
+  if (eAn) {
+    const l = prog(b, ENDE_AT, .3);
+    set(logoE, { opacity: l, transform: `scale(${(1.15 - .15 * l) * (1 + pm * .03)})`, filter: D.logo ? `drop-shadow(0 0 ${30 + pm * 40}px rgba(255,42,68,${.25 + pm * .35}))` : "none" });
+    set(e1, { opacity: prog(b, ENDE_AT + 1, .3, "out") });
+    const u = prog(b, ENDE_AT + 1, .25); set(e2, { opacity: u, transform: `scale(${(1 + (1 - u) * .4) * (1 + pm * .03)})` });
+    set(e3, { opacity: prog(b, ENDE_AT + 2, .4, "out") });
+  }
+} };
+</script>
+</body></html>

@@ -1,0 +1,65 @@
+/* Reels – gemeinsame Grundlage: 1080 × 1920, Calavera-Look.
+   Instagram überdeckt oben ~220 px und unten ~400 px mit Bedienelementen: Schrift bleibt dazwischen. */
+@font-face { font-family: "Bebas Neue"; src: url("assets/bebas-neue-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-weight: 400; src: url("assets/space-grotesk-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-weight: 500; src: url("assets/space-grotesk-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 500; src: url("assets/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); }
+:root { --bg: #0b0b0b; --text: #d1cabf; --hell: #f1ebe2; --text-2: #aaa397; --text-3: #8f897f; --rot: #e0485e; --akzent: #b3122e; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+p { margin: 0; }
+.stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); color: var(--text); font-family: "Space Grotesk", sans-serif; }
+.ebene { position: absolute; inset: 0; }
+.display { font-family: "Bebas Neue", sans-serif; font-weight: 400; line-height: .9; text-transform: uppercase; }
+.mono { font-family: "IBM Plex Mono", monospace; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; }
+.rot { color: var(--rot); }
+.ch { display: inline-block; will-change: transform, opacity; }
+.fit { display: inline-block; white-space: nowrap; flex: none; }  /* flex: none – sonst schrumpft die Zeile im Flex-Kasten und fit() misst falsch */
+.mitte { position: absolute; left: 60px; right: 60px; text-align: center; }
+
+/* Hintergründe */
+.hg-unscharf { position: absolute; left: -60px; right: -60px; top: 120px; height: 1680px; background-position: center; background-size: cover; opacity: .6; }
+.hg-dunkel { position: absolute; inset: 0; background: radial-gradient(ellipse 72% 55% at 50% 46%, rgba(11,11,11,.22), rgba(11,11,11,.9)); }
+.blitz { position: absolute; inset: 0; background: #eef0ff; opacity: 0; pointer-events: none; }
+.flyer { position: absolute; display: block; border-radius: 6px; box-shadow: 0 40px 110px rgba(0,0,0,.72); transform-origin: 50% 50%; will-change: transform; }
+
+/* Schlusstafel */
+.ende { position: absolute; left: 60px; right: 60px; text-align: center; }
+.ende-datum { color: var(--rot); text-shadow: 0 0 50px rgba(224,72,94,.38); }
+.ende-titel { color: var(--hell); margin-top: 10px; }
+.ende-by { font-size: 44px; color: var(--text-2); margin-top: 22px; }
+.ende-ort { font-size: 30px; color: var(--text-3); margin-top: 26px; }
+
+/* Atmosphäre – Nebel (vorberechnete Bilder, nur verschoben) */
+.nebel { position: absolute; left: 0; right: 0; bottom: 0; height: var(--nh, 900px); overflow: hidden; pointer-events: none; }
+.nebel > span { position: absolute; left: 0; bottom: 0; width: calc(1080px + var(--kw)); height: 100%; background-repeat: repeat-x; background-size: var(--kw) 100%; animation: drift var(--d) linear infinite; }
+.nebel .n1 { --kw: 3600px; --d: 30s; background-image: url("assets/nebel-hinten.webp"); }
+.nebel .n2 { --kw: 3600px; --d: 19s; background-image: url("assets/nebel-mitte.webp"); animation: drift var(--d) linear -6s infinite, atmen 8s ease-in-out infinite; }
+.nebel .n3 { --kw: 2700px; --d: 11s; height: 75%; bottom: 6%; background-image: url("assets/nebel-vorn.webp"); opacity: .8; }
+@keyframes drift { to { transform: translateX(calc(var(--kw) * -1)); } }
+@keyframes atmen { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+/* Konfetti, Schnee, Funken, Sterne */
+.teilchen { position: absolute; inset: 0; pointer-events: none; }
+.konfetti i { position: absolute; top: -60px; left: var(--x); width: var(--w); height: calc(var(--w) * .5); background: var(--c); border-radius: 2px; opacity: .95;
+  animation: fallen var(--d) linear var(--dl) infinite, flattern var(--f) ease-in-out var(--dl) infinite alternate; }
+.schnee i { position: absolute; top: -40px; left: var(--x); width: var(--w); height: var(--w); border-radius: 50%; background: #f4f1ec; opacity: var(--o);
+  box-shadow: 0 0 calc(var(--w) * .9) rgba(255,255,255,.6); animation: fallen var(--d) linear var(--dl) infinite, schaukeln var(--f) ease-in-out var(--dl) infinite alternate; }
+.funken i { position: absolute; bottom: -30px; left: var(--x); width: var(--w); height: var(--w); border-radius: 50%; background: #ffb35c; opacity: 0;
+  box-shadow: 0 0 10px 3px rgba(255,140,40,.8), 0 0 26px 8px rgba(255,90,20,.35); animation: steigen var(--d) linear var(--dl) infinite, flimmern var(--f) ease-in-out var(--dl) infinite alternate; }
+.sterne i { position: absolute; left: var(--x); top: var(--y); width: var(--w); height: var(--w); margin: calc(var(--w) / -2) 0 0 calc(var(--w) / -2); opacity: 0;
+  animation: funkeln var(--d) ease-in-out var(--dl) infinite; }
+.sterne i::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, #fff 0 18%, #ffe9b0 45%, #f3c766);
+  clip-path: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%); }
+.sterne i::after { content: ""; position: absolute; inset: -60%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,214,130,.5), transparent); z-index: -1; }
+@keyframes fallen { to { transform: translate(var(--dx), 2020px) rotate(var(--r)); } }
+@keyframes flattern { from { scale: 1 1; } to { scale: .15 1; } }
+@keyframes schaukeln { from { translate: -14px 0; } to { translate: 14px 0; } }
+@keyframes steigen { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: .9; } 80% { opacity: .7; } 100% { transform: translate(var(--dx), -1600px); opacity: 0; } }
+@keyframes flimmern { from { scale: 1; } to { scale: .5; } }
+@keyframes funkeln { 0% { opacity: 0; transform: scale(0) rotate(0); } 14% { opacity: 1; transform: scale(1) rotate(30deg); } 22% { opacity: .7; transform: scale(.55) rotate(40deg); }
+  30% { opacity: 1; transform: scale(1.15) rotate(50deg); } 42% { opacity: .85; transform: scale(.8) rotate(65deg); } 55%, 100% { opacity: 0; transform: scale(0) rotate(90deg); } }
+
+/* Hilfslinien für Instagrams Bedienflächen: reels.py --hilfslinien */
+.hilfslinien::before, .hilfslinien::after { content: ""; position: absolute; left: 0; right: 0; z-index: 99; background: rgba(0,160,255,.28); }
+.hilfslinien::before { top: 0; height: 220px; }
+.hilfslinien::after { bottom: 0; height: 400px; }

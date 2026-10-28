@@ -33,6 +33,19 @@
 <body class="{% block body_class %}{% endblock %}">
 <a class="skip" href="#inhalt">Zum Inhalt springen</a>
 
+{# Kellerfunk-Band: erscheint nur, wenn gerade gesendet wird oder eine Sendung in < 60 Minuten beginnt (site.js) #}
+<aside class="onair-band" hidden aria-label="Kellerfunk" data-config="{{ kellerfunk.config }}" data-url="{{ kellerfunk.url }}"
+  data-hours="{{ kellerfunk.default_hours|default(6) }}" data-refresh="{{ kellerfunk.refresh_seconds|default(60) }}">
+  <div class="ob-inner wrap">
+    <a class="ob-link" href="{{ kellerfunk.url }}">
+      <span class="ob-dot" aria-hidden="true"></span><span class="ob-status">Kellerfunk</span>
+      <span class="ob-show"></span>
+      <span class="ob-go"></span>
+    </a>
+    <button class="ob-close" type="button" aria-label="Hinweis ausblenden"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+</aside>
+
 <header class="site-header">
   <div class="bar wrap">
     <a class="brand" href="/" aria-label="{{ site.name }} – Startseite">

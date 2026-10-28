@@ -1,0 +1,44 @@
+/* superdark – die Dunkelheit übernimmt. Auf der Veranstaltungsseite blassen nach dem Laden alle Farben
+   langsam aus, die Seite wird deutlich dunkler, kühl getönt, und ein silbriger Schimmer zieht darüber.
+   Kachel: Flyer entsättigt und abgedunkelt, ein Schimmer läuft über den Flyer.
+   Alles, was sich bewegt, ist transform/opacity; der Filter wird nur einmal beim Laden eingeblendet. */
+
+/* ---------- Veranstaltungsseite ---------- */
+body:has(.event.fx-mit-superdark) { background: #050506; }
+body:has(.event.fx-mit-superdark) :is(.site-header, .site-main, .site-footer, .onair-band) {
+  filter: saturate(.16) brightness(.76) contrast(1.12);
+  animation: sd-verblassen 4.5s cubic-bezier(.4, 0, .2, 1) .6s both; }
+@keyframes sd-verblassen { from { filter: saturate(1) brightness(1) contrast(1); } }
+/* Vignette + kühler Schleier über allem (klickt man durch) */
+body:has(.event.fx-mit-superdark)::before { content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none;
+  background: radial-gradient(ellipse 78% 72% at 50% 38%, rgba(4,4,8,0) 30%, rgba(3,3,7,.72) 100%), linear-gradient(rgba(34,40,66,.12), rgba(34,40,66,.12));
+  animation: sd-nacht 4.5s cubic-bezier(.4, 0, .2, 1) .6s both, sd-atmen 9s ease-in-out 5.1s infinite; }
+@keyframes sd-nacht { from { opacity: 0; } }
+@keyframes sd-atmen { 0%, 100% { opacity: 1; } 50% { opacity: .82; } }
+/* Schimmer: ein breites, schräges Lichtband zieht langsam über die ganze Seite */
+body:has(.event.fx-mit-superdark)::after { content: ""; position: fixed; top: 0; bottom: 0; left: -100%; width: 300%; z-index: 31; pointer-events: none;
+  background: linear-gradient(100deg, rgba(200,210,240,0) 41%, rgba(200,210,240,.045) 46.5%, rgba(236,240,255,.1) 50%, rgba(200,210,240,.045) 53.5%, rgba(200,210,240,0) 59%);
+  transform: translateX(-34%); animation: sd-schimmer 12s cubic-bezier(.45, 0, .55, 1) 3s infinite; will-change: transform; }
+@keyframes sd-schimmer { 0% { transform: translateX(-34%); } 55%, 100% { transform: translateX(34%); } }
+/* Titel: kaltes Silber mit wanderndem Glanz */
+.event.fx-mit-superdark .event-title { color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(100deg, #9a9ca6 0%, #9a9ca6 42%, #f1f3fa 50%, #9a9ca6 58%, #9a9ca6 100%); background-size: 260% 100%;
+  animation: sd-titel 8s linear infinite; }
+@keyframes sd-titel { from { background-position: 100% 0; } to { background-position: -160% 0; } }
+.event.fx-mit-superdark.fx-paused .event-title { animation-play-state: paused; }
+
+/* ---------- Kachel ---------- */
+.tile.fx-mit-superdark .t-flyer img { filter: grayscale(.82) brightness(.68) contrast(1.15); }
+.tile.fx-mit-superdark .t-title { color: #a9abb4; }
+.fx-superdark-nacht { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 80% at 50% 40%, rgba(30,34,52,.35), rgba(3,3,6,.6)); }
+.fx-sd-glanz { position: absolute; top: 0; bottom: 0; left: -100%; width: 300%;
+  background: linear-gradient(100deg, rgba(220,226,255,0) 42%, rgba(220,226,255,.09) 48%, rgba(245,247,255,.2) 50%, rgba(220,226,255,.09) 52%, rgba(220,226,255,0) 58%);
+  transform: translateX(-34%); animation: sd-schimmer 9s cubic-bezier(.45, 0, .55, 1) var(--fx-delay, 0s) infinite; }
+.event .fx-sd-glanz { display: none; }   /* auf der Seite schimmert schon alles */
+
+@media (prefers-reduced-motion: reduce) {
+  body:has(.event.fx-mit-superdark) :is(.site-header, .site-main, .site-footer, .onair-band),
+  body:has(.event.fx-mit-superdark)::before { animation: none !important; }
+  body:has(.event.fx-mit-superdark)::after, .fx-sd-glanz { display: none; }
+  .event.fx-mit-superdark .event-title { animation: none !important; background-position: 50% 0; }
+}

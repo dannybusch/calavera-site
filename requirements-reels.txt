@@ -1,0 +1,3 @@
+# Zusätzlich für reels.py (Instagram-Reels) – nicht nötig für die Website
+# Danach einmal: python -m playwright install chromium   (und ffmpeg installieren)
+playwright>=1.40

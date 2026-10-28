@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Reel · Programm</title><link rel="stylesheet" href="basis.css">
+<style>
+/* Programm der Woche – Takt 1: "Diese Woche im Calavera" · je Veranstaltung ein Takt: Datum, Flyer schnappt
+   herein, Titel; auf Schlag 4 Reißschwenk zur nächsten · letzter Takt: "Alles unter calavera.club/programm". */
+.kopf1 { top: 640px; color: var(--hell); }
+.kopf2 { top: 860px; color: var(--rot); }
+.kopf3 { top: 1110px; font-size: 34px; color: var(--text-2); }
+.termin { position: absolute; inset: 0; }
+.t-datum { top: 250px; color: var(--rot); }
+.t-tag { top: 238px; font-size: 32px; color: var(--text-2); }
+.t-titel { top: 1320px; color: var(--hell); }
+.t-by { top: 1470px; font-size: 36px; color: var(--text-2); }
+.schluss1 { top: 760px; font-size: 40px; color: var(--text-2); }
+.schluss2 { top: 840px; color: var(--hell); }
+.logo { position: absolute; left: 50%; top: 1080px; width: 200px; margin-left: -100px; }
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="hg-unscharf" id="hg"></div><div class="hg-dunkel"></div>
+  <div class="ebene" id="atmo"></div>
+  <div class="ebene" id="kopf"></div>
+  <div class="ebene" id="termine"></div>
+  <div class="ebene" id="schluss"><p class="mono mitte schluss1">Alles unter</p><img class="logo" id="logo" src="assets/calavera_logo.svg" alt=""></div>
+  <div class="blitz" id="blitz"></div>
+</div>
+<script src="daten.js"></script>
+<script src="reel.js"></script>
+<script>
+const { D, prog, pump, set, $, textBlock, atmo, blitz, letters } = Reel;
+set($("hg"), { backgroundImage: `url("${D.termine[0].flyer_unscharf}")` });
+atmo($("atmo"), "funken", { dichte: .7 });
+const k1 = textBlock($("kopf"), "display mitte kopf1", D.kopf[0], { maxPx: 230, zweizeilig: false });
+const k2 = textBlock($("kopf"), "display mitte kopf2", D.kopf[1], { maxPx: 230, zweizeilig: false });
+const k3 = document.createElement("p"); k3.className = "mono mitte kopf3"; k3.textContent = D.kopf[2]; $("kopf").appendChild(k3);
+const kChs = [k1, k2].flatMap(k => letters(k.querySelector(".fit")));
+const T = D.termine.map(tm => {
+  const box = document.createElement("div"); box.className = "termin"; $("termine").appendChild(box);
+  const dat = textBlock(box, "display mitte t-datum", tm.datum, { maxPx: 170, zweizeilig: false });
+  const img = document.createElement("img"); img.className = "flyer"; img.src = tm.flyer; box.appendChild(img);
+  const w = Math.min(640, 820 / tm.flyer_ratio); set(img, { width: w + "px", left: (540 - w / 2) + "px", top: (470 + (820 - w * tm.flyer_ratio) / 2) + "px" });
+  const tit = textBlock(box, "display mitte t-titel", tm.titel, { maxPx: 104, minPx: 56 });
+  const by = document.createElement("p"); by.className = "mitte t-by"; by.textContent = tm.byline; box.appendChild(by);
+  by.style.top = (1320 + tit.offsetHeight + 14) + "px";   // immer direkt unter dem (ein- oder zweizeiligen) Titel
+  return { box, dat, img, tit, by };
+});
+const s2 = textBlock($("schluss"), "display mitte schluss2", D.url, { maxPx: 150, zweizeilig: false });
+const N = T.length, ENDE_AT = 4 + N * 4, BEATS = ENDE_AT + 4;
+
+window.REEL = { beats: BEATS, render(b, t) {
+  const pm = pump(b, t), idx = Math.floor((b - 4) / 4);
+  set($("hg"), { transform: `scale(${1.15 + pm * .02})`, backgroundImage: `url("${(D.termine[Math.max(0, Math.min(N - 1, idx))] || D.termine[0]).flyer_unscharf}")` });
+  set($("blitz"), { opacity: Math.min(.6, Array.from({ length: N + 2 }, (_, i) => blitz(b, i * 4, .28)).reduce((a, x) => a + x, 0)) });
+  // Kopf
+  set($("kopf"), { opacity: b < 4 ? 1 : 0, transform: `translateX(${-1200 * prog(b, 3.8, .2, "in")}px)` });
+  kChs.forEach((c, i) => { const p = prog(b, i * .06, .2); set(c, { opacity: p, transform: `translateY(${(1 - p) * 100}px)` }); });
+  set(k3, { opacity: prog(b, 2, .5, "out") });
+  // Termine: je ein Takt, Reißschwenk nach links zum nächsten
+  T.forEach((e, i) => {
+    const at = 4 + i * 4, inn = prog(b, at, .25), out = prog(b, at + 3.8, .2, "in"), on = b >= at - .05 && b < at + 4;
+    set(e.box, { display: on ? "block" : "none", transform: `translateX(${(1 - inn) * 1100 - out * 1100}px)` });
+    set(e.img, { transform: `perspective(1400px) rotateY(${(1 - inn) * -25}deg) scale(${1 + pm * .02})` });
+    set(e.dat, { transform: `scale(${1 + pm * .05})` });
+    set(e.tit, { opacity: prog(b, at + 1, .25), transform: `translateY(${(1 - prog(b, at + 1, .25)) * 60}px)` });
+    set(e.by, { opacity: prog(b, at + 1.5, .3, "out") });
+  });
+  // Schluss
+  const sp = prog(b, ENDE_AT, .25);
+  set($("schluss"), { display: b >= ENDE_AT - .05 ? "block" : "none", opacity: sp });
+  set(s2, { transform: `scale(${(1 + (1 - sp) * .4) * (1 + pm * .03)})` });
+  set($("logo"), { opacity: prog(b, ENDE_AT + 1, .4, "out"), transform: `scale(${.8 + .2 * prog(b, ENDE_AT + 1, .4, "out")})` });
+} };
+</script>
+</body></html>

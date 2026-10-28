@@ -136,6 +136,7 @@ effekte: [snow, twinklestar]                # Weihnachten
 | `spotlight` | ein warmer Lichtkegel auf den Flyer, ganz ruhig | Konzerte |
 | `cempasuchil` (auch `papelpicado`) | Papel-picado-Wimpel oben, Studentenblumen-Blätter fallen (Totenfest, 1./2. November) | Calavera selbst |
 | `feuerwerk` | Buketts zerplatzen in Calavera-Rot, Gold und Weiß | Silvester, Jubiläen |
+| `superdark` | Die Dunkelheit übernimmt: auf der Veranstaltungsseite verblassen nach dem Laden alle Farben, die Seite wird deutlich dunkler und kühl, ein silbriger Schimmer zieht darüber; Kachel: Flyer entsättigt mit Glanz | Darkwave, Gothic, Dark RIOT |
 
 **Wo die Effekte laufen:** Im Programm (Startseite und `/programm/`) zeigen nur die **ersten zwei Kacheln**
 ihre Effekte – einstellbar in `config.yml` unter `programm.effekte_kacheln`. Auf der eigenen Seite einer
@@ -203,6 +204,28 @@ location = /config.yml {
 
 Auch die Visuals der Sendungen werden von dort geladen (als normale Bilder, dafür braucht es kein CORS).
 Ist live.calavera.club nicht erreichbar, bleibt einfach die statische Kellerfunk-Karte stehen.
+
+**Auf jeder Seite:** Läuft gerade eine Sendung, erscheint ganz oben ein schmales rotes Band
+„Live im Kellerfunk · Titel · DJs – Reinhören ↗“. Beginnt eine in weniger als 60 Minuten, steht dort
+dezent grau „Gleich auf Sendung: …“ mit Countdown. Das Band lässt sich wegklicken (gilt für diese
+Sendung, bis der Tab geschlossen wird).
+
+**Abende mit `stream:`** brauchen keinen eigenen Effekt: In der Stream-Karte auf der Veranstaltungsseite
+hängt ein kleines „On Air“-Leuchtschild, das aus ist und während des Abends rot aufleuchtet; das
+Stream-Kennzeichen auf der Kachel glüht dann ebenfalls.
+
+## Startseiten-Übernahme
+
+Ab 6 Stunden vor Beginn übernimmt die Veranstaltung des Tages den großen Claim („Vielfalt. Musik.
+Freude.“): Flyer mit Effekten, Datum, Titel und ein Countdown bis Einlass bzw. Beginn, während des
+Abends „Jetzt geöffnet · bis 04:00 Uhr“. Im Programm darunter wird dann keine Kachel mehr extra groß
+gezeigt. Danach steht wieder der Claim da – das entscheidet der Browser, ein neuer Build ist nicht nötig.
+
+```yaml
+site:
+  startseite_uebernahme: false        # ausschalten (Standard: an)
+  startseite_uebernahme_stunden: 6    # wie lange vorher (Standard: 6)
+```
 
 ## Hochladen
 
@@ -362,6 +385,106 @@ Text
 ```
 
 Stellen in `<span class="placeholder">[…]</span>` sind rot hinterlegt und müssen noch ausgefüllt werden.
+
+## Reels für Instagram (`reels.py`)
+
+Ein eigenständiges Programm macht aus den Event-Dateien kurze Videos für Instagram-Reels und -Stories
+(1080 × 1920, 30 Bilder/s, H.264 + AAC). Es ist **vom Website-Build getrennt**: liest nur `events/` und
+`config.yml`, schreibt nur nach `reels/out/` und verändert nichts an der Website.
+
+**Einmal einrichten** (zusätzlich zur Website):
+
+```bash
+pip install -r requirements-reels.txt
+python -m playwright install chromium
+# ffmpeg:  macOS: brew install ffmpeg · Windows: winget install ffmpeg · Linux: sudo apt install ffmpeg
+```
+
+**Benutzen:**
+
+```bash
+python reels.py --liste                     # was würde gerendert?
+python reels.py                             # alle kommenden Veranstaltungen mit "reels:"
+python reels.py melancholie                 # nur diese (Teil des Dateinamens)
+python reels.py melancholie --schnell       # Vorschau, ca. 4× schneller (ohne Bewegungsunschärfe)
+python reels.py melancholie --pruefen       # nur Musik prüfen: Tempo und Eins
+python reels.py woche                       # Programm der nächsten 7 Tage (--ab 2026-11-02 --tage 7)
+python reels.py kellerfunk                  # Kellerfunk-Sendeplan eines Monats (--monat 2026-11)
+```
+
+Weitere Schalter: `--vorlage flyerfahrt,teaser`, `--countdown 7,3,1,0`, `--klick` (Metronom statt Musik,
+zum Prüfen des Takts), `--hilfslinien` (zeigt die Flächen, die Instagram mit Bedienelementen überdeckt).
+
+Ergebnis in `reels/out/<veranstaltung>/`: je Reel ein `.mp4` und ein `.jpg` (Titelbild für Instagram,
+die Schlusstafel), dazu `bildtext-instagram.txt` – derselbe Text wie auf `/intern/`.
+Ein Reel braucht in voller Qualität einige Minuten (jedes Bild entsteht aus 4 Zwischenbildern).
+
+**In der Event-Datei** (alles optional):
+
+```yaml
+reels: [flyerfahrt, freunde, countdown, teaser]
+musik: "melancholie.mp3"                     # in events/ oder reels/musik/ (ohne Angabe: events/<dateiname>.mp3)
+bpm: 124                                     # Tempo des Titels
+eins: "0:42.310"                             # Zeitpunkt einer "1" (Taktanfang) – dort beginnt das Reel
+reel_fokus: [[50, 20], [40, 70], [60, 45]]   # Flyer-Fahrt: 3 Kamerapunkte (x/y in % des Flyers)
+```
+
+| Vorlage | Was passiert | Länge |
+|---|---|---|
+| `flyerfahrt` | harter Einstieg in eine Nahaufnahme des Flyers, Reißschwenks zu zwei weiteren Stellen (`reel_fokus`), Aufziehen mit Kippen im Raum, Schlusstafel | 6 Takte |
+| `freunde` | Datum riesig · „Was euch erwartet“ · ein Name aus `fans_of` pro Schlag (bis 12) · Flyer · Schlusstafel; Ende führt nahtlos zurück zum Anfang | 6–8 Takte |
+| `countdown` | „Noch 3 Tage“ / „Morgen“ / „Heute“, Flyer, Schlusstafel – für Stories über die Woche (`--countdown`) | 4 Takte |
+| `teaser` | der Teaser-Satz in Häppchen, Wort für Wort auf dem halben Schlag, längstes Wort rot; Flyer wird scharf | je nach Text |
+| `woche` | „Diese Woche im Calavera“ · ein Takt pro Veranstaltung · „calavera.club/programm“ | je nach Programm |
+| `kellerfunk` | Sender-Look: Rauschen, Logo glimmt auf, Monat + Anzahl · je Sendung ein Kanalwechsel mit Datum, Visual im Monitor, Titel, DJs · Sendeplan zum Anhalten · „Einschalten: live.calavera.club“ | 5 + Anzahl Takte |
+
+**Kellerfunk-Reel:** Die Sendungen kommen aus derselben `config.yml` wie live.calavera.club und das
+OBS-Overlay (`shows:` mit `title`, `start`, `djs`, `visual`, optional `club: true/false` für „Live im Club & im
+Stream“ / „Nur im Stream“ und `genres: [...]`) – nichts doppelt eintragen. Ohne `--monat`
+nimmt es bis zum 14. den laufenden Monat, danach den nächsten. Sendungen ohne Visual zeigen im Monitor das
+Kellerfunk-Logo auf Streifen; Platzhalter wie `[DJ]` werden weggelassen. Ergebnis: `reels/out/kellerfunk-JJJJ-MM.mp4`,
+`.jpg` (Titelbild: Monat + Anzahl) und `kellerfunk-JJJJ-MM-bildtext.txt` mit allen Terminen.
+Ohne Internet oder zum Ausprobieren: `--plan pfad/zur/config.yml` (Visuals und `kellerfunk.png` werden dann
+relativ zu dieser Datei gesucht).
+
+Die Stimmung passt sich den Effekten der Website an: Nebel bei `rauschnebel` & Co., Blitze bei `gewitter`,
+Konfetti bei `konfetti`, Schnee bei `snow`, Sterne bei `twinklestar` – sonst Funken.
+
+**Musik und Takt:** Die MP3 lädst du selbst (z. B. Pixabay) und legst sie neben die Event-Datei oder in
+`reels/musik/`. Alles im Reel ist in Schlägen geplant: Schnitte, Namen, Blitze und das Pumpen sitzen auf
+dem Schlag, und zusätzlich reagiert das Pumpen auf die Bässe der Musik. Dafür braucht es:
+
+- `bpm` – das Tempo (zeigt z. B. Mixxx, eine freie DJ-Software, beim Laden an)
+- `eins` – den Zeitpunkt einer „1“, am besten am Anfang einer Phrase (Refrain, Drop). In Audacity oder
+  Mixxx in die Wellenform zoomen und den Anfang eines kräftigen Schlags ablesen.
+
+`reels.py` prüft beides: Es warnt, wenn das erkannte Tempo deutlich abweicht, und rastet `eins` auf den
+Anfang des nächsten Bassschlags ein, wenn sie bis zu 70 ms daneben liegt. Die Musik wird auf das Reel
+zugeschnitten, im letzten Takt ausgeblendet und auf Instagram-Lautheit (−14 LUFS) gebracht. Titel mit
+festem Tempo nehmen (elektronisch produziert); in der Instagram-App keine andere Musik darüberlegen.
+
+**Optional in `config.yml`:**
+
+```yaml
+reels:
+  bpm: 124                       # Standard-Tempo, wenn in der Event-Datei keins steht
+  woche_musik: "woche.mp3"       # Musik für "woche" (in reels/musik/), dazu woche_eins: "0:12.500"
+  url_text: "calavera.club/programm"
+  kellerfunk_musik: "kellerfunk.mp3"   # Musik für "kellerfunk", dazu kellerfunk_bpm: 120 und kellerfunk_eins: "0:08.000"
+  kellerfunk_claim: "Live aus dem Calavera-Keller"
+  kellerfunk_unterzeile: "Im Stream · aus dem Keller"
+  kellerfunk_hinweis: "Link in Bio"
+```
+
+Für `woche` und `kellerfunk` geht die Musik auch direkt: `--musik datei.mp3 --bpm 120 --eins 0:08.000`.
+
+**Auf GitHub:** Actions → „Reels rendern“ → „Run workflow“ (Auswahl, Vorlage, Schnell). Die Videos liegen
+danach unter „Artifacts“ zum Herunterladen. Dafür muss die Musik im Repository liegen. Änderungen an Reels
+und Musik lösen keine Veröffentlichung der Website aus.
+
+**Tipps:** Flyer ab etwa 2000 px Breite machen die Nahaufnahmen scharf (aktuell ~800 px → leicht weich).
+Die Vorlagen liegen in `reels/vorlagen/` (HTML/CSS, eine Datei pro Vorlage) und lassen sich wie die
+Website-Vorlagen anpassen.
 
 ## Lizenzen
 

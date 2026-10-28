@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Reel · Countdown</title><link rel="stylesheet" href="basis.css">
+<style>
+/* Countdown – 4 Takte (16 Schläge), für Stories über die Woche verteilt:
+   Takt 1: "Noch" · Zahl · "Tage" schlagen ein (bzw. "Morgen" / "Heute") · Takt 2: Flyer schnappt herein
+   Takt 3–4: Flyer rückt hoch, Schlusstafel. Zahl/Wort kommt aus reels.py (--countdown 7,3,1,0). */
+.zeile { color: var(--hell); }
+.zahl { color: var(--rot); text-shadow: 0 0 70px rgba(224,72,94,.45); }
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="hg-unscharf" id="hg"></div><div class="hg-dunkel"></div>
+  <div class="ebene" id="atmo"></div>
+  <div class="ebene" id="zaehlen"></div>
+  <div class="ebene" id="bild"></div>
+  <div class="ebene" id="tafel"></div>
+  <div class="blitz" id="blitz"></div>
+</div>
+<script src="daten.js"></script>
+<script src="reel.js"></script>
+<script>
+const { D, prog, pump, set, $, textBlock, atmo, blitz, ende, endeZeigen, flyer } = Reel;
+set($("hg"), { backgroundImage: `url("${D.flyer_unscharf}")` });
+atmo($("atmo"), D.atmo);
+// Wörter je nach Abstand: 0 → "Heute", 1 → "Morgen", sonst "Noch" N "Tage"
+const n = D.tage;
+const teile = n === 0 ? [["Heute", "zahl", 420], [`ab ${D.uhrzeit} Uhr`, "zeile", 150]]
+            : n === 1 ? [["Morgen", "zahl", 380], [D.wochentag, "zeile", 150]]
+            : [["Noch", "zeile", 200], [String(n), "zahl", 720], ["Tage", "zeile", 200]];
+const tops = teile.length === 2 ? [600, 1020] : [330, 520, 1190];
+const els = teile.map(([txt, cls, px], i) => { const el = textBlock($("zaehlen"), `display mitte ${cls}`, txt, { maxPx: px, zweizeilig: false }); el.style.top = tops[i] + "px"; return el; });
+const bild = flyer($("bild")); const tafel = ende($("tafel"), 985, { datumPx: 220, titelPx: 120 });
+
+window.REEL = { beats: 16, render(b, t) {
+  const pm = pump(b, t);
+  set($("hg"), { transform: `scale(${1.15 + b * .008 + pm * .02})` });
+  set($("blitz"), { opacity: Math.min(.7, [0, 1, 2, 4, 8].reduce((a, at) => a + blitz(b, at, .3), 0)) });
+  set($("zaehlen"), { opacity: b < 4 ? 1 : 0, transform: `translateY(${-1500 * prog(b, 3.8, .2, "in")}px)` });
+  els.forEach((el, i) => { const p = prog(b, i, .2); set(el, { opacity: p, transform: `scale(${(1 + (1 - p) * .6) * (1 + (b >= i ? pm * (el.classList.contains("zahl") ? .07 : .03) : 0))})` }); });
+  const fIn = prog(b, 4, .3), fUp = prog(b, 7, 1.2, "inOut"), w = 700 + (500 - 700) * fUp, top = 330 + (240 - 330) * fUp;
+  set(bild, { opacity: b >= 4 ? fIn : 0, left: (540 - w / 2) + "px", top: top + "px", width: w + "px",
+    transform: `perspective(1400px) translateY(${(1 - fIn) * 600}px) rotateX(${(1 - fIn) * 40}deg) rotateZ(${(1 - fIn) * 5}deg) scale(${1 + (1 - fIn) * .3 + pm * .02})` });
+  endeZeigen(tafel, b, 8, pm);
+} };
+</script>
+</body></html>

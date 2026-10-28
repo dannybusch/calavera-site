@@ -1,0 +1,82 @@
+# ------------------------------------------------------------------
+#  Calavera Bremen – Reels für Instagram rendern (unabhängig von der Website)
+#
+#  Läuft nur von Hand: GitHub → Actions → "Reels rendern" → "Run workflow".
+#  Die fertigen Videos (MP4 + Titelbild + Bildtext) liegen danach unten auf der Seite des Laufs
+#  unter "Artifacts" zum Herunterladen (7 Tage lang). Es wird nichts veröffentlicht.
+#
+#  Musik: die MP3 muss dafür im Repository liegen (events/ oder reels/musik/).
+# ------------------------------------------------------------------
+
+name: Reels rendern
+
+on:
+  workflow_dispatch:
+    inputs:
+      auswahl:
+        description: 'Teil des Dateinamens einer Veranstaltung (leer = alle mit "reels:"), oder "woche" / "kellerfunk"'
+        type: string
+        default: ""
+      vorlage:
+        description: "nur diese Vorlage(n), z. B. flyerfahrt,freunde (leer = wie in der Event-Datei)"
+        type: string
+        default: ""
+      monat:
+        description: "nur bei kellerfunk: Monat JJJJ-MM (leer = automatisch)"
+        type: string
+        default: ""
+      schnell:
+        description: "Vorschau ohne Bewegungsunschärfe (ca. 4× schneller)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: reels
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Projekt holen
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: ffmpeg installieren
+        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+
+      - name: Pakete und Browser installieren
+        run: |
+          pip install -r requirements.txt -r requirements-reels.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Reels rendern
+        env:
+          AUSWAHL: ${{ inputs.auswahl }}
+          VORLAGE: ${{ inputs.vorlage }}
+          SCHNELL: ${{ inputs.schnell }}
+          MONAT: ${{ inputs.monat }}
+        run: |
+          args=()
+          [ -n "$AUSWAHL" ] && args+=("$AUSWAHL")
+          [ -n "$VORLAGE" ] && args+=(--vorlage "$VORLAGE")
+          [ "$SCHNELL" = "true" ] && args+=(--schnell)
+          [ -n "$MONAT" ] && args+=(--monat "$MONAT")
+          python reels.py "${args[@]}"
+
+      - name: Reels zum Herunterladen bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: reels
+          path: reels/out/
+          if-no-files-found: warn
+          retention-days: 7
