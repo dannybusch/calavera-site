@@ -1,0 +1,15 @@
+/* disco2 – eine Spiegelkugel wirft Lichtpunkte: Ringe um die Kugel, außen größer und weiter auseinander
+   (lichtpunkte.webp, Mitte = Kugel). Die Ebene dreht sich langsam um die Kugel – nur Drehung, also günstig.
+   Gedämpft, damit Schrift lesbar bleibt. Auf der Veranstaltungsseite nur im Raum (hinter dem Inhalt) und
+   von der kleinen Kugel oben rechts aus, nicht zusätzlich auf dem Flyer. */
+.fx-disco2 { position: absolute; inset: 0; overflow: hidden; }
+.fx-disco2 > span { position: absolute; left: var(--dx, 50%); top: var(--dy, -12%); width: var(--dw, 300%); aspect-ratio: 1; translate: -50% -50%;
+  background: url("/static/img/fx/lichtpunkte.webp") center / 100% 100% no-repeat; opacity: var(--do, .34);
+  animation: fx-disco-drehen var(--dd, 60s) linear infinite; }
+.fx-flyer .fx-disco2 > span { --dw: 340%; --do: .36; }
+.fx-tile .fx-disco2 > span { --dw: 320%; --do: .44; }
+.fx-page .fx-disco2 > span { --dx: calc(88% - 42px); --dy: 24px; --dw: 260%; --do: .34; --dd: 80s; }
+.event .fx-flyer .fx-disco2 { display: none; }
+@media (max-width: 640px) {
+  .fx-page .fx-disco2 > span { --dx: calc(92% - 28px); --dy: 10px; --dw: 380%; }
+}

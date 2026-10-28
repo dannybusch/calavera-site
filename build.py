@@ -65,7 +65,8 @@ EFFEKTE = (
     "gewitter", "fratzen",                                       # Halloween
     "snow", "twinklestar",                                       # Winter
     "grunge", "vhs", "flanell",                                  # 90er
-    "konfetti", "regenbogenfolie", "seifenblasen", "discokugel", # Gute Laune
+    "konfetti", "regenbogenfolie", "seifenblasen",                # Gute Laune
+    "disco1", "disco2", "disco3",                                # Discokugel: ursprünglich / Projektion / mit Pulsieren
     "bassboom", "spraydose",                                     # Hip-Hop
     "glitch", "laser", "scanlines",                              # Dunkel / Elektronisch
     "retrogrid", "neon", "vinyl", "schwerelos",                  # 80er
@@ -77,14 +78,15 @@ EFFEKTE = (
 )
 EFFEKT_ALIAS = {"bühnennebel": "buehnennebel", "flyer-aus-nebel": "flyerausnebel", "schnee": "snow", "sterne": "twinklestar",
                 "twinkle": "twinklestar", "stars": "twinklestar", "glühwürmchen": "gluehwuermchen", "regenbogen": "regenbogenfolie",
-                "holo": "regenbogenfolie", "disco": "discokugel", "papelpicado": "cempasuchil", "kerze": "kerzenlicht",
+                "holo": "regenbogenfolie", "disco": "disco2", "discokugel": "disco2", "papelpicado": "cempasuchil", "kerze": "kerzenlicht",
                 "blasen": "seifenblasen", "graffiti": "spraydose", "synthwave": "retrogrid", "bass": "bassboom",
                 "super-dark": "superdark", "darkwave": "superdark",
                 "emojis": "funemotes", "emoticons": "funemotes", "smileys": "funemotes", "emotes": "funemotes",
                 "herzen": "heartbubble", "hearts": "heartbubble", "heartbubbles": "heartbubble"}
 # CSS-Dateien je Effekt (static/css/fx/<datei>.css); ohne Eintrag: Datei heißt wie der Effekt
 EFFEKT_CSS = {"rauschnebel": ["nebel"], "flyerausnebel": ["nebel", "flyerausnebel"], "buehnennebel": ["buehnennebel"],
-              "spotlight": ["buehnennebel", "spotlight"], "vhs": ["grunge", "vhs"]}
+              "spotlight": ["buehnennebel", "spotlight"], "vhs": ["grunge", "vhs"],
+              "disco1": ["kugel", "disco1"], "disco2": ["kugel", "disco2"], "disco3": ["kugel", "disco3"]}
 
 
 def fx_css_for(effekte) -> list[str]:
@@ -627,7 +629,7 @@ def make_fx_textures(out: Path) -> None:
     dark = Image.new("RGBA", (512, 512), (20, 18, 16, 0)); dark.putalpha(m)
     save(dark, "staub.webp", lossless=True)
 
-    # Discokugel-Lichtpunkte wie die Kugel im Calavera: größere, verwaschene Fünfecke, nur blau-weiß.
+    # disco1 (die ursprüngliche Variante): größere, verwaschene Fünfecke, nur blau-weiß, frei verteilt.
     # 1024×1024, nahtlos (über die Ränder weitergezeichnet); im CSS auf 360 px verkleinert.
     rnd = random.Random(21)
     pts = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0)); d = ImageDraw.Draw(pts)
@@ -642,7 +644,48 @@ def make_fx_textures(out: Path) -> None:
                 poly = [(x + ox + r * math.cos(rot + k * 2 * math.pi / 5), y + oy + r * stretch * math.sin(rot + k * 2 * math.pi / 5)) for k in range(5)]
                 d.polygon(poly, fill=col + (a,))
     pts = Image.alpha_composite(pts.filter(ImageFilter.GaussianBlur(24)), pts.filter(ImageFilter.GaussianBlur(10)))   # verwaschen
-    save(pts.resize((512, 512), Image.LANCZOS), "lichtpunkte.webp", quality=82, method=3)   # weich genug für halbe Auflösung
+    save(pts.resize((512, 512), Image.LANCZOS), "lichtpunkte-alt.webp", quality=82, method=3)   # weich genug für halbe Auflösung
+
+    # disco2/disco3 – Lichtpunkte wie die Kugel im Calavera: verwaschene, blau-weiße Fünfecke – angeordnet, wie eine
+    # Spiegelkugel sie wirft: Ringe um die Kugel (Bildmitte), je Ring etwa gleich viele Punkte (gleicher Winkel
+    # zwischen den Spiegeln), nach außen größer, weiter auseinander und in Strahlrichtung gestreckt (Perspektive).
+    # Etwas Streuung und ein paar fehlende Spiegel, damit es nicht wie ein Raster aussieht.
+    # Gezeichnet auf 2800 px, gespeichert als 1024 px; im CSS dreht es sich um die Mitte (= die Kugel).
+    rnd = random.Random(21)
+    S = 2800; c = S / 2
+    pts = Image.new("RGBA", (S, S), (0, 0, 0, 0)); d = ImageDraw.Draw(pts)
+    # disco3: dieselben Punkte zusätzlich auf drei Gruppen verteilt – jede Gruppe pulsiert für sich
+    gruppen = [Image.new("RGBA", (S, S), (0, 0, 0, 0)) for _ in range(3)]; gd = [ImageDraw.Draw(g) for g in gruppen]
+    grnd = random.Random(5)                                     # eigener Zufall → disco2 bleibt unverändert
+    ring, rr = 0, 170.0
+    while rr < c * 1.02:
+        n = 19 + rnd.randint(-2, 2)
+        versatz = (ring % 2) * .5 + rnd.uniform(-.15, .15)
+        for k in range(n):
+            if rnd.random() < .22:
+                continue                                        # fehlender / verschmutzter Spiegel
+            wi = (k + versatz + rnd.uniform(-.18, .18)) * 2 * math.pi / n
+            r = rr * rnd.uniform(.94, 1.06)
+            x, y = c + r * math.cos(wi), c + r * math.sin(wi)
+            gr = r * rnd.uniform(.05, .068)                     # Größe wächst mit dem Abstand
+            streck = 1 + .5 * r / c                             # außen in Strahlrichtung länger
+            rot = rnd.uniform(0, 2 * math.pi)
+            col = rnd.choice([(236, 242, 255), (236, 242, 255), (210, 225, 255), (175, 200, 255)])
+            a = int(rnd.randrange(110, 200) * min(1, .45 + r / c) * (1 - .25 * r / c))   # nah an der Kugel schwächer
+            poly = []
+            for j in range(5):
+                t = rot + j * 2 * math.pi / 5
+                px, py = gr * math.cos(t) * streck, gr * math.sin(t)     # in Strahlrichtung gestreckt …
+                poly.append((x + px * math.cos(wi) - py * math.sin(wi), y + px * math.sin(wi) + py * math.cos(wi)))   # … und dorthin gedreht
+            d.polygon(poly, fill=col + (a,))
+            gd[grnd.randrange(3)].polygon(poly, fill=col + (min(255, int(a * 1.25)),))
+        ring += 1
+        rr *= 1.27 + rnd.uniform(-.03, .03)
+    verwaschen = lambda im: Image.alpha_composite(im.filter(ImageFilter.GaussianBlur(22)), im.filter(ImageFilter.GaussianBlur(8)))
+    for gi, g in enumerate(gruppen):
+        save(verwaschen(g).resize((1024, 1024), Image.LANCZOS), f"lichtpunkte-{gi + 1}.webp", quality=72, method=4)
+    pts = verwaschen(pts)
+    save(pts.resize((1024, 1024), Image.LANCZOS), "lichtpunkte.webp", quality=74, method=4)
 
     # Dampf (dampf): 256×512, senkrechte Schwaden, oben/unten/seitlich ausgeblendet
     dw, dh = 256, 512

@@ -1,0 +1,7 @@
+/* disco1 – die ursprüngliche Variante: frei verteilte, verwaschene blau-weiße Fünfecke (lichtpunkte-alt.webp)
+   wandern im Kreis über Flyer, Kachel und Seite */
+.fx-disco1 { position: absolute; inset: 0; overflow: hidden; }
+.fx-disco1 > span { position: absolute; left: 50%; top: 28%; width: var(--dw, 260%); aspect-ratio: 1; translate: -50% -50%;
+  background: url("/static/img/fx/lichtpunkte-alt.webp") 0 0 / 360px 360px; opacity: var(--do, .5); animation: fx-disco-drehen 46s linear infinite; }
+.fx-flyer .fx-disco1 > span { --do: .42; }
+.fx-page .fx-disco1 > span { --dw: 150%; --do: .38; top: 0; }

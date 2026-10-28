@@ -54,7 +54,7 @@ VORLAGE_ALIAS = {"fahrt": "flyerfahrt", "flyer": "flyerfahrt", "fans": "freunde"
 # Atmosphäre im Reel passend zu den Effekten der Website
 ATMO = {"rauschnebel": "nebel", "buehnennebel": "nebel", "flyerausnebel": "nebel", "fratzen": "nebel", "gewitter": "nebel",
         "grunge": "funken", "vhs": "funken", "flanell": "funken",
-        "konfetti": "konfetti", "regenbogenfolie": "konfetti", "seifenblasen": "konfetti", "discokugel": "konfetti", "spraydose": "konfetti",
+        "konfetti": "konfetti", "regenbogenfolie": "konfetti", "seifenblasen": "konfetti", "disco1": "konfetti", "disco2": "konfetti", "disco3": "konfetti", "spraydose": "konfetti",
         "bassboom": "konfetti", "snow": "schnee", "twinklestar": "sterne", "schwerelos": "sterne", "feuerwerk": "sterne",
         "lichterkette": "sterne", "gluehwuermchen": "sterne", "kerzenlicht": "funken", "dampf": "funken", "superdark": "nebel", "funemotes": "konfetti", "heartbubble": "konfetti"}
 

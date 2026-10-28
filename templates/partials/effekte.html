@@ -114,8 +114,18 @@
 {{ particles("fx-blasen", {"flyer": 5, "tile": 6, "page": 12}[wo], ev.slug ~ "-blasen-" ~ wo) }}
 {% endmacro %}
 
-{% macro fx_discokugel(ev, wo, img) %}
-<span class="fx-disco"><span></span></span>
+{# Discokugel in drei Fassungen: disco1 ursprünglich (frei verteilt, kreisend), disco2 Projektion von der Kugel,
+   disco3 Projektion mit pulsierenden Lichtpunkten (drei Ebenen) #}
+{% macro fx_disco1(ev, wo, img) %}
+<span class="fx-disco1"><span></span></span>
+{% if wo == "page" %}<span class="fx-kugel"></span>{% endif %}
+{% endmacro %}
+{% macro fx_disco2(ev, wo, img) %}
+<span class="fx-disco2"><span></span></span>
+{% if wo == "page" %}<span class="fx-kugel"></span>{% endif %}
+{% endmacro %}
+{% macro fx_disco3(ev, wo, img) %}
+<span class="fx-disco3"><span><i></i><i></i><i></i></span></span>
 {% if wo == "page" %}<span class="fx-kugel"></span>{% endif %}
 {% endmacro %}
 
@@ -224,7 +234,7 @@
   "rauschnebel": fx_rauschnebel, "buehnennebel": fx_buehnennebel, "flyerausnebel": fx_flyerausnebel,
   "gewitter": fx_gewitter, "fratzen": fx_fratzen, "snow": fx_snow, "twinklestar": fx_twinklestar,
   "grunge": fx_grunge, "vhs": fx_vhs, "flanell": fx_flanell,
-  "konfetti": fx_konfetti, "regenbogenfolie": fx_regenbogenfolie, "seifenblasen": fx_seifenblasen, "discokugel": fx_discokugel,
+  "konfetti": fx_konfetti, "regenbogenfolie": fx_regenbogenfolie, "seifenblasen": fx_seifenblasen, "disco1": fx_disco1, "disco2": fx_disco2, "disco3": fx_disco3,
   "bassboom": fx_bassboom, "spraydose": fx_spraydose,
   "glitch": fx_glitch, "laser": fx_laser, "scanlines": fx_scanlines,
   "retrogrid": fx_retrogrid, "neon": fx_neon, "vinyl": fx_vinyl, "schwerelos": fx_schwerelos,

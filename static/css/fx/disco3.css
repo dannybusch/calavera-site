@@ -1,0 +1,19 @@
+/* disco3 – wie disco2 (Projektion von der Kugel, dreht sich), aber lebendiger: die Lichtpunkte sind auf drei
+   Ebenen verteilt (lichtpunkte-1/2/3.webp), die sich gemeinsam drehen und jede für sich sanft heller und
+   dunkler werden – in verschiedenen Takten, so funkelt es unregelmäßig. Nur Drehung und Deckkraft. */
+.fx-disco3 { position: absolute; inset: 0; overflow: hidden; }
+.fx-disco3 > span { position: absolute; left: var(--dx, 50%); top: var(--dy, -12%); width: var(--dw, 300%); aspect-ratio: 1; translate: -50% -50%;
+  opacity: var(--do, .4); animation: fx-disco-drehen var(--dd, 60s) linear infinite; }
+.fx-disco3 i { position: absolute; inset: 0; background: center / 100% 100% no-repeat;
+  animation: fx-disco-funkeln var(--fd) ease-in-out var(--fl) infinite alternate; }
+.fx-disco3 i:nth-child(1) { background-image: url("/static/img/fx/lichtpunkte-1.webp"); --fd: 2.7s; --fl: 0s; }
+.fx-disco3 i:nth-child(2) { background-image: url("/static/img/fx/lichtpunkte-2.webp"); --fd: 3.5s; --fl: -1.4s; }
+.fx-disco3 i:nth-child(3) { background-image: url("/static/img/fx/lichtpunkte-3.webp"); --fd: 4.6s; --fl: -2.9s; }
+@keyframes fx-disco-funkeln { from { opacity: .12; } to { opacity: 1; } }
+.fx-flyer .fx-disco3 > span { --dw: 340%; --do: .42; }
+.fx-tile .fx-disco3 > span { --dw: 320%; --do: .5; }
+.fx-page .fx-disco3 > span { --dx: calc(88% - 42px); --dy: 24px; --dw: 260%; --do: .4; --dd: 80s; }
+.event .fx-flyer .fx-disco3 { display: none; }
+@media (max-width: 640px) {
+  .fx-page .fx-disco3 > span { --dx: calc(92% - 28px); --dy: 10px; --dw: 380%; }
+}

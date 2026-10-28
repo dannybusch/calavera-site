@@ -1,0 +1,10 @@
+/* Discokugel (disco1–3): die kleine Kugel oben rechts auf der Veranstaltungsseite + gemeinsame Drehung */
+.fx-kugel { position: absolute; top: -18px; right: 12%; width: 84px; aspect-ratio: 1; border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,.9), transparent 22%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.4) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.4) 0 1px, transparent 1px 8px),
+    radial-gradient(circle at 40% 35%, #ececf2, #8a8a96 60%, #34343c);
+  box-shadow: 0 0 40px rgba(255,255,255,.18); }
+@keyframes fx-disco-drehen { to { transform: rotate(360deg); } }
+@media (max-width: 640px) { .fx-kugel { width: 56px; right: 8%; } }

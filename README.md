@@ -114,7 +114,9 @@ effekte: [snow, twinklestar]                # Weihnachten
 | `konfetti` | buntes Konfetti fällt, dreht sich und flattert | Fick Dich Ins Knie, Melancholie, Neue Freunde |
 | `regenbogenfolie` (auch `holo`) | Hologramm-Schimmer zieht schräg über den Flyer | Gute-Laune-Partys („Einhörner“) |
 | `seifenblasen` | schillernde Blasen steigen auf und zerplatzen | Honeycafé, Sommer |
-| `discokugel` (auch `disco`) | verwaschene blau-weiße Lichtflecken (Fünfecke) wie von der Calavera-Kugel wandern im Kreis, auf der Seite hängt die Kugel | Feiern für Fortgeschrittene, Flashdance |
+| `disco1` | Discokugel, ursprüngliche Fassung: frei verteilte, verwaschene blau-weiße Fünfecke wandern im Kreis über Flyer, Kachel und Seite; auf der Seite hängt die Kugel | Feiern für Fortgeschrittene, Flashdance |
+| `disco2` (auch `disco`, `discokugel`) | Discokugel als Projektion: Lichtpunkte in Ringen um die Kugel, außen größer und weiter auseinander, drehen sich langsam; auf der Seite nur im Raum (nicht auf dem Flyer), gedämpft | wie oben |
+| `disco3` | wie `disco2`, aber lebendiger: die Lichtpunkte werden in verschiedenen Takten sanft heller und dunkler | wie oben |
 | **Hip-Hop** | | |
 | `bassboom` | Flyer pumpt im Takt (90 BPM) | They call it HIP HOP |
 | `spraydose` (auch `graffiti`) | Sprühkante oben, bunte Farbnasen laufen herunter | They call it HIP HOP |
