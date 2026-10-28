@@ -2,6 +2,11 @@
 .fx-beam--spot { --bx: 50%; --img: url("/static/img/fx/kegel-warm.webp"); --von: -5deg; --bis: 5deg; --d: 9s; --o: 1; }
 .fx-tile .fx-beam--spot { --bh: 85%; --o: 1; --von: -4deg; --bis: 4deg; }
 .fx-page .fx-beam--spot { --bx: 19%; --bh: 120%; }
+/* große Kacheln: der Kegel steht über dem Flyer (linke Spalte: 28px Rand + halbe Flyerbreite), nicht mitten im Text */
+.tile.is-next .fx-tile .fx-beam--spot { --bx: 178px; --bh: 118%; }
+.tile.is-takeover .fx-tile .fx-beam--spot { --bx: 173px; --bh: 118%; }
+@media (max-width: 1023px) { .tile.is-next .fx-tile .fx-beam--spot { --bx: 148px; } }
+@media (max-width: 640px) { .tile:is(.is-next, .is-takeover) .fx-tile .fx-beam--spot { --bx: 50%; --bh: 70%; } }
 @media (max-width: 960px) { .fx-page .fx-beam--spot { --bx: 50%; } }
 .fx-mit-spotlight .fx-flyer { box-shadow: inset 0 0 70px 18px rgba(0,0,0,.45); }
 .fx-lichtfleck { position: absolute; left: 50%; top: 32%; width: 95%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;

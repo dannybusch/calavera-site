@@ -220,7 +220,7 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 .tile.is-next .t-tags { grid-area: tags; align-self: end; margin-top: 8px; }
 .tile.is-next .t-more { grid-area: more; display: inline-flex; gap: 6px; align-self: end; justify-self: end; font-family: var(--mono); font-size: 13px;
   letter-spacing: .06em; color: var(--accent-text); }
-.tile.is-next .tile-link { box-shadow: inset 0 0 0 2px var(--accent); }
+.tile.is-next .tile-link { box-shadow: inset 0 0 0 1px #2c2a29; }   /* normaler Rahmen – rot nur, wenn ein Effekt ihn mitbringt (neon) */
 .tile.is-next .t-badge { display: inline-flex; }
 .tile.is-next .t-num { font-size: clamp(64px, 8vw, 112px); line-height: .8; color: var(--accent-display); }
 /* Highlight (per "highlight:" in der .md): normale Kachelgröße, nur abgehoben –
@@ -681,10 +681,13 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 .tile.is-takeover .tile-link { flex: 1; height: auto; background: var(--surface-2); padding: 28px; display: grid; column-gap: 32px; row-gap: 10px;
   grid-template-columns: minmax(180px, 290px) minmax(0, 1fr);
   grid-template-areas: "flyer flags" "flyer date" "flyer title" "flyer by" "flyer teaser" "flyer count" "flyer more";
-  grid-template-rows: auto auto auto auto auto 1fr auto; box-shadow: inset 0 0 0 2px var(--accent); }
+  grid-template-rows: auto auto auto auto auto 1fr auto; box-shadow: inset 0 0 0 1px #2c2a29; }
 .tile.is-takeover .t-flags { grid-area: flags; display: flex; flex-wrap: wrap; gap: 8px; align-self: start; }
 .tile.is-takeover .t-badge { display: inline-flex; }
 .tile.is-takeover.is-highlight .t-flags .t-hl { display: inline-flex; }
+.tile.is-takeover .t-flyer .t-hl { display: none !important; }
+/* Highlight in der Übernahme: kein roter Schimmer/Rahmen (das Etikett oben reicht) */
+.tile.is-takeover.is-highlight .tile-link, .tile.is-takeover.is-highlight .tile-link:hover { background: var(--surface-2); box-shadow: inset 0 0 0 1px #2c2a29; }   /* Etikett steht schon oben – nicht doppelt auf dem Flyer */
 .tile.is-takeover .t-flyer { grid-area: flyer; align-self: start; }
 .tile.is-takeover .t-date { grid-area: date; display: flex; justify-content: flex-start; align-items: baseline; gap: 16px; margin-top: 6px; }
 .tile.is-takeover .t-num { font-size: clamp(56px, 6vw, 96px); line-height: .8; color: var(--accent-display); }
@@ -704,7 +707,9 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 .tile.is-takeover .tile-link:hover .t-more { filter: brightness(1.12); }
 @media (max-width: 640px) {
   .tile.is-takeover .tile-link { display: flex; flex-direction: column; gap: 8px; padding: 14px; }
-  .tile.is-takeover .tile-link > * { text-align: left; margin-top: 0; }
+  .tile.is-takeover .tile-link > * { align-self: stretch; text-align: left; margin-top: 0; }
+  .tile.is-takeover .t-date { flex-direction: row; align-items: baseline; justify-content: flex-start; }
+  .tile.is-takeover .t-count { justify-content: flex-start; }
   .tile.is-takeover .t-flags { order: -3; }
   .tile.is-takeover .t-flyer { order: -2; width: 100%; margin-bottom: 8px; }
   .tile.is-takeover .t-badge, .tile.is-takeover .t-hl { font-size: 12px; padding: 7px 12px; }
@@ -716,3 +721,15 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
   .tile.is-takeover .t-more { align-self: stretch; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) { .tile.is-takeover .tc-dot { animation: none !important; } }
+
+/* ==========================================================================
+   Mit Effekt: der Effekt spielt die erste Geige – Etiketten werden leiser, Highlight ohne roten Rahmen.
+   (Große Kachel und Startseiten-Übernahme haben ohnehin immer nur einen normalen Rahmen.)
+   ========================================================================== */
+.tile.has-fx.is-highlight:not(.is-next):not(.is-takeover) .tile-link { background: var(--surface-1); box-shadow: inset 0 0 0 1px #2c2a29; }
+.tile.has-fx.is-highlight:not(.is-next):not(.is-takeover) .tile-link:hover { background: #1a1a1a; }
+/* "Heute · 22:00" / "Läuft gerade": umrandet statt rot gefüllt */
+.tile.has-fx:is(.is-next, .is-takeover) .t-badge { background: rgba(11,11,11,.6); color: var(--accent-text); box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .55); }
+/* während des Abends: ruhiger Punkt statt pulsierendem Glühen */
+.tile.has-fx.is-takeover .t-count.is-live { color: var(--text-3); }
+.tile.has-fx.is-takeover .tc-dot { width: 8px; height: 8px; box-shadow: none; animation: none; }

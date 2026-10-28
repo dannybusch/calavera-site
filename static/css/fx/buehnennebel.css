@@ -19,6 +19,11 @@
 /* normale Kachel: kürzer, endet vor dem unteren Rand */
 .fx-tile .fx-beam--a { --bx: 22%; --bh: 75%; --o: .85; --von: -18deg; --bis: 14deg; }
 .fx-tile .fx-beam--b { --bx: 78%; --bh: 75%; --o: .9; --von: 14deg; --bis: -14deg; }
-/* große erste Kachel: breiter Raum */
-.tile.is-next .fx-tile .fx-beam--a { --bx: 34%; --bh: 120%; --von: -26deg; --bis: 18deg; }
-.tile.is-next .fx-tile .fx-beam--b { --bx: 82%; --bh: 120%; --von: 22deg; --bis: -20deg; }
+/* große Kacheln (erste im Programm, Startseiten-Übernahme): breiter Raum, Flyer links.
+   Die Strahler hängen etwas über dem Rand (kein heller, abgeschnittener Ansatz an der Kante),
+   der obere Rand blendet weich ein, und sie sind etwas zurückgenommen, damit die Schrift ruhig bleibt. */
+.tile:is(.is-next, .is-takeover) .fx-tile .fx-beam { top: -7%; }
+.tile:is(.is-next, .is-takeover) .fx-tile .fx-beam--a { --bx: 34%; --bh: 120%; --o: .8; --von: -26deg; --bis: 18deg; }
+.tile:is(.is-next, .is-takeover) .fx-tile .fx-beam--b { --bx: 82%; --bh: 120%; --o: .8; --von: 22deg; --bis: -20deg; }
+.tile:is(.is-next, .is-takeover):is(.fx-mit-buehnennebel, .fx-mit-spotlight) .fx-tile {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 16%); mask-image: linear-gradient(to bottom, transparent, #000 16%); }
