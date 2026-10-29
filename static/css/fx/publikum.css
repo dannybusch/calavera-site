@@ -1,0 +1,15 @@
+/* publikum – vor dem Flyer wie vor einer Bühne: Silhouetten mit Köpfen, erhobenen Armen und Pommesgabeln
+   wippen im Takt (~125 BPM), erhobene Arme schwenken. Nur translate/rotate. */
+.fx-publikum { position: absolute; inset: 0; overflow: hidden; container-type: size; }
+.pb-schatten { position: absolute; left: 0; right: 0; bottom: 0; height: 24%; background: linear-gradient(to top, rgba(0,0,0,.7), transparent); }
+.fx-publikum > i { position: absolute; bottom: calc(var(--h) * -.3); width: calc(var(--h) * .5); height: var(--h); color: #060606;
+  animation: pb-wippen var(--bp) ease-in-out var(--dl) infinite alternate; }
+.fx-publikum svg { width: 100%; height: 100%; overflow: visible; fill: currentColor; opacity: .95;
+  filter: drop-shadow(0 -1.5px 0 rgba(255,214,190,.4)); }   /* Gegenlicht von der Bühne: Kanten bleiben auch auf dunklen Flyern sichtbar */
+.fx-publikum line { stroke: currentColor; stroke-width: 8; stroke-linecap: round; }
+.fx-publikum .pb-finger { stroke-width: 3; }
+.pb-arm { animation: pb-schwenken calc(var(--bp) * 2) ease-in-out var(--dl) infinite alternate; }
+.pb-arm-r { transform-origin: 45px 66px; }
+.pb-arm-l { transform-origin: 15px 66px; animation-direction: alternate-reverse; }
+@keyframes pb-wippen { from { transform: translateY(0); } to { transform: translateY(-5%); } }
+@keyframes pb-schwenken { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }

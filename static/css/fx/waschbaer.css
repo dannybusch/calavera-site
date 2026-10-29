@@ -1,0 +1,15 @@
+/* waschbaer – ein Waschbär lugt alle paar Sekunden von unten über den Flyerrand: erst die Pfoten,
+   dann der Kopf, blinzelt, legt den Kopf schief und verschwindet wieder. */
+.fx-waschbaer { position: absolute; inset: 0; overflow: hidden; container-type: size; }
+.wb-ganz { position: absolute; right: 9%; bottom: 0; width: 30cqw; height: 30cqw; transform: translateY(110%);
+  animation: wb-kopf 12s cubic-bezier(.45, 0, .3, 1) calc(var(--fx-delay, 0s) * .3) infinite; }
+.wb-kopf { width: 100%; height: 100%; display: block; transform-origin: 50% 90%; animation: wb-neigen 12s ease-in-out calc(var(--fx-delay, 0s) * .3) infinite; }
+.wb-augen { transform-origin: 50px 54px; animation: wb-blinzeln 12s steps(1) calc(var(--fx-delay, 0s) * .3) infinite; }
+.wb-pfoten { position: absolute; right: 9%; bottom: -1cqw; width: 30cqw; transform: translateY(120%);
+  animation: wb-pfoten 12s cubic-bezier(.45, 0, .3, 1) calc(var(--fx-delay, 0s) * .3) infinite; }
+@keyframes wb-pfoten { 0%, 4% { transform: translateY(120%); } 8%, 56% { transform: translateY(0); } 62%, 100% { transform: translateY(120%); } }
+@keyframes wb-kopf { 0%, 8% { transform: translateY(110%); } 13% { transform: translateY(58%); } 20% { transform: translateY(58%); }
+  26%, 48% { transform: translateY(18%); } 56%, 100% { transform: translateY(110%); } }
+@keyframes wb-neigen { 0%, 28% { rotate: 0deg; } 33%, 40% { rotate: -11deg; } 45%, 100% { rotate: 0deg; } }
+@keyframes wb-blinzeln { 0%, 16% { transform: scaleY(1); } 16.6% { transform: scaleY(.1); } 17.6%, 43% { transform: scaleY(1); } 43.6% { transform: scaleY(.1); } 44.6%, 100% { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .fx-waschbaer { display: none; } }

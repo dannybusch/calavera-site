@@ -1,0 +1,21 @@
+/* lichtorgel – rot, gelb, grün pulsieren versetzt (schneller Anschlag, langsames Verglühen), wie die
+   Lichtorgel im Jugendkeller. Höchstens etwa 1,7 Blitze pro Sekunde und weich – kein Stroboskop. */
+.fx-lichtorgel { position: absolute; inset: 0; overflow: hidden; }
+.fx-lichtorgel > i { position: absolute; width: 95%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: .2;
+  background: radial-gradient(closest-side, var(--lc), transparent); animation: lo-puls var(--lp) cubic-bezier(.1, .7, .3, 1) var(--ld, 0s) infinite; }
+.fx-lichtorgel .lo-1 { --lc: rgba(255,48,72,.55); --lp: .6s; }
+.fx-lichtorgel .lo-2 { --lc: rgba(255,194,46,.5); --lp: .9s; --ld: -.3s; }
+.fx-lichtorgel .lo-3 { --lc: rgba(63,220,106,.45); --lp: 1.2s; --ld: -.7s; }
+.fx-lichtorgel > .lo-1 { left: 12%; top: -12%; }
+.fx-lichtorgel > .lo-2 { left: 50%; top: -18%; }
+.fx-lichtorgel > .lo-3 { left: 88%; top: -12%; }
+@keyframes lo-puls { 0% { opacity: .95; } 100% { opacity: .18; } }
+/* Flyer: farbiges Licht fällt von unten leicht auf den Flyer */
+.lo-flyer > i { width: 110%; top: 112% !important; }
+.lo-flyer .lo-1 { --lc: rgba(255,48,72,.32); } .lo-flyer .lo-2 { --lc: rgba(255,194,46,.28); } .lo-flyer .lo-3 { --lc: rgba(63,220,106,.26); }
+/* Seite: große Lichtflecken oben, dazu die drei Lampen als kleine Leiste */
+.lo-page > i { width: 60%; }
+.lo-lampen { position: absolute; left: 50%; top: 14px; translate: -50% 0; display: flex; gap: 10px; padding: 7px 10px; border-radius: 6px; background: #151515; box-shadow: inset 0 0 0 1px #2a2a2a; }
+.lo-lampen b { width: 16px; height: 16px; border-radius: 50%; background: var(--lc); box-shadow: 0 0 12px 3px var(--lc);
+  animation: lo-puls var(--lp) cubic-bezier(.1, .7, .3, 1) var(--ld, 0s) infinite; }
+.lo-lampen .lo-1 { --lc: #ff3048; } .lo-lampen .lo-2 { --lc: #ffc22e; } .lo-lampen .lo-3 { --lc: #3fdc6a; }

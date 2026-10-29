@@ -56,7 +56,9 @@ ATMO = {"rauschnebel": "nebel", "buehnennebel": "nebel", "flyerausnebel": "nebel
         "grunge": "funken", "vhs": "funken", "flanell": "funken",
         "konfetti": "konfetti", "regenbogenfolie": "konfetti", "seifenblasen": "konfetti", "disco1": "konfetti", "disco2": "konfetti", "disco3": "konfetti", "spraydose": "konfetti",
         "bassboom": "konfetti", "snow": "schnee", "twinklestar": "sterne", "schwerelos": "sterne", "feuerwerk": "sterne",
-        "lichterkette": "sterne", "gluehwuermchen": "sterne", "kerzenlicht": "funken", "dampf": "funken", "superdark": "nebel", "funemotes": "konfetti", "heartbubble": "konfetti"}
+        "lichterkette": "sterne", "gluehwuermchen": "sterne", "kerzenlicht": "funken", "dampf": "funken", "superdark": "nebel", "funemotes": "konfetti", "heartbubble": "konfetti",
+        "lichtorgel": "konfetti", "lichtorgel2": "konfetti", "lichtorgel3": "konfetti", "lichtorgel4": "konfetti", "lichtorgel5": "konfetti",
+        "tanzflaeche": "konfetti", "tanzflaeche2": "konfetti", "tanzflaeche3": "konfetti"}
 
 
 def info(msg: str) -> None:

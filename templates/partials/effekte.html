@@ -230,6 +230,75 @@
 {% endif %}
 {% endmacro %}
 
+{# ---------- Lichtorgel ---------- #}
+{# lichtorgel: drei farbige Lichter (rot, gelb, grün) pulsieren versetzt wie die Lichtorgel im Jugendkeller #}
+{% macro fx_lichtorgel(ev, wo, img) %}
+<span class="fx-lichtorgel lo-{{ wo }}"><i class="lo-1"></i><i class="lo-2"></i><i class="lo-3"></i>{% if wo == "page" %}<b class="lo-lampen"><b class="lo-1"></b><b class="lo-2"></b><b class="lo-3"></b></b>{% endif %}</span>
+{% endmacro %}
+
+{# Farben der Calavera-Lichtorgeln: Rot, Bordeaux, Bernstein, Gold, Koralle, Creme, Rosé … #}
+{% set LO_FARBEN = ["#e0485e", "#f0a23a", "#b3122e", "#f6d27a", "#ff7a5c", "#f1ebe2", "#c2334f", "#ff9f43", "#e85d75"] %}
+{% set LO_RING = [(0, 0), (1.15, 0), (0.86, 0.86), (0, 1.25), (-0.86, 0.86), (-1.25, 0), (-0.81, -0.81), (0, -1.15), (0.88, -0.88)] %}
+
+{# lichtorgel2: Multi-Lichtorgel wie im Calavera – 9 farbige Kreise als Gruppe blitzen an einer Stelle auf,
+   huschen ein kurzes Stück über die Wand, sind weg und tauchen woanders wieder auf (Abfolge in lichtorgel2.css) #}
+{% macro fx_lichtorgel2(ev, wo, img) %}
+{% if wo != "flyer" %}
+<span class="fx-lo2 lo2-{{ wo }}"><span class="lo2-gruppe"><span class="lo2-dreh">{% for x, y in LO_RING %}<i style="--x:{{ x }};--y:{{ y }};--c:{{ LO_FARBEN[loop.index0] }}"></i>{% endfor %}</span></span></span>
+{% endif %}
+{% endmacro %}
+
+{# lichtorgel5: wie lichtorgel2, aber die 9 Kreise stehen im 3×3-Raster – so wie die Lichtorgel im Calavera
+   (gleiche Bewegung, CSS aus lichtorgel2.css) #}
+{% set LO_RASTER = [(-1.25, -1.25), (0, -1.25), (1.25, -1.25), (-1.25, 0), (0, 0), (1.25, 0), (-1.25, 1.25), (0, 1.25), (1.25, 1.25)] %}
+{% macro fx_lichtorgel5(ev, wo, img) %}
+{% if wo != "flyer" %}
+<span class="fx-lo2 lo2-{{ wo }} lo5"><span class="lo2-gruppe"><span class="lo2-dreh">{% for x, y in LO_RASTER %}<i style="--x:{{ x }};--y:{{ y }};--c:{{ LO_FARBEN[(loop.index0 * 4) % 9] }}"></i>{% endfor %}</span></span></span>
+{% endif %}
+{% endmacro %}
+
+{# lichtorgel3: Multi-Lichtorgel als Lauflicht – die 9 Kreise ziehen einzeln ihre Bahnen über die Wand und blitzen
+   nacheinander auf, wie ein Lauflicht #}
+{% macro fx_lichtorgel3(ev, wo, img) %}
+{% if wo != "flyer" %}
+{% set A = [(18, 22), (50, 16), (82, 24), (84, 52), (52, 50), (16, 54), (20, 84), (50, 82), (80, 86)] %}
+<span class="fx-lo3 lo3-{{ wo }}">{% for x, y in A %}<i class="{{ 'lo3-l' if loop.index0 % 2 else 'lo3-r' }}" style="left:{{ x }}%;top:{{ y }}%;--c:{{ LO_FARBEN[loop.index0] }};--o:{{ (7 + (loop.index0 * 5) % 9) }}s;--od:{{ (loop.index0 * -1.7)|round(1) }}s;--k:{{ loop.index0 }}"><b></b></i>{% endfor %}</span>
+{% endif %}
+{% endmacro %}
+
+{# lichtorgel4: Farbrad – eine Scheibe mit Farbfeldern dreht sich vor dem Scheinwerfer, das Licht fächert weich
+   über die Wand und pulsiert im Takt #}
+{% macro fx_lichtorgel4(ev, wo, img) %}
+{% if wo != "flyer" %}<span class="fx-lo4 lo4-{{ wo }}"><span class="lo4-rad"></span></span>{% endif %}
+{% endmacro %}
+
+{# ---------- Tanzfläche ---------- #}
+{# tanzflaeche: leuchtende Bodenfliesen in Perspektive, Muster wandern in Wellen #}
+{% macro fx_tanzflaeche(ev, wo, img) %}
+{% if wo != "flyer" %}
+{% set cols, rows = (7, 4) if wo == "tile" else (11, 5) %}
+<span class="fx-tanzflaeche tf-{{ wo }}"><span class="tf-boden" style="--cols:{{ cols }};--rows:{{ rows }}">{% for r in range(rows) %}{% for c in range(cols) %}<i class="c{{ (r * 3 + c * 2) % 5 }}" style="--dl:{{ ((c + r) * 0.17 + ((c * 7 + r * 3) % 5) * 0.11)|round(2) }}s"></i>{% endfor %}{% endfor %}</span></span>
+{% endif %}
+{% endmacro %}
+
+{# tanzflaeche2: Ringe – von vorn in der Mitte laufen Lichtringe über die Fliesen nach außen, in Calavera-Farben #}
+{% macro fx_tanzflaeche2(ev, wo, img) %}
+{% if wo != "flyer" %}
+{% set cols, rows = (9, 4) if wo == "tile" else (13, 5) %}
+{% set cc = (cols - 1) / 2 %}
+<span class="fx-tanzflaeche tf-{{ wo }} tf-ringe"><span class="tf-glut"></span><span class="tf-boden" style="--cols:{{ cols }};--rows:{{ rows }}">{% for r in range(rows) %}{% for c in range(cols) %}{% set d = ((c - cc) ** 2 + ((rows - 1 - r) * 1.7) ** 2) ** 0.5 %}<i class="r{{ (d|round|int) % 4 }}" style="--dl:{{ (d * 0.16)|round(2) }}s"></i>{% endfor %}{% endfor %}</span></span>
+{% endif %}
+{% endmacro %}
+
+{# tanzflaeche3: Schachbrett im Takt – die Felder wechseln sich Schlag für Schlag ab, ein heller Lauflicht-Streifen
+   zieht schräg über den Boden #}
+{% macro fx_tanzflaeche3(ev, wo, img) %}
+{% if wo != "flyer" %}
+{% set cols, rows = (8, 4) if wo == "tile" else (12, 5) %}
+<span class="fx-tanzflaeche tf-{{ wo }} tf-schach"><span class="tf-boden" style="--cols:{{ cols }};--rows:{{ rows }}">{% for r in range(rows) %}{% for c in range(cols) %}<i class="p{{ (r + c) % 2 }} z{{ r % 2 }}"></i>{% endfor %}{% endfor %}<span class="tf-lauf"></span></span></span>
+{% endif %}
+{% endmacro %}
+
 {% set FX = {
   "rauschnebel": fx_rauschnebel, "buehnennebel": fx_buehnennebel, "flyerausnebel": fx_flyerausnebel,
   "gewitter": fx_gewitter, "fratzen": fx_fratzen, "snow": fx_snow, "twinklestar": fx_twinklestar,
@@ -240,6 +309,8 @@
   "retrogrid": fx_retrogrid, "neon": fx_neon, "vinyl": fx_vinyl, "schwerelos": fx_schwerelos,
   "lichterkette": fx_lichterkette, "dampf": fx_dampf, "kerzenlicht": fx_kerzenlicht,
   "gluehwuermchen": fx_gluehwuermchen, "spotlight": fx_spotlight, "cempasuchil": fx_cempasuchil, "feuerwerk": fx_feuerwerk, "superdark": fx_superdark, "funemotes": fx_funemotes, "heartbubble": fx_heartbubble,
+  "lichtorgel": fx_lichtorgel, "lichtorgel2": fx_lichtorgel2, "lichtorgel3": fx_lichtorgel3, "lichtorgel4": fx_lichtorgel4, "lichtorgel5": fx_lichtorgel5,
+  "tanzflaeche": fx_tanzflaeche, "tanzflaeche2": fx_tanzflaeche2, "tanzflaeche3": fx_tanzflaeche3,
 } %}
 
 {% macro layer(ev, wo, img="") %}{% for name in ev.effekte %}{% if name in FX %}{{ FX[name](ev, wo, img) }}{% endif %}{% endfor %}{% endmacro %}

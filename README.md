@@ -140,6 +140,14 @@ effekte: [snow, twinklestar]                # Weihnachten
 | `feuerwerk` | Buketts zerplatzen in Calavera-Rot, Gold und Weiß | Silvester, Jubiläen |
 | `funemotes` | Fröhliche Emojis (😄 🥳 😍 🎉 🕺 …) steigen auf wie Reaktionen in einem Live-Stream, ploppen kurz auf und wackeln; über dem Flyer am rechten Rand | Gute-Laune-Partys, Mottopartys, Geburtstage |
 | `heartbubble` | Nur auf dem Flyer: Herzen in Rot- und Rosatönen steigen aus der Ecke rechts unten auf und driften leicht schräg über den Flyer, wie Herzchen in einem Live-Stream | Valentinstag, Hochzeiten, Kuschelpartys, Lieblingsabende |
+| `lichtorgel` | Rot, Gelb, Grün pulsieren versetzt wie die Lichtorgel im Jugendkeller; auf der Seite mit kleiner Lampenleiste oben | 70er/80er, Partyklassiker |
+| `lichtorgel2` (auch `multilichtorgel`) | Multi-Lichtorgel wie im Calavera: 9 farbige Kreise in Calavera-Farben blitzen als Gruppe auf, huschen ein Stück über die Wand, verlöschen und tauchen woanders wieder auf | jede Party |
+| `lichtorgel5` | wie `lichtorgel2`, aber die 9 Kreise stehen im 3×3-Raster – so wie die Lichtorgel im Calavera | jede Party |
+| `lichtorgel3` | Multi-Lichtorgel als Lauflicht: die 9 Kreise ziehen einzeln Bahnen und blitzen nacheinander auf | Dance, Pop |
+| `lichtorgel4` (auch `farbrad`) | Farbrad: Farbfelder drehen sich vor dem Scheinwerfer, das Licht fächert weich von oben über die Wand und pulsiert im Takt | 70er, Soul, Funk |
+| `tanzflaeche` (auch `dancefloor`) | Leuchtende Bodenfliesen in Perspektive glimmen in bunten Wellen auf – unten in der Kachel, auf der Seite leise unter dem Flyer | Dance, Disco, 2000er |
+| `tanzflaeche2` | Tanzfläche mit Lichtringen, die von vorn in der Mitte nach außen laufen (Rot, Bernstein, Rosé, Creme) | Dance, Feiern für Fortgeschrittene |
+| `tanzflaeche3` | Tanzfläche als Schachbrett im Takt (Rot/Bernstein), dazu ein Lauflicht-Streifen | Disco, 80er |
 | `superdark` | Die Dunkelheit übernimmt: auf der Veranstaltungsseite verblassen nach dem Laden alle Farben, die Seite wird deutlich dunkler und kühl, ein silbriger Schimmer zieht darüber; Kachel: Flyer entsättigt mit Glanz | Darkwave, Gothic, Dark RIOT |
 
 **Wo die Effekte laufen:** Im Programm (Startseite und `/programm/`) zeigen nur die **ersten zwei Kacheln**

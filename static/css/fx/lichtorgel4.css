@@ -1,0 +1,15 @@
+/* lichtorgel4 – Farbrad: eine Scheibe mit Farbfeldern in Calavera-Farben dreht sich vor dem Scheinwerfer, das Licht
+   fächert weich von oben über die Wand und pulsiert im Takt. Unschärfe einmal berechnet, danach nur Drehung/Deckkraft. */
+.fx-lo4 { position: absolute; inset: 0; overflow: hidden; }
+.lo4-rad { position: absolute; left: 50%; top: -14%; width: var(--rw, 170%); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: conic-gradient(#e0485e 0 40deg, #f0a23a 40deg 80deg, #b3122e 80deg 120deg, #f6d27a 120deg 160deg, #c2334f 160deg 200deg,
+    #ff7a5c 200deg 240deg, #f1ebe2 240deg 280deg, #e85d75 280deg 320deg, #ff9f43 320deg 360deg);
+  -webkit-mask: radial-gradient(circle closest-side, transparent 0 10%, #000 34%, #000 70%, transparent 100%);
+          mask: radial-gradient(circle closest-side, transparent 0 10%, #000 34%, #000 70%, transparent 100%);
+  filter: blur(var(--rb, 22px)); opacity: var(--ro, .3);
+  animation: lo4-drehen 26s linear infinite, lo4-puls 1s cubic-bezier(.1, .7, .3, 1) infinite; }
+@keyframes lo4-drehen { to { transform: rotate(360deg); } }
+.lo4-tile { --ro: .42; }
+@keyframes lo4-puls { 0% { opacity: calc(var(--ro, .3) * 1.5); } 100% { opacity: calc(var(--ro, .3) * .7); } }
+.lo4-page { --rw: 120%; --rb: 36px; --ro: .22; }
+.lo4-page .lo4-rad { top: -30%; }

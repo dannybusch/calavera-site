@@ -1,0 +1,14 @@
+/* lichtorgel3 – Multi-Lichtorgel als Lauflicht: 9 farbige Kreise ziehen jeder für sich kleine Bahnen über die Wand
+   und blitzen nacheinander auf (schneller Anschlag, langsames Verglühen) – ein Lauflicht in Calavera-Farben. */
+.fx-lo3 { position: absolute; inset: 0; overflow: hidden; container-type: size; }
+.fx-lo3 > i { position: absolute; width: 0; height: 0; animation: lo3-bahn var(--o) linear var(--od) infinite; }
+.fx-lo3 > i.lo3-l { animation-name: lo3-bahn-l; }
+.fx-lo3 b { position: absolute; left: 0; top: 0; width: var(--ks); aspect-ratio: 1; translate: calc(-50% + var(--ks) * .45) -50%; border-radius: 50%;
+  background: radial-gradient(circle closest-side, var(--c) 0 72%, transparent 100%); opacity: .12;
+  animation: lo3-lauf 1.8s cubic-bezier(.1, .7, .3, 1) calc(var(--k) * .2s) infinite; }
+@keyframes lo3-bahn { to { transform: rotate(360deg); } }
+@keyframes lo3-bahn-l { to { transform: rotate(-360deg); } }
+@keyframes lo3-lauf { 0% { opacity: var(--lo, .55); } 30% { opacity: .14; } 100% { opacity: .1; } }
+.lo3-tile { --ks: min(22cqw, 30cqh); --lo: .55; }
+.lo3-page { --ks: 130px; --lo: .4; }
+@media (max-width: 640px) { .lo3-page { --ks: 84px; } }

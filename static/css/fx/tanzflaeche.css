@@ -1,0 +1,13 @@
+/* tanzflaeche – leuchtende Bodenfliesen in Perspektive; die Fliesen glimmen in Wellen auf (nur Deckkraft). */
+.fx-tanzflaeche { position: absolute; left: -12%; right: -12%; bottom: 0; height: 30%; perspective: 420px; perspective-origin: 50% 0; overflow: hidden; }
+.tf-boden { position: absolute; inset: 0 0 -6% 0; display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr);
+  gap: 4px; padding: 4px; background: #070707; transform: rotateX(56deg); transform-origin: 50% 100%; }
+.tf-boden i { background: var(--tc); opacity: .06; border-radius: 2px; animation: tf-glimmen 2.6s ease-in-out var(--dl) infinite; }
+.tf-boden .c0 { --tc: #ff3a5c; } .tf-boden .c1 { --tc: #ffb02e; } .tf-boden .c2 { --tc: #3fd8ff; } .tf-boden .c3 { --tc: #b26bff; } .tf-boden .c4 { --tc: #4ff08a; }
+@keyframes tf-glimmen { 0%, 100% { opacity: .05; } 30% { opacity: .38; } 55% { opacity: .08; } }
+.tf-tile { -webkit-mask-image: linear-gradient(to top, #000 55%, transparent); mask-image: linear-gradient(to top, #000 55%, transparent); }
+/* Seite: der Flyer steht auf der Tanzfläche – in der linken Spalte unter dem Flyer, nicht hinter dem Text */
+.tf-page { left: 0; right: auto; width: 36%; height: 300px; top: 770px; bottom: auto; perspective-origin: 50% 0; }
+@media (max-width: 960px) { .tf-page { display: none; } }
+.tf-page .tf-boden i { animation-name: tf-glimmen-leise; }
+@keyframes tf-glimmen-leise { 0%, 100% { opacity: .04; } 30% { opacity: .32; } 55% { opacity: .07; } }

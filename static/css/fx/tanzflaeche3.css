@@ -1,0 +1,12 @@
+/* tanzflaeche3 – Schachbrett im Takt: die Felder wechseln sich Schlag für Schlag ab (~120 BPM), Rot und Bernstein
+   im Wechsel der Reihen; ein heller Lauflicht-Streifen zieht schräg über den Boden. Grundlage: tanzflaeche.css */
+.tf-schach .tf-boden i { animation: tf-takt 1s steps(1, end) infinite; opacity: .06; }
+.tf-schach .p1 { animation-delay: -.5s; }
+.tf-schach .z0 { --tc: #e0485e; } .tf-schach .z1 { --tc: #f0a23a; }
+@keyframes tf-takt { 0% { opacity: .44; } 50%, 100% { opacity: .06; } }
+.tf-lauf { position: absolute; top: 0; bottom: 0; left: -100%; width: 300%; pointer-events: none;
+  background: linear-gradient(100deg, transparent 44%, rgba(255,240,220,.26) 49%, rgba(255,250,240,.4) 50%, rgba(255,240,220,.26) 51%, transparent 56%);
+  animation: tf-lauf 3.4s linear infinite; }
+@keyframes tf-lauf { from { transform: translateX(-34%); } to { transform: translateX(34%); } }
+.tf-page.tf-schach .tf-boden i { animation-name: tf-takt-leise; }
+@keyframes tf-takt-leise { 0% { opacity: .28; } 50%, 100% { opacity: .05; } }

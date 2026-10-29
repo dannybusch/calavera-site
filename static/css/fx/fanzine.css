@@ -1,0 +1,20 @@
+/* fanzine – Kopierer-Ästhetik der Szene: Flyer schwarz-weiß mit hartem Kontrast und Tonerkorn,
+   ab und zu fährt der Lichtbalken des Kopierers drüber; zwei Klebestreifen halten ihn fest.
+   Der Titel wird zum aufgeklebten Papierstreifen, der alle paar Sekunden kurz verrutscht. */
+.fx-mit-fanzine .t-flyer img, .fx-mit-fanzine .event-flyer img { filter: grayscale(1) contrast(1.75) brightness(1.06); }
+.fx-fanzine { position: absolute; inset: 0; }
+.fz-korn { position: absolute; inset: 0; background: url("/static/img/fx/korn.webp") 0 0 / 180px 180px repeat; opacity: .3; }
+.fz-licht { position: absolute; left: -10%; right: -10%; top: 0; height: 16%; opacity: 0;
+  background: linear-gradient(to bottom, rgba(210,255,235,0), rgba(225,255,240,.5) 45%, rgba(245,255,250,.75) 50%, rgba(225,255,240,.5) 55%, rgba(210,255,235,0));
+  animation: fz-scan 9s ease-in-out calc(var(--fx-delay, 0s) * .2 + .8s) infinite; }
+@keyframes fz-scan { 0% { transform: translateY(-110%); opacity: 0; } 2% { opacity: 1; } 22% { transform: translateY(640%); opacity: 1; } 24%, 100% { transform: translateY(640%); opacity: 0; } }
+.fz-tape { position: absolute; top: -1.5%; width: 30%; height: 7%; background: rgba(232,222,192,.78); box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  -webkit-mask: linear-gradient(90deg, transparent 0 2%, #000 2% 98%, transparent 98%); mask: linear-gradient(90deg, transparent 0 2%, #000 2% 98%, transparent 98%); }
+.fz-t1 { left: -6%; rotate: -27deg; }
+.fz-t2 { right: -6%; rotate: 23deg; }
+/* Titel als Papierstreifen */
+.fx-mit-fanzine .t-title, .fx-mit-fanzine .event-title { width: fit-content; max-width: 100%; padding: .06em .24em .02em; background: #ece6d8; color: #0e0e0e;
+  box-shadow: 3px 4px 0 rgba(0,0,0,.55); rotate: -1.2deg; animation: fz-ruck 7s steps(1) var(--fx-delay, 0s) infinite; }
+@keyframes fz-ruck { 0%, 90% { translate: 0 0; rotate: -1.2deg; } 91% { translate: 3px -2px; rotate: .8deg; } 93% { translate: -2px 1px; rotate: -2deg; } 95%, 100% { translate: 0 0; rotate: -1.2deg; } }
+/* Seite: Papierstaub im Raum */
+.fx-fanzine-papier { position: absolute; inset: 0; background: url("/static/img/fx/staub.webp") 0 0 / 512px 512px repeat; opacity: .5; filter: invert(1); }

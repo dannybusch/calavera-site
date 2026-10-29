@@ -1,0 +1,28 @@
+/* nachtfalter – Motten umflattern den Flyer wie eine Lampe: jede auf eigener Kreisbahn (Drehung),
+   dazu Zittern und schneller Flügelschlag. Kachel: warmer Lichtschein hinter dem Flyer. */
+.fx-nachtfalter { position: absolute; inset: 0; overflow: hidden; container-type: size; }
+.fx-nachtfalter > i { position: absolute; left: 50%; top: 46%; width: 0; height: 0; animation: nf-kreis var(--d) linear var(--dl) infinite; }
+.fx-nachtfalter > i.nf-rechts { animation-name: nf-kreis-r; }
+.fx-nachtfalter b { position: absolute; left: 0; top: 0; translate: calc(var(--r) * 1cqw) 0; }
+.fx-nachtfalter svg { position: absolute; width: 11cqw; aspect-ratio: 40 / 28; translate: -50% -50%; overflow: visible;
+  animation: nf-zittern var(--zd) ease-in-out var(--dl) infinite alternate; }
+.nf-links svg { rotate: 180deg; }
+.nf-fl path { fill: #b9a98f; } .nf-fl .nf-hinten { fill: #8f7f68; }
+.nf-koerper { fill: #4d4336; } .nf-fuehler { fill: none; stroke: #6c5f4d; stroke-width: .7; stroke-linecap: round; }
+.nf-fl { animation: nf-flattern .09s ease-in-out infinite alternate; }
+.nf-fl-r { animation-delay: -.02s; }
+@keyframes nf-kreis { to { transform: rotate(360deg); } }
+@keyframes nf-kreis-r { to { transform: rotate(-360deg); } }
+@keyframes nf-zittern { 0% { transform: translate(0, 0); } 30% { transform: translate(1.4cqw, -1cqw); } 60% { transform: translate(-1cqw, 1.6cqw); } 100% { transform: translate(.8cqw, .4cqw); } }
+@keyframes nf-flattern { from { scale: 1 1; } to { scale: .3 1; } }
+/* Seite: Motten im Raum um den Flyer (linke Spalte), größer */
+.nf-page { container-type: normal; }
+.nf-page > i { left: 17%; top: 470px; }
+.nf-page b { translate: calc(var(--r) * 7px) 0; }
+.nf-page svg { width: 38px; }
+@media (max-width: 960px) { .nf-page > i { left: 50%; top: 620px; } }
+.event .nf-flyer svg { width: 8cqw; }
+/* Kachel: warmer Lichtschein, als wäre der Flyer die Lampe */
+.nf-halo { position: absolute; left: 50%; top: 42%; width: 130%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,214,150,.16), rgba(255,190,110,.05) 55%, transparent); }
+@media (prefers-reduced-motion: reduce) { .fx-nachtfalter { display: none; } }

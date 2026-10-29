@@ -75,6 +75,9 @@ EFFEKTE = (
     "superdark",                                                 # Darkwave: Dunkelheit übernimmt die Seite
     "funemotes",                                                 # fröhliche Emojis steigen auf wie Live-Reaktionen
     "heartbubble",                                               # Herzen steigen aus der Flyer-Ecke rechts unten
+    "lichtorgel", "lichtorgel2", "lichtorgel3", "lichtorgel4",   # Lichtorgel: klassisch / Multi-Kreise / Lauflicht / Farbrad
+    "lichtorgel5",                                               # Multi-Lichtorgel, Kreise im 3×3-Raster wie im Calavera
+    "tanzflaeche", "tanzflaeche2", "tanzflaeche3",               # Tanzfläche: Wellen / Ringe / Schachbrett im Takt
 )
 EFFEKT_ALIAS = {"bühnennebel": "buehnennebel", "flyer-aus-nebel": "flyerausnebel", "schnee": "snow", "sterne": "twinklestar",
                 "twinkle": "twinklestar", "stars": "twinklestar", "glühwürmchen": "gluehwuermchen", "regenbogen": "regenbogenfolie",
@@ -82,11 +85,14 @@ EFFEKT_ALIAS = {"bühnennebel": "buehnennebel", "flyer-aus-nebel": "flyerausnebe
                 "blasen": "seifenblasen", "graffiti": "spraydose", "synthwave": "retrogrid", "bass": "bassboom",
                 "super-dark": "superdark", "darkwave": "superdark",
                 "emojis": "funemotes", "emoticons": "funemotes", "smileys": "funemotes", "emotes": "funemotes",
-                "herzen": "heartbubble", "hearts": "heartbubble", "heartbubbles": "heartbubble"}
+                "herzen": "heartbubble", "hearts": "heartbubble", "heartbubbles": "heartbubble",
+                "multilichtorgel": "lichtorgel2", "farbrad": "lichtorgel4",
+                "dancefloor": "tanzflaeche", "tanzfläche": "tanzflaeche", "tanzfläche2": "tanzflaeche2", "tanzfläche3": "tanzflaeche3"}
 # CSS-Dateien je Effekt (static/css/fx/<datei>.css); ohne Eintrag: Datei heißt wie der Effekt
 EFFEKT_CSS = {"rauschnebel": ["nebel"], "flyerausnebel": ["nebel", "flyerausnebel"], "buehnennebel": ["buehnennebel"],
               "spotlight": ["buehnennebel", "spotlight"], "vhs": ["grunge", "vhs"],
-              "disco1": ["kugel", "disco1"], "disco2": ["kugel", "disco2"], "disco3": ["kugel", "disco3"]}
+              "disco1": ["kugel", "disco1"], "disco2": ["kugel", "disco2"], "disco3": ["kugel", "disco3"],
+              "lichtorgel5": ["lichtorgel2"], "tanzflaeche2": ["tanzflaeche", "tanzflaeche2"], "tanzflaeche3": ["tanzflaeche", "tanzflaeche3"]}
 
 
 def fx_css_for(effekte) -> list[str]:

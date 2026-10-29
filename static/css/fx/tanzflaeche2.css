@@ -1,0 +1,10 @@
+/* tanzflaeche2 – Ringe: von vorn in der Mitte laufen Lichtringe nach außen über die Fliesen (Rot, Bernstein,
+   Bordeaux-Rosé, Creme); darüber glimmt der Schein der Tanzfläche im selben Takt. Grundlage: tanzflaeche.css */
+.tf-ringe .tf-boden i { opacity: .05; animation: tf-ring 2.2s cubic-bezier(.2, .6, .4, 1) var(--dl) infinite; }
+.tf-ringe .r0 { --tc: #e0485e; } .tf-ringe .r1 { --tc: #f0a23a; } .tf-ringe .r2 { --tc: #c2334f; } .tf-ringe .r3 { --tc: #f1ebe2; }
+@keyframes tf-ring { 0% { opacity: .05; } 10% { opacity: .5; } 45%, 100% { opacity: .05; } }
+.tf-glut { position: absolute; left: 50%; bottom: -30%; width: 70%; aspect-ratio: 2; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(224,72,94,.32), transparent); animation: tf-glut 2.2s ease-out infinite; }
+@keyframes tf-glut { 0% { opacity: 1; } 60%, 100% { opacity: .3; } }
+.tf-page.tf-ringe .tf-boden i { animation-name: tf-ring-leise; }
+@keyframes tf-ring-leise { 0% { opacity: .04; } 10% { opacity: .32; } 45%, 100% { opacity: .04; } }
