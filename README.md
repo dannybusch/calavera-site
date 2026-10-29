@@ -226,6 +226,29 @@ Sendung, bis der Tab geschlossen wird).
 hängt ein kleines „On Air“-Leuchtschild, das aus ist und während des Abends rot aufleuchtet; das
 Stream-Kennzeichen auf der Kachel glüht dann ebenfalls.
 
+## Seiteneffekte
+
+Seiteneffekte wirken global auf **jeder** Seite – unabhängig von den Veranstaltungen. Eingetragen werden sie in
+`config.yml`, jeweils mit optionalem Zeitfenster (Bremer Zeit). Der Browser schaltet sie pünktlich ein und
+wieder aus, ein neuer Build ist dafür nicht nötig; schon abgelaufene Einträge lässt der Build weg.
+
+```yaml
+seiteneffekte:
+  - effekt: spinne
+    start: "2026-10-31T18:00"     # optional
+    end: "2026-11-01T04:00"       # optional
+  - effekt: logo                  # ohne start/end: immer an
+```
+
+| Seiteneffekt | Was passiert |
+|---|---|
+| `spinne` | Im rechten oberen Eck hängt ein Spinnennetz (halb hinter der Kopfleiste), eine Spinne baumelt am Faden. Zur Begrüßung und immer, wenn man wieder nach oben scrollt, seilt sie sich ab und klettert zurück; fährt man mit der Maus über sie, flüchtet sie nach oben. |
+| `logo` (auch `logolebt`) | Das Logo lebt: im offenen Auge des Totenkopfs sitzt eine Pupille, die der Maus (bzw. dem Finger) folgt; ab und zu zwinkert es, und wer eine Weile nichts tut, sieht den Kopf sich neigen und umschauen. |
+
+Zum Testen `?now=2026-10-31T20:00` an eine Adresse hängen. Mit „Bewegung reduzieren“ hängt die Spinne still und
+das Auge zwinkert nicht. Neue Seiteneffekte: Name in `SEITENEFFEKTE` (build.py), CSS in
+`static/css/seiteneffekte/<name>.css`, Verhalten in `static/js/seiteneffekte.js`.
+
 ## Startseiten-Übernahme
 
 Ab 6 Stunden vor Beginn übernimmt die Veranstaltung des Tages den großen Claim („Vielfalt. Musik.

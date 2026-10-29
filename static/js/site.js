@@ -60,6 +60,7 @@
   var fixedNow = nowParam ? bremen(nowParam) : null;
   var loadedAt = Date.now();
   function now() { return fixedNow ? new Date(fixedNow.getTime() + Date.now() - loadedAt) : new Date(); }
+  window.calaveraJetzt = now;      // für seiteneffekte.js (gleiche Uhr inkl. ?now=)
   function countdown(ms) {         // 2:14:05 bzw. 42:10
     var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
     var mm = (h ? String(m).padStart(2, "0") : String(m)) + ":" + String(sec).padStart(2, "0");

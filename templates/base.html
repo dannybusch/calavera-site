@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-{% set full_title = (title ~ " · " ~ site.name) if title is defined and title else site.name ~ " | Party im kleinen Club im Viertel | Bremen, Deutschland" %}
+{% set full_title = (title ~ " Â· " ~ site.name) if title is defined and title else site.name ~ " | Party im kleinen Club im Viertel | Bremen, Deutschland" %}
 <title>{{ full_title }}</title>
 <meta name="description" content="{{ description if description is defined and description else site.description }}">
 <meta name="theme-color" content="#0b0b0b">
@@ -25,6 +25,7 @@
 <link rel="stylesheet" href="{{ asset('css/site.css') }}">
 {# Effekt-CSS nur für die Effekte, die auf dieser Seite tatsächlich vorkommen (setzt build.py) #}
 {% for f in fx_css|default([]) %}<link rel="stylesheet" href="{{ asset('css/fx/' ~ f ~ '.css') }}">
+{% endfor %}{% for f in seiteneffekte|map(attribute="name")|unique %}<link rel="stylesheet" href="{{ asset('css/seiteneffekte/' ~ f ~ '.css') }}">
 {% endfor %}<style>:root{--accent:{{ palette.accent }};--accent-rgb:{{ palette.accent_rgb }};--accent-display:{{ palette.accent_display }};--accent-text:{{ palette.accent_text }};--text:{{ textpal.text }};--text-2:{{ textpal.text_2 }};--text-3:{{ textpal.text_3 }};--muted:{{ textpal.muted }}}</style>
 <link rel="alternate" type="text/calendar" title="Calavera Programm" href="{{ kalender_url }}">
 <script>document.documentElement.classList.add('js')</script>
@@ -106,5 +107,7 @@
 
 <script src="{{ asset('js/js-yaml.min.js') }}" defer></script>
 <script src="{{ asset('js/site.js') }}" defer></script>
+{% if seiteneffekte %}<script type="application/json" id="seiteneffekte-daten">{{ seiteneffekte|tojson }}</script>
+<script src="{{ asset('js/seiteneffekte.js') }}" defer></script>{% endif %}
 </body>
 </html>

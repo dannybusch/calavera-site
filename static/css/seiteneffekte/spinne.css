@@ -1,0 +1,20 @@
+/* Seiteneffekt spinne – Netz im rechten oberen Eck (hängt hinter der Kopfleiste), die Spinne baumelt am Faden.
+   Länge des Fadens setzt seiteneffekte.js (--len); nur transform wird animiert. */
+.se-spinne { position: fixed; top: 0; right: 0; z-index: 15; width: 150px; height: 150px; pointer-events: none; }
+.se-netz { position: absolute; inset: 0; width: 100%; height: 100%; }
+.se-netz line, .se-netz path { fill: none; stroke: rgba(225,222,215,.28); stroke-width: .8; }
+.se-anker { --len: 44px; position: absolute; top: 46px; right: 58px; width: 0; height: 0;
+  transform-origin: 0 0; animation: se-pendeln 3.6s ease-in-out infinite alternate; }
+.se-faden { position: absolute; left: -.5px; top: 0; width: 1px; height: var(--len); background: rgba(225,222,215,.6);
+  transition: height var(--dauer, 1s) var(--kurve, ease); }   /* ein 1-px-Faden: Höhe animieren kostet nichts */
+.se-tier { position: absolute; left: 0; top: 0; width: 34px; height: 34px; margin: -6px 0 0 -17px; pointer-events: auto; cursor: default;
+  transform: translateY(var(--len)); transition: transform var(--dauer, 1s) var(--kurve, ease); }
+.se-tier svg { width: 100%; height: 100%; overflow: visible; }
+.se-beine path { fill: none; stroke: #d6d0c6; stroke-width: 1.5; stroke-linecap: round; }
+.se-leib { fill: #161616; stroke: #d6d0c6; stroke-width: .9; }
+.se-auge { fill: #ff3b55; }
+.se-krabbelt .se-beine { animation: se-krabbeln .16s ease-in-out infinite alternate; transform-origin: 0 0; }
+@keyframes se-krabbeln { from { transform: scaleY(1); } to { transform: scaleY(.82) translateY(1px); } }
+@keyframes se-pendeln { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+@media (max-width: 640px) { .se-spinne { width: 112px; height: 112px; } .se-anker { top: 34px; right: 42px; } .se-tier { width: 28px; height: 28px; margin-left: -14px; } }
+@media (prefers-reduced-motion: reduce) { .se-anker, .se-krabbelt .se-beine { animation: none; } .se-faden, .se-tier { transition: none; } }

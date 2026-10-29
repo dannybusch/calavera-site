@@ -95,6 +95,51 @@ EFFEKT_CSS = {"rauschnebel": ["nebel"], "flyerausnebel": ["nebel", "flyerausnebe
               "lichtorgel5": ["lichtorgel2"], "tanzflaeche2": ["tanzflaeche", "tanzflaeche2"], "tanzflaeche3": ["tanzflaeche", "tanzflaeche3"]}
 
 
+# Seiteneffekte – wirken global auf jeder Seite (config.yml → seiteneffekte:), optional mit Zeitfenster.
+# Je Effekt: static/css/seiteneffekte/<name>.css; das Verhalten steckt in static/js/seiteneffekte.js.
+SEITENEFFEKTE = ("spinne", "logo")
+SEITENEFFEKT_ALIAS = {"logolebt": "logo", "logo-lebt": "logo", "lebendes-logo": "logo", "spider": "spinne"}
+
+
+def seiteneffekte_aus(cfg: dict, tz: ZoneInfo, now: datetime) -> list[dict]:
+    """Liest seiteneffekte: aus config.yml. Einträge: "spinne" oder {effekt: spinne, start: "2026-10-31T18:00", end: "…"}.
+    Zeiten gelten in Bremer Ortszeit. Schon abgelaufene Einträge fallen beim Bauen weg; ob einer gerade läuft,
+    entscheidet der Browser (der Build kann älter sein)."""
+    out = []
+    for e in cfg.get("seiteneffekte") or []:
+        if isinstance(e, str):
+            e = {"effekt": e}
+        if not isinstance(e, dict):
+            continue
+        name = str(e.get("effekt") or e.get("name") or "").strip().lower()
+        name = SEITENEFFEKT_ALIAS.get(name, name)
+        if name not in SEITENEFFEKTE:
+            warn(f"config.yml: Seiteneffekt \"{name}\" gibt es nicht – möglich: {', '.join(SEITENEFFEKTE)}")
+            continue
+        zeiten = {}
+        for key in ("start", "end"):
+            v = e.get(key) or e.get({"start": "beginn", "end": "ende"}[key])
+            if not v:
+                continue
+            if isinstance(v, datetime):
+                dt = v if v.tzinfo else v.replace(tzinfo=tz)
+            else:
+                try:
+                    dt = datetime.fromisoformat(str(v).strip().replace(" ", "T"))
+                except ValueError:
+                    warn(f"config.yml: Seiteneffekt {name}: {key} \"{v}\" nicht lesbar (Format 2026-10-31T18:00)")
+                    dt = None
+                if dt is not None and dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=tz)
+            if dt is not None:
+                zeiten[key] = dt
+        if "end" in zeiten and zeiten["end"] <= now:
+            continue                                            # schon vorbei
+        out.append({"name": name, "start": zeiten["start"].isoformat() if "start" in zeiten else "",
+                    "end": zeiten["end"].isoformat() if "end" in zeiten else ""})
+    return out
+
+
 def fx_css_for(effekte) -> list[str]:
     """CSS-Dateien, die eine Seite für diese Effekte braucht (basis zuerst, keine doppelt)."""
     files = []
@@ -1138,7 +1183,8 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
                        asset=asset, now=now, relative_label=relative_label, year=now.year,
                        palette=accent_palette(cfg["site"].get("accent", "#b3122e")),
                        textpal=text_palette(cfg["site"].get("text", "#d1cabf")),
-                       pages={p.slug: p for p in pages})
+                       pages={p.slug: p for p in pages},
+                       seiteneffekte=seiteneffekte_aus(cfg, tz, now))
 
     # Programm-Kalender vorab erzeugen: Links darauf bekommen ?v=…, damit Handys nach einer
     # Änderung nicht die zwischengespeicherte alte Datei öffnen.
