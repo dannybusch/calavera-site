@@ -3,7 +3,7 @@ title: "Take The Power Back"
 teaser: "Alternative Rock, Grunge, Punk und Crossover der 90er – das Flanellhemd gibt Extra-Karma."
 start: "2026-11-06 22:00"
 djs: ["DJ Matze"]
-genres: ["90s", "Alternative Rock", "Grunge", "Punk", "Crossover"]
+genres: ["90s", "Alternative Rock", "Grunge", "Punk", "Nu Metal", "Crossover"]
 tags: ["Ab 18"]
 effekte: [grunge, flanell]
 ---
