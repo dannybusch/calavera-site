@@ -7,6 +7,7 @@ genres: ["Gruseln & Feiern"]
 tags: ["Ab 18"]
 visual_alt: "Halloween Party mit einem Schloss im Hintergrund. Vor einem großen Vollmond fliegt eine Hexe entlang. Im Vordergrund sind drei Skelette mit Kürbisköpfen."
 effekte: [fratzen, gewitter, rauschnebel]
+genres: ["Psychedelic", "Horrorpop", "Wave", "Indie", "Alternative", "Punkrock", "Garage", "60s Beat"]
 ---
 
 Zeit zum **Gruseln** – und zum Feiern. Aber natürlich auf Calavera-Art.
