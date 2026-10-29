@@ -14,7 +14,8 @@ site:
   accent: "#b3122e"                          # gedämpftes Rot wie auf live.calavera.club
                                              # (hellere Töne für rote Schrift berechnet der Build selbst)
   text: "#d1cabf"                            # Schriftfarbe: gedämpftes, warmes Hellgrau statt Weiß
-                                             # (Nebentexte werden daraus abgestuft; heller = "#e0dad0", dunkler = "#c4bdb2")
+    
+    # (Nebentexte werden daraus abgestuft; heller = "#e0dad0", dunkler = "#c4bdb2")
 #seiteneffekte:
 #  - effekt: spinne
 #    start: "2026-10-31T18:00"     # optional
