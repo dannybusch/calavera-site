@@ -1,10 +1,13 @@
-/* glitch – alle paar Sekunden springen Streifen des Flyers kurz zur Seite, mit Farbversatz */
+/* glitch – alle paar Sekunden springen Streifen des Flyers kurz zur Seite, mit Farbversatz.
+   Der erste Glitch kommt gleich nach dem Laden (die Animation startet 4,6 s in ihren 5,5-s-Zyklus hinein,
+   der Sprung liegt bei 87 % ≈ 4,8 s), danach die Pause. Der Versatz je Veranstaltung (--fx-delay, bis 7 s)
+   wird hier nur zu einem Zehntel genutzt – sonst käme der erste Glitch bei manchen erst nach Sekunden. */
 .fx-glitch { position: absolute; inset: 0; }
 .fx-glitch i, .fx-glitch b { position: absolute; inset: 0; background: var(--img) center / cover no-repeat; opacity: 0; }
-.fx-glitch i:nth-child(1) { clip-path: inset(17% 0 71% 0); animation: fx-glitch-a 5.5s steps(1) var(--fx-delay, 0s) infinite; }
-.fx-glitch i:nth-child(2) { clip-path: inset(46% 0 42% 0); animation: fx-glitch-b 5.5s steps(1) var(--fx-delay, 0s) infinite; }
-.fx-glitch i:nth-child(3) { clip-path: inset(78% 0 11% 0); animation: fx-glitch-a 5.5s steps(1) calc(var(--fx-delay, 0s) + .09s) infinite; }
-.fx-glitch b { clip-path: inset(30% 0 52% 0); filter: hue-rotate(160deg) saturate(2.4); animation: fx-glitch-b 5.5s steps(1) calc(var(--fx-delay, 0s) + .05s) infinite; }
+.fx-glitch i:nth-child(1) { clip-path: inset(17% 0 71% 0); animation: fx-glitch-a 5.5s steps(1) calc(var(--fx-delay, 0s) * .1 - 4.6s) infinite; }
+.fx-glitch i:nth-child(2) { clip-path: inset(46% 0 42% 0); animation: fx-glitch-b 5.5s steps(1) calc(var(--fx-delay, 0s) * .1 - 4.6s) infinite; }
+.fx-glitch i:nth-child(3) { clip-path: inset(78% 0 11% 0); animation: fx-glitch-a 5.5s steps(1) calc(var(--fx-delay, 0s) * .1 - 4.6s + .09s) infinite; }
+.fx-glitch b { clip-path: inset(30% 0 52% 0); filter: hue-rotate(160deg) saturate(2.4); animation: fx-glitch-b 5.5s steps(1) calc(var(--fx-delay, 0s) * .1 - 4.6s + .05s) infinite; }
 @keyframes fx-glitch-a { 0%, 86% { opacity: 0; transform: none; } 87% { opacity: 1; transform: translateX(-6%); } 88% { transform: translateX(4%); }
   89% { transform: translateX(-2%); } 90%, 94% { opacity: 0; transform: none; } 95% { opacity: 1; transform: translateX(3%); } 95.8%, 100% { opacity: 0; transform: none; } }
 @keyframes fx-glitch-b { 0%, 86% { opacity: 0; transform: none; } 87% { opacity: 1; transform: translateX(5%); } 88% { transform: translateX(-7%); }
