@@ -29,9 +29,10 @@ club:
   box_office: "nur Abendkasse"
 
 social:
+  - { label: "Mixcloud",  url: "https://www.mixcloud.com/calaverabremen" }
   - { label: "Instagram", url: "https://www.instagram.com/calavera.bremen/" }
   - { label: "Facebook",  url: "https://www.facebook.com/calavera.bremen" }
-  - { label: "Mixcloud",  url: "https://www.mixcloud.com/calaverabremen" }
+  - { label: "Reddit", url: "https://www.reddit.com/r/calaverabremen/" }
 
 # Hauptmenü (Reihenfolge = Reihenfolge im Menü)
 navigation:
