@@ -5,6 +5,8 @@
  *   spinne – im Eck hängt ein Netz; scrollt man nach oben, seilt sich die Spinne ab und klettert wieder hoch
  *   logo   – das offene Auge im Calavera-Totenkopf folgt der Maus (bzw. dem Finger) und zwinkert ab und zu;
  *            wer eine Weile nichts tut, sieht den Kopf sich neigen
+ *   rip    – Gedenken: schmales, dunkles Band ganz oben (R.I.P. · Name · Lebensdaten · Satz · Link),
+ *            dahinter ganz ruhig vorbeiziehende Sterne; mehrere Einträge erscheinen nebeneinander
  */
 (function () {
   "use strict";
@@ -127,17 +129,62 @@
     };
   }
 
-  var EFFEKTE = { spinne: spinne, logo: logo };
-  var aktiv = {};      // name → Aufräum-Funktion
+  /* ---------- rip: Gedenken ---------- */
+  function rip(eintraege) {
+    var text = function (t) { var s = document.createElement("span"); s.textContent = t; return s; };
+    var band = document.createElement("aside");
+    band.className = "se-rip";
+    band.setAttribute("aria-label", "In Erinnerung");
+    var innen = document.createElement("div"); innen.className = "se-rip-innen wrap"; band.appendChild(innen);
+    var zeile = document.createElement("div"); zeile.className = "se-rip-zeile"; innen.appendChild(zeile);
+    eintraege.forEach(function (e) {
+      var p = document.createElement(e.link ? "a" : "span");
+      p.className = "se-rip-person";
+      if (e.link) { p.href = e.link; p.rel = "noopener"; }
+      var marke = text("R.I.P."); marke.className = "se-rip-marke"; marke.setAttribute("aria-hidden", "true"); p.appendChild(marke);
+      var name = text(e.person); name.className = "se-rip-name"; p.appendChild(name);
+      if (e.daten) { var d = text(e.daten); d.className = "se-rip-daten"; p.appendChild(d); }
+      if (e.text) { var t = text(e.text); t.className = "se-rip-text"; p.appendChild(t); }
+      if (e.link) { var l = text("↗"); l.className = "se-rip-pfeil"; l.setAttribute("aria-hidden", "true"); p.appendChild(l); }
+      zeile.appendChild(p);
+    });
+    var knopf = document.createElement("button");
+    knopf.className = "ob-close"; knopf.type = "button"; knopf.setAttribute("aria-label", "Hinweis ausblenden");
+    knopf.innerHTML = '<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    innen.appendChild(knopf);
+    // Wegklicken gilt nur für die gerade offene Seite – gespeichert wird nichts (kein Cookie, kein Storage)
+    var kopf = document.querySelector(".site-header");
+    if (kopf) kopf.parentNode.insertBefore(band, kopf);
+    knopf.addEventListener("click", function () { band.remove(); });
+    var sterne = null;
+    if (eintraege.some(function (e) { return e.sterne !== false; })) {
+      sterne = document.createElement("div");
+      sterne.className = "se-sterne"; sterne.setAttribute("aria-hidden", "true");
+      var html = "";
+      for (var i = 0; i < 70; i++) {
+        var dauer = rnd(9, 22);
+        html += '<i style="--w:' + rnd(0, 360).toFixed(0) + 'deg;--d:' + dauer.toFixed(1) + 's;--dl:' + (-rnd(0, dauer)).toFixed(1) + 's;--g:' + rnd(1, 2.6).toFixed(1) + 'px"></i>';
+      }
+      sterne.innerHTML = html;
+      document.body.appendChild(sterne);
+    }
+    return function () { band.remove(); if (sterne) sterne.remove(); };
+  }
+
+  // Effekte bekommen ihre gerade aktiven Einträge (wichtig für rip: wen, Daten, Text); ändert sich die
+  // Auswahl (z. B. ein zweiter Eintrag beginnt), wird der Effekt neu aufgebaut
+  var EFFEKTE = { spinne: spinne, logo: logo, rip: rip };
+  var aktiv = {};      // name → { schluessel, weg: Aufräum-Funktion }
   function pruefen() {
     var n = jetzt(), soll = {};
     liste.forEach(function (e) {
       var an = (!e.start || n >= new Date(e.start)) && (!e.end || n < new Date(e.end));
-      if (an && EFFEKTE[e.name]) soll[e.name] = true;
+      if (an && EFFEKTE[e.name]) (soll[e.name] = soll[e.name] || []).push(e);
     });
     Object.keys(EFFEKTE).forEach(function (name) {
-      if (soll[name] && !aktiv[name]) aktiv[name] = EFFEKTE[name]();
-      else if (!soll[name] && aktiv[name]) { aktiv[name](); delete aktiv[name]; }
+      var schluessel = soll[name] ? JSON.stringify(soll[name]) : "";
+      if (aktiv[name] && aktiv[name].schluessel !== schluessel) { aktiv[name].weg(); delete aktiv[name]; }
+      if (schluessel && !aktiv[name]) aktiv[name] = { schluessel: schluessel, weg: EFFEKTE[name](soll[name]) };
     });
   }
   pruefen();

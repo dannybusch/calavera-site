@@ -97,8 +97,8 @@ EFFEKT_CSS = {"rauschnebel": ["nebel"], "flyerausnebel": ["nebel", "flyerausnebe
 
 # Seiteneffekte – wirken global auf jeder Seite (config.yml → seiteneffekte:), optional mit Zeitfenster.
 # Je Effekt: static/css/seiteneffekte/<name>.css; das Verhalten steckt in static/js/seiteneffekte.js.
-SEITENEFFEKTE = ("spinne", "logo")
-SEITENEFFEKT_ALIAS = {"logolebt": "logo", "logo-lebt": "logo", "lebendes-logo": "logo", "spider": "spinne"}
+SEITENEFFEKTE = ("spinne", "logo", "rip")
+SEITENEFFEKT_ALIAS = {"logolebt": "logo", "logo-lebt": "logo", "lebendes-logo": "logo", "spider": "spinne", "r.i.p.": "rip", "gedenken": "rip", "trauer": "rip"}
 
 
 def seiteneffekte_aus(cfg: dict, tz: ZoneInfo, now: datetime) -> list[dict]:
@@ -135,8 +135,17 @@ def seiteneffekte_aus(cfg: dict, tz: ZoneInfo, now: datetime) -> list[dict]:
                 zeiten[key] = dt
         if "end" in zeiten and zeiten["end"] <= now:
             continue                                            # schon vorbei
-        out.append({"name": name, "start": zeiten["start"].isoformat() if "start" in zeiten else "",
-                    "end": zeiten["end"].isoformat() if "end" in zeiten else ""})
+        eintrag = {"name": name, "start": zeiten["start"].isoformat() if "start" in zeiten else "",
+                   "end": zeiten["end"].isoformat() if "end" in zeiten else ""}
+        if name == "rip":                                       # wen wir ehren – nur Text, kein HTML
+            eintrag.update({k: str(e.get(k) or "").strip() for k in ("person", "daten", "text", "link")})
+            eintrag["sterne"] = e.get("sterne", True) is not False
+            if not eintrag["person"]:
+                warn("config.yml: Seiteneffekt rip ohne person: – übersprungen")
+                continue
+            if eintrag["link"] and not eintrag["link"].startswith(("https://", "http://")):
+                eintrag["link"] = ""
+        out.append(eintrag)
     return out
 
 

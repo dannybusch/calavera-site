@@ -220,7 +220,7 @@ Ist live.calavera.club nicht erreichbar, bleibt einfach die statische Kellerfunk
 **Auf jeder Seite:** Läuft gerade eine Sendung, erscheint ganz oben ein schmales rotes Band
 „Live im Kellerfunk · Titel · DJs – Reinhören ↗“. Beginnt eine in weniger als 60 Minuten, steht dort
 dezent grau „Gleich auf Sendung: …“ mit Countdown. Das Band lässt sich wegklicken (gilt für diese
-Sendung, bis der Tab geschlossen wird).
+offene Seite – gespeichert wird dafür nichts).
 
 **Abende mit `stream:`** brauchen keinen eigenen Effekt: In der Stream-Karte auf der Veranstaltungsseite
 hängt ein kleines „On Air“-Leuchtschild, das aus ist und während des Abends rot aufleuchtet; das
@@ -238,11 +238,19 @@ seiteneffekte:
     start: "2026-10-31T18:00"     # optional
     end: "2026-11-01T04:00"       # optional
   - effekt: logo                  # ohne start/end: immer an
+  - effekt: rip                   # Gedenken – Felder siehe unten
+    person: "Name"
+    daten: "1946 – 2026"          # optional
+    text: "Danke für die Musik."  # optional
+    link: "https://…"             # optional, z. B. ein Nachruf
+    sterne: false                 # optional: ohne Sternenhimmel
+    end: "2026-11-07T00:00"
 ```
 
 | Seiteneffekt | Was passiert |
 |---|---|
 | `spinne` | Im rechten oberen Eck hängt ein Spinnennetz (halb hinter der Kopfleiste), eine Spinne baumelt am Faden. Zur Begrüßung und immer, wenn man wieder nach oben scrollt, seilt sie sich ab und klettert zurück; fährt man mit der Maus über sie, flüchtet sie nach oben. |
+| `rip` (auch `gedenken`) | Gedenken, wenn eine für uns wichtige Musikerin oder ein Musiker gestorben ist: ein schmales, dunkles Band ganz oben – „R.I.P.“, Name, Lebensdaten, ein Satz und optional ein Link (z. B. zum Nachruf) –, dahinter ziehen ganz ruhig Sterne vorbei. Mehrere `rip`-Einträge gleichzeitig stehen nebeneinander im Band. Wegklickbar für die gerade offene Seite (es wird nichts gespeichert). |
 | `logo` (auch `logolebt`) | Das Logo lebt: im offenen Auge des Totenkopfs sitzt eine Pupille, die der Maus (bzw. dem Finger) folgt; ab und zu zwinkert es, und wer eine Weile nichts tut, sieht den Kopf sich neigen und umschauen. |
 
 Zum Testen `?now=2026-10-31T20:00` an eine Adresse hängen. Mit „Bewegung reduzieren“ hängt die Spinne still und

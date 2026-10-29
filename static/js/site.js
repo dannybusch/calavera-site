@@ -355,15 +355,16 @@
   }
 
   /* Band oben auf jeder Seite: live → rot; beginnt in < 60 Minuten → dezent mit Countdown.
-     Wegklicken gilt für diese Sendung, bis der Tab geschlossen wird (sessionStorage). */
+     Wegklicken gilt nur für die gerade offene Seite – gespeichert wird nichts (kein Cookie, kein Storage). */
   var bandEl = band && {
     status: band.querySelector(".ob-status"), show: band.querySelector(".ob-show"), go: band.querySelector(".ob-go"),
     close: band.querySelector(".ob-close")
   };
   var bandKey = "";
-  function bandZu(key) { try { return sessionStorage.getItem("onair-zu") === key; } catch (e) { return false; } }
+  var bandWeg = "";                                     // nur im Speicher dieser Seite
+  function bandZu(key) { return bandWeg === key; }
   if (bandEl && bandEl.close) bandEl.close.addEventListener("click", function () {
-    try { sessionStorage.setItem("onair-zu", bandKey); } catch (e) {}
+    bandWeg = bandKey;
     band.hidden = true;
   });
   function renderBand(state) {

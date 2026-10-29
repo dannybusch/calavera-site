@@ -20,7 +20,16 @@ site:
 #  - effekt: spinne
 #    start: "2026-10-31T18:00"     # optional
 #    end: "2026-11-01T04:00"       # optional
-#  - effekt: logo                  # ohne start/end: immer an                                             
+#  - effekt: logo                  # ohne start/end: immer an    
+
+#seiteneffekte:
+  #- effekt: rip
+   # person: "Sir Patrick Stewart"
+   # daten: "1940 – 2026"            # optional
+   # text: "Danke, Captain."    # optional
+    # link: "https://…"               # optional, z. B. Nachruf
+   # sterne: false   # optional: ohne Sternenhimmel
+   # end: "2026-11-01T00:00"         # optional, ebenso start
 
 club:
   address: "Körnerwall 1"
