@@ -1,8 +1,8 @@
 ---
 title: "Über den Club"
 kicker: "Seit 2009 im Viertel"
-lead: "Das Calavera ist ein kleiner Club im Bremer Viertel – bunt, divers und von Stammgästen getragen."
-description: "Die Geschichte des Calavera Bremen: seit 2009 am Körnerwall, von Stammgästen weitergeführt, per Crowdfunding gerettet."
+lead: "Das Calavera ist ein kleiner Club im Bremer Viertel – bunt und divers."
+description: "Die Geschichte des Calavera Bremen: seit 2009 am Körnerwall."
 ---
 
 ## Unsere Geschichte
