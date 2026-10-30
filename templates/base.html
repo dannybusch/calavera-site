@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-{% set full_title = (title ~ " Â· " ~ site.name) if title is defined and title else site.name ~ " | Party im kleinen Club im Viertel | Bremen, Deutschland" %}
+{# Startseite (und Seiten ohne eigenen Titel): Name · Zusatz aus config.yml → site.titel_zusatz (leer = nur der Name) #}
+{% set zusatz = site.titel_zusatz if site.titel_zusatz is defined else "Kellerclub im Viertel" %}
+{% set full_title = (title ~ " · " ~ site.name) if title is defined and title else (site.name ~ (" · " ~ zusatz if zusatz else "")) %}
 <title>{{ full_title }}</title>
 <meta name="description" content="{{ description if description is defined and description else site.description }}">
 <meta name="theme-color" content="#0b0b0b">

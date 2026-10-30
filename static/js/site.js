@@ -388,7 +388,7 @@
     if (!el.show) return;                             // keine Kellerfunk-Karte auf dieser Seite
     var show = state.show;
     card.classList.toggle("is-live", state.live);
-    if (el.status) el.status.textContent = state.live ? "Jetzt live" : (show ? "Off Air" : "Kellerfunk");
+    if (el.status) el.status.textContent = state.live ? "Jetzt live" : "Kellerfunk";
     if (show) {
       var who = show.djs.length ? " mit " + esc(show.djs.join(" & ")) : "";
       el.show.innerHTML = state.live

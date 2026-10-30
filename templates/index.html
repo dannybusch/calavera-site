@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% from "partials/tile.html" import tile %}
 {% block body_class %}home{% endblock %}
+{% block head %}
+<script type="application/ld+json">
+{{ club_ld|tojson }}
+</script>
+{% endblock %}
 {% block content %}
 <section class="hero wrap">
   <div class="hero-claim">

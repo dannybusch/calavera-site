@@ -423,10 +423,131 @@ class Event:
             data["performer"] = [{"@type": "Person", "name": d} for d in self.djs]
         if self.doors:
             data["doorTime"] = self.doors.isoformat()
+        offers, frei = eintritt_offers(self.entry, site["url"] + self.url)
+        if offers:
+            data["offers"] = offers
+        if frei:
+            data["isAccessibleForFree"] = True
         if self.stream_url:
             data["eventAttendanceMode"] = "https://schema.org/MixedEventAttendanceMode"
             data["location"] = [data["location"], {"@type": "VirtualLocation", "url": self.stream_url}]
         return data
+
+
+def eintritt_offers(text: str, url: str) -> tuple[list[dict], bool]:
+    """Eintritt (z. B. "5 € · Azubis & Studis frei", "Bis 23:00 frei, danach 5 €", "Hutspende") → schema.org-Offers.
+    Ein Preis wird zum Angebot an der Abendkasse; "frei"/"gratis" daneben ergibt ein zweites Angebot für 0 €.
+    Ganz ohne Preis, aber frei oder auf Spende → isAccessibleForFree."""
+    text = (text or "").strip()
+    if not text:
+        return [], False
+    m = re.search(r"(\d+(?:[.,]\d{1,2})?)\s*(?:€|eur\b|euro\b)|(?:€|eur)\s*(\d+(?:[.,]\d{1,2})?)", text, re.I)
+    frei = bool(re.search(r"\bfrei\b|gratis|kostenlos", text, re.I))
+    spende = bool(re.search(r"spende|\bhut\b", text, re.I))
+    basis = {"@type": "Offer", "priceCurrency": "EUR", "availability": "https://schema.org/InStoreOnly",
+             "url": url, "description": text}
+    if m:
+        preis = float((m.group(1) or m.group(2)).replace(",", "."))
+        offers = [dict(basis, price=f"{preis:.2f}")]
+        if frei:
+            offers.append(dict(basis, price="0.00"))
+        return offers, False
+    if frei or spende:
+        return [dict(basis, price="0.00")], True
+    return [], False
+
+
+TAGE_SCHEMA = {"mo": "Monday", "di": "Tuesday", "mi": "Wednesday", "do": "Thursday", "fr": "Friday", "sa": "Saturday", "so": "Sunday"}
+
+
+def oeffnungszeiten_schema(text: str) -> list[dict]:
+    """ "Fr + Sa · 22–04" → openingHoursSpecification (Tage: Mo…So, mit "+", "," oder "–"; Zeit HH oder HH:MM).
+    Nicht erkannt → leere Liste (dann fehlt die Angabe einfach)."""
+    t = (text or "").lower()
+    zeit = re.search(r"(\d{1,2})(?::(\d{2}))?\s*[–-]\s*(\d{1,2})(?::(\d{2}))?", t)
+    if not zeit:
+        return []
+    tage_teil = t[:zeit.start()]
+    reihenfolge = list(TAGE_SCHEMA)
+    tage = []
+    for von, bis in re.findall(r"\b(mo|di|mi|do|fr|sa|so)\b(?:\s*[–-]\s*\b(mo|di|mi|do|fr|sa|so)\b)?", tage_teil):
+        if bis:
+            i, j = reihenfolge.index(von), reihenfolge.index(bis)
+            tage += reihenfolge[i:j + 1] if i <= j else reihenfolge[i:] + reihenfolge[:j + 1]
+        else:
+            tage.append(von)
+    if not tage:
+        return []
+    auf = f"{int(zeit.group(1)):02d}:{zeit.group(2) or '00'}"
+    zu = f"{int(zeit.group(3)):02d}:{zeit.group(4) or '00'}"
+    return [{"@type": "OpeningHoursSpecification", "dayOfWeek": [f"https://schema.org/{TAGE_SCHEMA[d]}" for d in dict.fromkeys(tage)],
+             "opens": auf, "closes": zu}]
+
+
+def club_json_ld(cfg: dict) -> dict:
+    """Strukturierte Daten für den Club selbst (Startseite): schema.org/NightClub."""
+    site, club = cfg["site"], cfg["club"]
+    base = site["url"].rstrip("/")
+    data = {
+        "@context": "https://schema.org", "@type": "NightClub", "@id": base + "/#club",
+        "name": site["name"], "url": base + "/", "description": site.get("description", ""),
+        "logo": base + "/static/img/calavera_logo.svg", "image": base + "/static/img/calavera_logo.svg",
+        "address": {"@type": "PostalAddress", "streetAddress": club["address"], "postalCode": club["city"].split(" ")[0],
+                    "addressLocality": " ".join(club["city"].split(" ")[1:]) or "Bremen", "addressCountry": "DE"},
+        "priceRange": club.get("entry", ""),
+        "sameAs": [s["url"] for s in cfg.get("social", []) if s.get("url")],
+    }
+    if club.get("email"):
+        data["email"] = club["email"]
+    if club.get("telefon") or club.get("phone"):
+        data["telephone"] = club.get("telefon") or club.get("phone")
+    if club.get("maps_url"):
+        data["hasMap"] = club["maps_url"]
+    oz = oeffnungszeiten_schema(club.get("hours", ""))
+    if oz:
+        data["openingHoursSpecification"] = oz
+    eintritt = (cfg.get("events") or {}).get("default_entry") or " · ".join(x for x in [club.get("entry"), club.get("entry_note")] if x)
+    if eintritt:
+        data["publicAccess"] = True
+        data["description"] = (data["description"] + " Eintritt: " + eintritt + ".").strip()
+    return {k: v for k, v in data.items() if v not in ("", [], None)}
+
+
+def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str) -> str:
+    """llms.txt – klare Kurzfassung für KI-Suchdienste (https://llmstxt.org): wer, wo, wann, was es kostet, nächste Termine."""
+    site, club = cfg["site"], cfg["club"]
+    base = site["url"].rstrip("/")
+    eintritt = (cfg.get("events") or {}).get("default_entry") or f"{club.get('entry', '')} · {club.get('entry_note', '')}"
+    zeilen = [f"# {site['name']}", "", f"> {site.get('description', '').strip()}", "",
+              "## Auf einen Blick", "",
+              f"- Adresse: {club['address']}, {club['city']} ({club.get('directions', '')})",
+              f"- Geöffnet: {club.get('hours', '')}" + (f" – {club['hours_note']}" if club.get("hours_note") else ""),
+              f"- Eintritt (wenn nicht anders angegeben): {eintritt}" + (f", {club['box_office']}" if club.get("box_office") else ""),
+              f"- Kontakt: {club.get('email', '')}",
+              f"- Programm: {base}/programm/",
+              f"- Programm als Kalender (ICS): {base}{kalender_url.split('?')[0]}"]
+    kf = cfg.get("kellerfunk") or {}
+    if kf.get("url"):
+        zeilen.append(f"- Kellerfunk (Live-Streams aus dem Club): {kf['url']}")
+    if cfg.get("social"):
+        zeilen.append("- " + ", ".join(f"{s['label']}: {s['url']}" for s in cfg["social"] if s.get("url")))
+    zeilen += ["", "## Nächste Veranstaltungen", ""]
+    for ev in upcoming[:16]:
+        teile = [f"{WOCHENTAG[ev.start.weekday()]} {ev.start:%d.%m.%Y}, {ev.start:%H:%M} Uhr", ev.title]
+        if ev.byline:
+            teile.append(ev.byline)
+        if ev.genres:
+            teile.append(", ".join(ev.genres))
+        if ev.entry and ev.entry != eintritt:
+            teile.append(f"Eintritt: {ev.entry}")
+        zeilen.append(f"- [{' – '.join(teile)}]({base}{ev.url})" + (f": {ev.teaser}" if ev.teaser else ""))
+    if not upcoming:
+        zeilen.append("- Gerade steht nichts im Programm.")
+    zeilen += ["", "## Seiten", ""]
+    for p in pages:
+        if p.in_sitemap:
+            zeilen.append(f"- [{p.title}]({base}{p.url})" + (f": {p.description}" if p.description else ""))
+    return "\n".join(zeilen).rstrip() + "\n"
 
 
 def load_reihen(cfg: dict) -> dict[str, dict]:
@@ -1227,7 +1348,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     render("index.html", "/", page_path="/", events=upcoming[:home_max],
            fx_css=fx_css_for([fx for ev in upcoming[:home_max][:fx_n] + uebernahme for fx in ev.effekte]),
            more=max(0, len(upcoming) - home_max), cols=cols, span=months_span(upcoming[:home_max]),
-           uebernahme=uebernahme, uebernahme_h=uebernahme_h)
+           uebernahme=uebernahme, uebernahme_h=uebernahme_h, club_ld=club_json_ld(cfg))
     render("programm.html", "/programm/", page_path="/programm/", events=upcoming, cols=cols, fx_css=fx_list(upcoming),
            span=months_span(upcoming), has_archive=bool(past))
     render("archiv.html", "/programm/archiv/", page_path="/programm/archiv/", events=past)
@@ -1268,6 +1389,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         + "</urlset>\n", encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /intern/\nSitemap: {base}/sitemap.xml\n",
                                     encoding="utf-8")
+    (out / "llms.txt").write_text(llms_txt(cfg, upcoming, pages, env.globals["kalender_url"]), encoding="utf-8")
     (out / "build.json").write_text(json.dumps({
         "built_at": now.isoformat(), "upcoming": len(upcoming), "past": len(past), "pages": len(pages)
     }, ensure_ascii=False, indent=2), encoding="utf-8")

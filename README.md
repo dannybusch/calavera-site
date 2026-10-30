@@ -66,6 +66,7 @@ letzten Build vorbei ist, und hebt den nächsten Termin hervor („Heute“, „
 ## Was der Build erzeugt
 
 - Startseite mit Claim, Kellerfunk-Karte, Infos und den nächsten Terminen (Anzahl: `programm.startseite_max`)
+  – Seitentitel der Startseite: `site.name` · `site.titel_zusatz` (z. B. „Calavera Bremen · Kellerclub im Viertel“; `titel_zusatz: ""` = nur der Name)
 - `/programm/` mit allen kommenden, `/programm/archiv/` mit vergangenen Terminen
 - eine Seite pro Veranstaltung mit Flyer, Fakten, Text, Kalender-Datei, Teilen, Anfahrt, „Danach“ am selben Abend
 - Visuals verkleinert (`640.webp` für Kacheln, `1200.jpg` für Detailseite und Vorschau beim Teilen)
@@ -287,6 +288,21 @@ Damit „vorbei“ auch ohne neue Inhalte stimmt, den Build am besten einmal tä
 
 Der Server sollte für fehlende Seiten `404.html` ausliefern (Apache: `ErrorDocument 404 /404.html`).
 
+### Suchmaschinen und KIs
+
+Der Build erzeugt dafür automatisch:
+
+- **`sitemap.xml`** und **`robots.txt`** (interne Seiten gesperrt).
+- **Strukturierte Daten** (schema.org): auf der Startseite der Club als `NightClub` – Adresse, Öffnungszeiten
+  (aus `club.hours`, z. B. „Fr + Sa · 22–04“), Eintritt, E-Mail, Karte und die Profile aus `social:` –, auf jeder
+  Veranstaltungsseite ein `MusicEvent` mit DJs, Stream und **Eintritt** (`offers`, aus `eintritt:` bzw.
+  `events.default_entry`; „frei“/„Hutspende“ wird als kostenlos erkannt). Prüfen mit Googles „Test für Rich-Suchergebnisse“.
+- **`llms.txt`** – eine klare Kurzfassung für KI-Suchdienste (ChatGPT, Perplexity, Gemini …): wer, wo, wann,
+  Eintritt, Kontakt, Kellerfunk und die nächsten 16 Veranstaltungen mit Links; bei jedem Build aktuell.
+
+Am meisten bringt außerhalb der Seite: das Google-Unternehmensprofil pflegen, überall dieselben Angaben zu
+Name, Adresse und Öffnungszeiten, Einträge in Bremer Veranstaltungskalendern (Texte: `/intern/`).
+
 ### `.htaccess` für www.calavera.club
 
 Liegt direkt im Ordner von www.calavera.club auf dem Server und wird vom automatischen Upload nicht
@@ -296,14 +312,14 @@ Zeilen selbst tippen** (aus Chats kopierte Anführungszeichen/Leerzeichen führe
 ```apache
 # Seiten und Kalender nicht ungeprüft aus dem Zwischenspeicher nehmen
 <IfModule mod_headers.c>
-  <FilesMatch "\.(html|ics)$">
+  <FilesMatch "\.(html|ics|txt)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
 </IfModule>
 
-# Kalenderdateien richtig ausliefern
+# Kalenderdateien und llms.txt richtig ausliefern (Umlaute!)
 AddType text/calendar .ics
-AddCharset utf-8 .ics
+AddCharset utf-8 .ics .txt
 
 # Eigene Fehlerseite
 ErrorDocument 404 /404.html

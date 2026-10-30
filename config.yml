@@ -9,6 +9,7 @@ site:
   language: "de"
   timezone: "Europe/Berlin"
   description: "Kleiner, aber feiner Club im 1/4 Bremen – entspannte Leute feiern zu guter Musik. Die Alternative in Bremen!"
+  titel_zusatz: " | Party im kleinen Club im Viertel | Bremen, Deutschland"
   kicker: "Kleiner, aber feiner Club in Bremen"
   claim: ["Vielfalt.", "Musik.", "Freude."]   # letzte Zeile erscheint rot
   accent: "#b3122e"                          # gedämpftes Rot wie auf live.calavera.club
