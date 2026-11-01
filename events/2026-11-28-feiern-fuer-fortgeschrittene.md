@@ -5,6 +5,7 @@ start: "2026-11-28 22:00"
 djs: ["DJ Kijote"]
 genres: ["Querbeet", "Tanzbares aus vielen Generationen"]
 tags: ["Ab 18"]
+effekte: disco
 ---
 
 **Feiert mit uns, und ihr wisst, was Feiern heißt** – eine abwechslungsreiche Party mit DJ Kijote!
