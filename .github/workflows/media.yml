@@ -1,0 +1,71 @@
+# ------------------------------------------------------------------
+#  Calavera Bremen – Bilder für Instagram/Facebook rendern (unabhängig von der Website)
+#
+#  Läuft nur von Hand: GitHub → Actions → "Bilder rendern" → "Run workflow".
+#  Die fertigen JPGs (+ Bildtext) liegen danach unten auf der Seite des Laufs
+#  unter "Artifacts" zum Herunterladen (7 Tage lang). Es wird nichts veröffentlicht.
+# ------------------------------------------------------------------
+
+name: Bilder rendern
+
+on:
+  workflow_dispatch:
+    inputs:
+      vorlage:
+        description: "programmzettel, plakatwand, wochenstreifen (Komma-getrennt) oder alle"
+        type: string
+        default: "alle"
+      woche:
+        description: "Kalenderwoche, z. B. 47 (leer = laufende Woche)"
+        type: string
+        default: ""
+      naechste:
+        description: "eine Woche später"
+        type: boolean
+        default: false
+
+concurrency:
+  group: media
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Projekt holen
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Pakete und Browser installieren
+        run: |
+          pip install -r requirements.txt -r requirements-reels.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Bilder rendern
+        env:
+          VORLAGE: ${{ inputs.vorlage }}
+          WOCHE: ${{ inputs.woche }}
+          NAECHSTE: ${{ inputs.naechste }}
+        run: |
+          args=(woche)
+          [ -n "$VORLAGE" ] && args+=(--vorlage "$VORLAGE")
+          [ -n "$WOCHE" ] && args+=(--woche "$WOCHE")
+          [ "$NAECHSTE" = "true" ] && args+=(--naechste)
+          python media.py "${args[@]}"
+
+      - name: Bilder zum Herunterladen bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilder
+          path: media/out/
+          if-no-files-found: warn
+          retention-days: 7

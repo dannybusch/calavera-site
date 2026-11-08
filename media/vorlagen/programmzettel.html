@@ -1,0 +1,79 @@
+{%- from "_teile.html" import bild, unterzeile, funkmarke -%}
+<!doctype html>
+<html lang="de" data-max="1.25">
+<head>
+<meta charset="utf-8">
+<title>Diese Woche · Programmzettel</title>
+<link rel="stylesheet" href="basis.css">
+{%- set gross = anzahl <= 2 %}
+{%- set fb = {1: 380, 2: 262, 3: 168, 4: 138, 5: 118, 6: 102}[anzahl] %}
+<style>
+:root { --akzent: {{ akzent }}; }
+.seite { padding: {{ px(64 if gross else 60) }} 72px {{ px(56 if gross else 52) }}; gap: {{ px(40 if gross else 30) }}; }
+header { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex: none; }
+.kopf { display: flex; flex-direction: column; gap: {{ px(14) }}; min-width: 0; flex: 1 1 auto; }
+.zeitraum { font-size: {{ px(22) }}; letter-spacing: .16em; color: var(--text-3); }
+h1 { font-size: {{ px(150 if gross else 112) }}; line-height: .84; color: var(--hell); }
+.logo { width: {{ px(190 if gross else 138) }}; }
+main { flex: 1 1 auto; min-height: 0; overflow: hidden; margin: 0 -18px; padding: 0 18px;  /* Platz für die getönte Kellerfunk-Zeile */ display: flex; flex-direction: column; gap: {{ px(28 if gross else 14) }}; }
+article { display: grid; grid-template-columns: {{ px(170 if gross else 150) }} {{ px(fb) }} minmax(0, 1fr); gap: {{ px(36 if gross else 28) }};
+          align-items: {{ "start" if gross else "center" }}; padding-top: {{ px(28 if gross else 14) }}; border-top: 2px solid var(--linie); flex: none; }
+.wann { display: flex; flex-direction: column; gap: {{ px(8 if gross else 4) }}; }
+.wt { font-size: {{ px(112 if gross else 64) }}; line-height: .8; color: var(--akzent); }
+.datum { font-size: {{ px(52 if gross else 38) }}; line-height: .9; color: var(--hell); }
+.zeit { font-size: {{ px(22 if gross else 19) }}; letter-spacing: .08em; color: var(--text-2); }
+.was { display: flex; flex-direction: column; gap: {{ px(14 if gross else 8) }}; padding-top: {{ px(6 if gross else 0) }}; min-width: 0; }
+h2 { font-size: {{ px(76 if gross else 50) }}; line-height: .9; color: var(--hell); }
+.by { font-size: {{ px(28 if gross else 21) }}; color: var(--text-2); }
+.genres { font-size: {{ px(20) }}; line-height: 1.5; color: var(--text-3); }
+.pillen { display: flex; flex-wrap: wrap; gap: 10px; margin-top: {{ px(6 if gross else 2) }}; }
+article.ist-funk { margin: 0 -18px; padding-left: 18px; padding-right: 18px; padding-bottom: {{ px(16 if gross else 12) }}; border-radius: 4px; border-top-color: transparent; box-shadow: inset 6px 0 0 var(--akzent); }
+.funkmarke { --fm: {{ px(34 if gross else 25) }}; }
+.kompakt .pille { font-size: {{ px(15) }}; padding: {{ px(6) }} {{ px(12) }}; }
+footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex: none; padding-top: {{ px(22) }};
+         border-top: 4px solid var(--akzent); font-size: 20px; white-space: nowrap; letter-spacing: .08em; color: var(--text-2); }
+</style>
+</head>
+<body>
+<div class="seite {{ 'gross' if gross else 'kompakt' }}">
+  <header>
+    <div class="kopf">
+      <span class="mono zeitraum">{{ zeitraum_lang }}</span>
+      <h1 class="display titel"{% if not gross %} data-zeilen="1"{% endif %}>Diese Woche{% if gross %}<br>{% else %} {% endif %}<span class="akzent">im Calavera</span></h1>
+    </div>
+    <img class="logo" src="{{ logo }}" alt="Calavera Bremen">
+  </header>
+
+  <main data-passt>
+    {%- for t in termine %}
+    <article{% if t.art == 'kellerfunk' %} class="ist-funk"{% endif %}>
+      <div class="wann">
+        <span class="display wt">{{ t.wt }}</span>
+        <span class="display datum">{{ t.datum }}</span>
+        <span class="mono zeit">{{ t.zeit }}</span>
+      </div>
+      {{ bild(t, px(fb), logo_kf, unterzeile=gross) }}
+      <div class="was">
+        {% if t.art == "kellerfunk" %}{{ funkmarke(t, kf_url) }}{% endif %}
+        <h2 class="display titel" data-zeilen="2">{{ t.titel }}</h2>
+        {%- if gross %}
+        {% if t.byline %}<span class="by">{{ t.byline }}</span>{% endif %}
+        {% if t.genres %}<span class="mono genres">{{ t.genres }}</span>{% endif %}
+        {%- else %}
+        {% set z = unterzeile(t, anzahl <= 4) %}{% if z %}<span class="by titel" data-zeilen="1">{{ z }}</span>{% endif %}
+        {%- endif %}
+        {% if t.pillen and t.art != "kellerfunk" %}<div class="pillen">{% for p in t.pillen %}<span class="pille">{{ p }}</span>{% endfor %}</div>{% endif %}
+      </div>
+    </article>
+    {%- endfor %}
+  </main>
+
+  <footer class="mono">
+    <span>{{ adresse }} · {{ stadt }}</span>
+    {% if eintritt %}<span>{{ eintritt }}</span>{% endif %}
+    <span class="hell">{{ url }}</span>
+  </footer>
+</div>
+<script src="passen.js"></script>
+</body>
+</html>

@@ -18,6 +18,18 @@ name: Bauen und veröffentlichen
 on:
   push:
     branches: [main]
+    # Reels und Bilder gehören nicht zur Website – Änderungen daran lösen keine Veröffentlichung aus
+    paths-ignore:
+      - "reels/**"
+      - "reels.py"
+      - "requirements-reels.txt"
+      - ".github/workflows/reels.yml"
+      - "media/**"
+      - "media.py"
+      - ".github/workflows/media.yml"
+      - "events/*.mp3"
+      - "events/*.m4a"
+      - "events/*.wav"
   schedule:
     # GitHub rechnet in UTC: 04:17 UTC = 05:17 Uhr Winterzeit / 06:17 Uhr Sommerzeit.
     # (Ungerade Minute, weil GitHub zur vollen Stunde oft stark verzögert.)

@@ -1,0 +1,107 @@
+{%- from "_teile.html" import bild, unterzeile, funkmarke -%}
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Diese Woche · Wochenstreifen</title>
+<link rel="stylesheet" href="basis.css">
+{%- set a = aktive_tage %}
+{%- set g = {1: [64, 60, 23], 2: [58, 50, 21], 3: [50, 42, 19]}.get(a, [44, 34, 17]) %}
+{%- set breit = a <= 3 %}
+{%- set zweizeilig = anzahl <= 3 %}
+<style>
+:root { --akzent: {{ akzent }}; }
+.seite { padding: {{ px(60 if zweizeilig else 56) }} 60px {{ px(50) }}; gap: {{ px(36 if zweizeilig else 30) }}; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 28px; flex: none; }
+.kopf { display: flex; flex-direction: column; gap: {{ px(10) }}; min-width: 0; flex: 1 1 auto; }
+.kw { font-size: {{ px(20) }}; letter-spacing: .16em; color: var(--text-3); }
+h1 { font-size: {{ px(118 if zweizeilig else 100) }}; line-height: .84; color: var(--hell); }
+.logo { width: {{ px(170 if zweizeilig else 128) }}; }
+main { flex: 1 1 auto; min-height: 0; display: flex; gap: 10px; }
+.leer { flex: 0 0 {{ 56 if a <= 3 else 50 }}px; border-radius: 6px; background: #121212; display: flex; flex-direction: column; align-items: center;
+        padding-top: {{ px(16) }}; gap: 4px; color: #5c5853; }
+.leer .display { font-size: {{ px(30 if a <= 3 else 27) }}; line-height: 1; }
+.leer .mono { font-size: {{ px(14 if a <= 3 else 13) }}; font-weight: 400; }
+.tag { flex: 1 1 0; min-width: 0; overflow: hidden; border-radius: 6px; background: #161616; box-shadow: inset 0 4px 0 var(--akzent);
+       display: flex; flex-direction: column; gap: {{ px(18 if breit else 14) }}; padding: {{ px(16) }} {{ 16 if breit else 12 }}px {{ px(20) }}; }
+.tag > * { flex: none; }
+.kopfzeile { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.wt { font-size: {{ px(g[0]) }}; line-height: .9; color: var(--akzent); white-space: nowrap; }
+.kopfzeile .mono { font-size: {{ px(19 if breit else 16) }}; color: var(--text-2); }
+.flyerbox { display: flex; justify-content: center; }
+.flyerbox > * { width: var(--fb, 100%) !important; }
+.unter { display: flex; flex-direction: column; gap: {{ px(6 if breit else 4) }}; }
+.unter .zeit { font-size: {{ px(18 if breit else 16) }}; color: var(--text-2); }
+.name { font-size: {{ px(g[1]) }}; line-height: .9; color: var(--hell); }
+.by { font-size: {{ px(g[2]) }}; color: var(--text-2); }
+.pillen { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.pille { font-size: {{ px(15 if breit else 13) }}; padding: {{ px(6) }} {{ px(11) }}; }
+.tag.ist-funk { background: color-mix(in srgb, var(--akzent) 13%, #121212); }
+.tag .funkmarke { --fm: {{ px(30 if a <= 2 else (26 if breit else 21)) }}; align-self: stretch; }
+.paar .funkmarke { --fm: {{ px(18 if breit else 15) }}; }
+/* mehrere Termine an einem Tag: kleine Flyer nebeneinander mit Text */
+.paar { display: grid; grid-template-columns: {{ "34%" if breit else "40%" }} minmax(0, 1fr); gap: {{ px(12 if breit else 10) }}; align-items: start; }
+.paar + .paar { padding-top: {{ px(14) }}; border-top: 2px solid var(--linie); }
+.paar .name { font-size: {{ px((g[1] * 0.8)|round|int) }}; }
+.paar .by { font-size: {{ px((g[2] * 0.9)|round|int) }}; }
+footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex: none;
+         font-size: 20px; white-space: nowrap; letter-spacing: .08em; color: var(--text-2); }
+</style>
+</head>
+<body>
+<div class="seite">
+  <header>
+    <div class="kopf">
+      <span class="mono kw">{{ woche_text }}</span>
+      <h1 class="display titel"{% if not zweizeilig %} data-zeilen="1"{% endif %}>Diese Woche{% if zweizeilig %}<br>{% else %} {% endif %}im <span class="akzent">Calavera</span></h1>
+    </div>
+    <img class="logo" src="{{ logo }}" alt="Calavera Bremen">
+  </header>
+
+  <main data-passt>
+    {%- for d in tage %}
+    {%- if not d.aktiv %}
+    <div class="leer"><span class="display">{{ d.wt }}</span><span class="mono">{{ d.tag }}</span></div>
+    {%- else %}
+    {%- set einzeln = d.termine|length == 1 %}
+    <div class="tag{% if einzeln and d.termine[0].art == 'kellerfunk' %} ist-funk{% endif %}" data-passt {% if einzeln %}data-flyerspalte{% endif %}>
+      <div class="kopfzeile">
+        <span class="display wt">{{ d.wt }} <span class="hell">{{ d.datum if breit else d.tag }}</span></span>
+        {% if einzeln and breit %}<span class="mono">{{ d.termine[0].zeit }}</span>{% endif %}
+      </div>
+      {%- if einzeln %}
+      {%- set t = d.termine[0] %}
+      {% if t.art == "kellerfunk" %}{{ funkmarke(t, kf_url) }}{% endif %}
+      <div class="flyerbox">{{ bild(t, "100%", logo_kf) }}</div>
+      <div class="unter">
+        {% if not breit %}<span class="mono zeit">{{ t.zeit }}</span>{% endif %}
+        <span class="display name titel" data-zeilen="{{ 2 if breit else 3 }}">{{ t.titel }}</span>
+        {% set z = unterzeile(t, breit and a <= 2) %}{% if z %}<span class="by titel" data-zeilen="2">{{ z }}</span>{% endif %}
+        {% if t.pillen and t.art != "kellerfunk" %}<div class="pillen">{% for p in t.pillen %}<span class="pille">{{ p }}</span>{% endfor %}</div>{% endif %}
+      </div>
+      {%- else %}
+      {%- for t in d.termine %}
+      <div class="paar">
+        {{ bild(t, "100%", logo_kf, unterzeile=false) }}
+        <div class="unter">
+          {% if t.art == "kellerfunk" %}{{ funkmarke(t, kf_url) }}{% endif %}
+          <span class="mono zeit">{{ t.zeit }}</span>
+          <span class="display name titel" data-zeilen="3">{{ t.titel }}</span>
+          {% set z = t.byline if t.art == "kellerfunk" else (t.pillen[0] if t.pillen else t.byline) %}{% if z %}<span class="by titel" data-zeilen="2">{{ z }}</span>{% endif %}
+        </div>
+      </div>
+      {%- endfor %}
+      {%- endif %}
+    </div>
+    {%- endif %}
+    {%- endfor %}
+  </main>
+
+  <footer class="mono">
+    <span>{{ adresse }}{% if eintritt %} · {{ eintritt }}{% else %} · {{ stadt }}{% endif %}</span>
+    <span class="hell">{{ url }}</span>
+  </footer>
+</div>
+<script src="passen.js"></script>
+</body>
+</html>

@@ -7,3 +7,7 @@ __pycache__/
 # Reels (reels.py): Ausgabe und Arbeitsordner
 reels/out/
 reels/.cache/
+
+# Bilder (media.py): Ausgabe und Arbeitsordner
+media/out/
+media/.cache/

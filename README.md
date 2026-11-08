@@ -545,6 +545,51 @@ und Musik lösen keine Veröffentlichung der Website aus.
 Die Vorlagen liegen in `reels/vorlagen/` (HTML/CSS, eine Datei pro Vorlage) und lassen sich wie die
 Website-Vorlagen anpassen.
 
+## Bilder für Instagram/Facebook (`media.py`)
+
+Macht das Bild **„Diese Woche im Calavera“** (1080 × 1350, JPG) aus den Event-Dateien der Woche (Mo–So)
+und den Kellerfunk-Sendungen von live.calavera.club. Wie `reels.py` vom Website-Build getrennt: schreibt nur
+nach `media/out/`. Braucht dieselben Pakete wie die Reels (Playwright + Chromium), aber kein ffmpeg.
+
+```bash
+python media.py                          # laufende Woche, alle drei Vorlagen
+python media.py --vorlage plakatwand     # nur eine (Kürzel: a, b, c)
+python media.py --naechste               # kommende Woche
+python media.py --woche 47               # Kalenderwoche 47
+python media.py --akzent "#b3122e"       # andere Akzentfarbe
+python media.py --liste                  # nur anzeigen, welche Termine drauf kämen
+```
+
+| Vorlage | Kürzel | Aussehen |
+|---|---|---|
+| `programmzettel` | a | Liste: Tag/Datum, Flyer, Name; ab 3 Terminen kompakt |
+| `plakatwand` | b | schräg geklebte Flyer mit Klebeband und roten Datums-Stickern |
+| `wochenstreifen` | c | sieben Tage als Spalten – Tage ohne Programm schrumpfen zu schmalen Streifen |
+
+Ergebnis: `media/out/woche-2026-kw45-<vorlage>.jpg` und `woche-2026-kw45-bildtext.txt` (Text zum Einfügen,
+mit allen Terminen und Hashtags). Termine der Woche, die schon vorbei sind, fallen weg (`--alle` zeigt sie trotzdem).
+
+- **Kellerfunk:** Sendungen der Woche kommen aus `kellerfunk.config` (ohne Internet: `--plan datei.yml`,
+  ganz ohne: `--ohne-kellerfunk`). Ohne Visual erscheint eine dunkle Funk-Karte. Ist eine Sendung zugleich
+  ein Abend im Club (gleicher Tag, ±3 Std.), steht sie nur einmal drauf – als Veranstaltung mit „Club & Stream“.
+- **Ohne Flyer** (z. B. Honeycafé ohne Bild): eine helle Papierkarte mit dem Namen.
+- **Eintritt:** steht unten (aus `club:`); weicht `eintritt:` in der Event-Datei davon ab, erscheint er beim
+  Termin (z. B. „Hutspende“, „frei“).
+- **Viele Termine:** Titel und Flyer werden kleiner, bis alles passt; höchstens 6 Termine aufs Bild (alle im Bildtext).
+- **Auf GitHub:** Actions → „Bilder rendern“ → „Run workflow“; die JPGs liegen danach unter „Artifacts“.
+
+Optional in `config.yml`:
+
+```yaml
+media:
+  vorlage: wochenstreifen      # Standard statt "alle"
+  akzent: "#e0485e"            # sonst je Vorlage
+  qualitaet: 92                # JPG-Qualität
+  hashtags: [bremen, viertel]  # zusätzlich im Bildtext
+```
+
+Die Vorlagen liegen in `media/vorlagen/` (HTML/CSS mit Jinja wie die Website; `passen.js` macht die Größen passend).
+
 ## Lizenzen
 
 Schriften Bebas Neue, Space Grotesk, IBM Plex Mono: SIL Open Font License (siehe `static/fonts/`).

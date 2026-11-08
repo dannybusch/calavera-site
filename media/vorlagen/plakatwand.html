@@ -1,0 +1,87 @@
+{%- from "_teile.html" import bild, funkmarke -%}
+<!doctype html>
+<html lang="de" data-max="1.2">
+<head>
+<meta charset="utf-8">
+<title>Diese Woche · Plakatwand</title>
+<link rel="stylesheet" href="basis.css">
+{%- set gross = anzahl <= 2 %}
+{%- set b = plakat_breite %}
+{%- set st = (b * 0.36)|round|int if not gross else 150 %}
+<style>
+:root { --akzent: {{ akzent }}; }
+.seite { padding: {{ px(58 if gross else 52) }} 60px {{ px(50 if gross else 44) }};
+         background: repeating-linear-gradient(90deg, #131313 0 268px, #161616 268px 270px), #131313; }
+header { position: relative; display: flex; justify-content: space-between; align-items: flex-start; flex: none; }
+h1 { font-size: {{ px(178 if gross else 132) }}; line-height: .8; letter-spacing: .01em; color: var(--hell); }
+.band { display: inline-block; margin-top: {{ px(10) }}; padding: {{ px(8) }} {{ px(18) }} {{ px(4) }}; background: var(--akzent); rotate: -2deg;
+        font-family: "Bebas Neue", sans-serif; font-size: {{ px(64 if gross else 48) }}; line-height: 1; color: #f8f3ea; }
+.logo { width: {{ px(150 if gross else 120) }}; rotate: 4deg; margin-top: 6px; }
+main { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center;
+       gap: {{ px(30) }}; padding: {{ px(26) }} 0 {{ px(10) }}; }
+.reihe { display: flex; justify-content: center; align-items: flex-start; gap: {{ px(56 if gross else 44) }}; }
+figure { position: relative; width: {{ px(b) }}; display: flex; flex-direction: column; gap: {{ px(16 if gross else 12) }}; flex: none; }
+.zettel { position: relative; display: block; box-shadow: 0 22px 40px rgba(0,0,0,.65); }
+.zettel > .flyer, .zettel > .karte { border-radius: 0; }
+.band-kleb { position: absolute; top: {{ px(-15) }}; height: {{ px(32 if gross else 28) }}; background: rgba(232,222,192,.77); }
+.sticker { position: absolute; width: {{ px(st) }}; height: {{ px(st) }}; border-radius: 50%; background: var(--akzent);
+           display: flex; flex-direction: column; align-items: center; justify-content: center; color: #f8f3ea; box-shadow: 0 7px 16px rgba(0,0,0,.5); }
+.sticker .tag { font-family: "Bebas Neue", sans-serif; font-size: {{ px((st * 0.39)|round|int) }}; line-height: .85; }
+.sticker .um { font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: {{ px([(st * 0.12)|round|int, 13]|max) }}; letter-spacing: .05em; }
+.sticker.r { right: {{ px(-(st * 0.23)|round|int) }}; }
+.sticker.l { left: {{ px(-(st * 0.24)|round|int) }}; }
+figure .funkmarke { --fm: {{ px(34 if gross else 25) }}; }
+figcaption { display: flex; flex-direction: column; gap: {{ px(4) }}; }
+.name { font-size: {{ px(48 if gross else 32) }}; line-height: .92; color: var(--hell); }
+.dazu { font-size: {{ px(18 if gross else 15) }}; letter-spacing: .04em; color: var(--text-2); text-transform: uppercase; }
+footer { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex: none; margin-top: {{ px(14) }};
+         font-size: 20px; white-space: nowrap; letter-spacing: .08em; color: var(--text-2); }
+</style>
+</head>
+<body>
+<div class="seite">
+  <header>
+    <div>
+      <h1 class="display">Diese Woche</h1>
+      <span class="band">im Calavera · {{ zeitraum_kurz }}</span>
+    </div>
+    <img class="logo" src="{{ logo }}" alt="Calavera Bremen">
+  </header>
+
+  <main data-passt>
+    {%- for reihe in reihen %}
+    <div class="reihe">
+      {%- for t in reihe %}
+      {%- set k = loop.index0 %}
+      <figure style="rotate: {{ t.dreh }}deg; margin-top: {{ px(t.versatz) }}">
+        <span class="zettel">
+          {{ bild(t, px(b), logo_kf) }}
+          <span aria-hidden="true" class="band-kleb" style="left: {{ (10 + (t.dreh * 7)|abs|round|int % 22) }}%; width: {{ px((b * 0.28)|round|int) }}; rotate: {{ (-t.dreh * 2.6)|round(1) }}deg"></span>
+          {%- if gross %}
+          <span aria-hidden="true" class="band-kleb" style="right: {{ (8 + (t.dreh * 5)|abs|round|int % 18) }}%; width: {{ px((b * 0.27)|round|int) }}; rotate: {{ (t.dreh * 2.4)|round(1) }}deg"></span>
+          {%- endif %}
+          <span class="sticker {{ t.seite }}" style="bottom: {{ px(((b * 0.17) + (k * 9))|round|int) }}; rotate: {{ (t.dreh * -3.4)|round(1) }}deg">
+            <span class="tag">{{ t.wt }} {{ t.tag }}</span>
+            <span class="um">{{ t.uhr }}</span>
+          </span>
+        </span>
+        <figcaption>
+          {% if t.art == "kellerfunk" %}{{ funkmarke(t, kf_url) }}{% endif %}
+          <span class="display name titel" data-zeilen="2">{{ t.titel }}</span>
+          {%- set dazu = ([t.byline] if t.byline else []) + (t.pillen if t.art != "kellerfunk" else []) %}
+          {% if dazu %}<span class="mono dazu titel" data-zeilen="1">{{ dazu|join(" · ") }}</span>{% endif %}
+        </figcaption>
+      </figure>
+      {%- endfor %}
+    </div>
+    {%- endfor %}
+  </main>
+
+  <footer class="mono">
+    <span>{{ adresse }} · {{ stadt }}{% if eintritt and gross %} · {{ eintritt }}{% endif %}</span>
+    <span class="hell">{{ url }}</span>
+  </footer>
+</div>
+<script src="passen.js"></script>
+</body>
+</html>
