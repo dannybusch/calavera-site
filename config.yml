@@ -131,3 +131,7 @@ no_cookie_banner:
 redirects:
   "privatveranstaltungen": "/calavera-mieten/"
   "über-den-club": "/ueber-den-club/"
+  
+rausgegangen:
+  location: "f4de137c-3c19-4989-abfc-1830b67e3a1b"
+  veroeffentlichen: true
