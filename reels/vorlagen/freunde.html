@@ -2,7 +2,7 @@
 <html lang="de"><head><meta charset="utf-8"><title>Reel · Für Freunde von</title><link rel="stylesheet" href="basis.css">
 <style>
 /* Für Freunde von – Takt 1: Datum riesig (Aufhänger) · Takt 2: "Was euch erwartet" Wort für Wort ·
-   dann ein Name aus "fans_of" pro Schlag (bis 12) · Flyer-Auftritt · Schlusstafel (Schleife zurück zum Datum) */
+   dann ein Name aus "fans_of" pro Schlag (bis 12) · zum Abschluss "u.v.a.m." · Flyer-Auftritt · Schlusstafel (Schleife zurück zum Datum) */
 .hook-kicker { top: 560px; font-size: 38px; color: var(--hell); }
 .hook-datum { top: 640px; color: var(--rot); text-shadow: 0 0 60px rgba(224,72,94,.35); }
 .hook-unter { top: 1080px; font-size: 34px; color: var(--text-2); }
@@ -10,6 +10,7 @@
 .strich { position: absolute; left: 90px; top: 1230px; width: 900px; height: 10px; background: var(--akzent); transform-origin: 0 50%; }
 .name { position: absolute; left: 70px; right: 70px; top: 0; height: 1920px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--hell); line-height: .88; }
 .name.rot { color: var(--rot); }
+.name.uvam { color: var(--text-2); }
 .zaehler { top: 1330px; font-size: 30px; color: var(--text-3); }
 </style></head>
 <body>
@@ -51,7 +52,10 @@ const namen = NAMEN.map((n, i) => {
   const chs = [...box.querySelectorAll(".fit")].flatMap(s => letters(s));
   return { box, chs };
 });
-const N = NAMEN.length, NAMES_AT = 8, FLYER_AT = Math.ceil((NAMES_AT + N) / 4) * 4, ENDE_AT = FLYER_AT + 4, BEATS = ENDE_AT + 4;
+// Abschluss: "u.v.a.m." als eigener Schlag nach dem letzten Namen
+{ const box = textBlock($("namen"), "display name uvam", "u.v.a.m.", { maxW: 900, maxPx: 340, minPx: 110 });
+  namen.push({ box, chs: [...box.querySelectorAll(".fit")].flatMap(s => letters(s)) }); }
+const N = NAMEN.length, NAMES_AT = 8, FLYER_AT = Math.ceil((NAMES_AT + N + 1) / 4) * 4, ENDE_AT = FLYER_AT + 4, BEATS = ENDE_AT + 4;
 const bild = flyer($("bild")); const tafel = ende($("tafel"), 985, { datumPx: 210, titelPx: 110 });
 let FW = 640;
 
@@ -71,11 +75,12 @@ window.REEL = { beats: BEATS, render(b, t) {
   set($("strich"), { transform: `scaleX(${prog(b, 7, .4)})` });
   // Namen, einer pro Schlag
   namen.forEach((n, i) => {
-    const at = NAMES_AT + i, on = b >= at && b < at + 1, st = Math.min(.025, .3 / n.chs.length);
+    // "u.v.a.m." (letzter Eintrag) bleibt stehen, bis der Flyer kommt – keine leeren Schläge bis zum Taktanfang
+    const at = NAMES_AT + i, bis = i === namen.length - 1 ? FLYER_AT : at + 1, on = b >= at && b < bis, st = Math.min(.025, .3 / n.chs.length);
     set(n.box, { opacity: on ? 1 : 0, transform: `scale(${on ? 1 + pulse(b - at, 8) * .07 : 1})` });
     if (on) n.chs.forEach((c, k) => { const p = prog(b, at + k * st, .14); set(c, { opacity: p, transform: `translateY(${(1 - p) * 90}px) rotate(${(1 - p) * (k % 2 ? 6 : -6)}deg)` }); });
   });
-  $("zaehler").textContent = b >= NAMES_AT && b < NAMES_AT + N ? `${String(beat - NAMES_AT + 1).padStart(2, "0")} / ${N}  ·  und viele mehr` : "";
+  $("zaehler").textContent = b >= NAMES_AT && b < NAMES_AT + N ? `${String(beat - NAMES_AT + 1).padStart(2, "0")} / ${N}` : "";
   // Flyer
   const fIn = prog(b, FLYER_AT, .3), fUp = prog(b, FLYER_AT + 2, 1.2, "inOut");
   const w = FW + (500 - FW) * fUp, top = 300 + (240 - 300) * fUp;

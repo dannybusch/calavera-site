@@ -1,0 +1,61 @@
+# ------------------------------------------------------------------
+#  Calavera Bremen – Veranstaltungen auf rausgegangen.de eintragen
+#
+#  Läuft automatisch nach jedem erfolgreichen "Bauen und veröffentlichen"
+#  (dann sind die Bilder schon online) und von Hand: Actions → "rausgegangen" → "Run workflow".
+#  Braucht das Secret RAUSGEGANGEN_API_KEY (Settings → Secrets and variables → Actions).
+#  Ohne Secret passiert nichts.
+# ------------------------------------------------------------------
+
+name: rausgegangen
+
+on:
+  workflow_run:
+    workflows: ["Bauen und veröffentlichen"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      probelauf:
+        description: "nur anzeigen, nichts senden"
+        type: boolean
+        default: false
+      bilder:
+        description: "Bilder auch bei schon angelegten Events neu übertragen"
+        type: boolean
+        default: false
+
+concurrency:
+  group: rausgegangen
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  eintragen:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Projekt holen
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Pakete installieren
+        run: pip install -r requirements.txt
+
+      - name: Veranstaltungen eintragen
+        env:
+          RAUSGEGANGEN_API_KEY: ${{ secrets.RAUSGEGANGEN_API_KEY }}
+          PROBELAUF: ${{ inputs.probelauf }}
+          BILDER: ${{ inputs.bilder }}
+        run: |
+          args=()
+          [ "$PROBELAUF" != "true" ] && args+=(--senden)
+          [ "$BILDER" = "true" ] && args+=(--bilder)
+          python rausgegangen.py "${args[@]}"

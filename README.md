@@ -590,6 +590,50 @@ media:
 
 Die Vorlagen liegen in `media/vorlagen/` (HTML/CSS mit Jinja wie die Website; `passen.js` macht die Größen passend).
 
+## rausgegangen.de (`rausgegangen.py`)
+
+Trägt alle kommenden Veranstaltungen automatisch bei [rausgegangen.de](https://rausgegangen.de) ein (Rausgegangen-API v2):
+je Veranstaltung ein Event mit einem Termin im Calavera. Zugeordnet wird über die `mapping_id`
+`calavera-<dateiname>` – fehlende werden angelegt, geänderte nachgetragen (nur die geänderten Felder),
+doppelt angelegt wird nichts. Auf GitHub läuft das automatisch nach jedem erfolgreichen Veröffentlichen.
+
+**Einmalig einrichten**
+
+1. API-Token bei rausgegangen anfragen: zentrale@rausgegangen.de (das „secret“ der Doku-Seite ist *kein* Token).
+2. Token als GitHub-Secret `RAUSGEGANGEN_API_KEY` hinterlegen – nie in Dateien schreiben.
+3. Die ID der Calavera-Location ermitteln und in `config.yml` eintragen:
+   ```bash
+   RAUSGEGANGEN_API_KEY=… python rausgegangen.py location
+   ```
+   ```yaml
+   rausgegangen:
+     location: "…"            # ID aus "python rausgegangen.py location"
+     veroeffentlichen: false  # erst mal nur Vorschau; true = auf rausgegangen.de sichtbar
+     kategorie: party         # Standard; "art: Konzert" u. ä. wird automatisch konzerte-und-musik
+   ```
+
+**Benutzen**
+
+```bash
+python rausgegangen.py                    # Probelauf: was würde gesendet? (braucht keinen Token)
+python rausgegangen.py --json             # … mit allen Daten
+RAUSGEGANGEN_API_KEY=… python rausgegangen.py --senden
+RAUSGEGANGEN_API_KEY=… python rausgegangen.py status   # was steht dort, was fehlt, was ist dort übrig?
+```
+
+- **Übertragen werden:** Titel, Kategorie, Genres als Tags (max. 12), Teaser + Text (als erlaubtes HTML),
+  DJs/Musik/Einlass, Link zur Calavera-Seite, Eintritt (`5 €` → 5,00 €; „Hutspende“ → nur als Text;
+  dazu „Azubis & Studis frei · nur Abendkasse“), Beginn/Ende und das Bild.
+- **Bild:** Der Build legt dafür je Flyer eine 16:9-Fassung an (`/media/events/<slug>/breit.jpg`, ganzer Flyer
+  auf unscharfem Hintergrund) – rausgegangen würde einen Hochformat-Flyer sonst beschneiden. Das Bild wird nur
+  beim Anlegen übertragen; neuer Flyer: in Actions „rausgegangen“ von Hand mit „Bilder … neu übertragen“ starten.
+- **Veröffentlichen:** Solange `veroeffentlichen: false`, sind die Events nur über den Vorschau-Link sichtbar
+  (steht in der Ausgabe). Ein in der Zentrale von Hand veröffentlichtes Event wird nicht wieder versteckt.
+- **Nicht übertragen:** `rausgegangen: false` in die Event-Datei. Andere Kategorie: `rausgegangen_kategorie: theater`
+  (möglich: aktiv-und-kreativ, ausstellung, feste-und-festival, film, food-und-drinks, gesprochenes,
+  kinder-und-familien, konzerte-und-musik, markt, party, shows-und-performances, sport, theater).
+- **Gelöscht/umbenannt:** wird dort nicht automatisch gelöscht – `status` listet solche Events, dann in der Zentrale entfernen.
+
 ## Lizenzen
 
 Schriften Bebas Neue, Space Grotesk, IBM Plex Mono: SIL Open Font License (siehe `static/fonts/`).

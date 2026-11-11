@@ -1060,6 +1060,14 @@ def process_visual(ev: Event, out: Path) -> None:
                 if copy.width > width:
                     copy.thumbnail((width, width * 4), Image.LANCZOS)
                 copy.save(target_dir / name, fmt, **opts)
+            # 16:9-Fassung (für rausgegangen.py): ganzer Flyer mittig auf unscharfem, abgedunkeltem Hintergrund
+            W, H = 1600, 900
+            hg = ImageOps.fit(rgb, (W, H), Image.LANCZOS).filter(ImageFilter.GaussianBlur(36))
+            hg = Image.blend(hg, Image.new("RGB", (W, H), (11, 11, 11)), .55)
+            vorn = rgb.copy()
+            vorn.thumbnail((W - 80, H - 80), Image.LANCZOS)
+            hg.paste(vorn, ((W - vorn.width) // 2, (H - vorn.height) // 2))
+            hg.save(target_dir / "breit.jpg", "JPEG", quality=85, optimize=True, progressive=True)
         ev.visual_thumb = f"{base}/640.webp"
         ev.visual_og = f"{base}/1200.jpg"
     except Exception as exc:  # noqa: BLE001

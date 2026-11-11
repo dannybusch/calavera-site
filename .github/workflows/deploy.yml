@@ -27,6 +27,8 @@ on:
       - "media/**"
       - "media.py"
       - ".github/workflows/media.yml"
+      - "rausgegangen.py"
+      - ".github/workflows/rausgegangen.yml"
       - "events/*.mp3"
       - "events/*.m4a"
       - "events/*.wav"
