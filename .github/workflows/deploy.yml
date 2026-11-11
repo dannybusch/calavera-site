@@ -53,7 +53,8 @@ permissions:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    # Feste Version statt ubuntu-latest: das neue Ubuntu 26.04 ("resolute") erreichte seine Paketquellen nicht
+    runs-on: ubuntu-24.04
     # Variablen und Secrets kommen aus diesem GitHub-Environment (Settings → Environments)
     environment: calavera-site.env
     timeout-minutes: 20
@@ -116,7 +117,21 @@ jobs:
           echo "Ziel: $SFTP_USER@$SFTP_HOST (Port $SFTP_PORT), Ordner: $SFTP_REMOTE_DIR  –  Probelauf: $DRY_RUN"
 
       - name: lftp installieren
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+        # Klappt das nicht (Paketquellen bei GitHub gestört), lädt unten hochladen.py statt lftp hoch –
+        # daher bricht dieser Schritt nie ab und dauert höchstens 4 Minuten.
+        timeout-minutes: 4
+        continue-on-error: true
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          if command -v lftp >/dev/null; then echo "lftp ist schon da"; exit 0; fi
+          sudo rm -f /var/lib/man-db/auto-update   # man-db-Index nach der Installation nicht neu aufbauen (dauert ewig)
+          for versuch in 1 2; do
+            if sudo timeout 90 apt-get install -y -qq --no-install-recommends -o Acquire::Retries=2 lftp; then break; fi
+            echo "Versuch $versuch fehlgeschlagen – Paketliste neu laden …"
+            sudo timeout 90 apt-get update -qq -o Acquire::Retries=2 || true
+          done
+          command -v lftp >/dev/null || echo "::warning::lftp nicht installierbar – es wird mit hochladen.py (Python) hochgeladen"
 
       - name: Server-Schlüssel hinterlegen
         env:
@@ -137,7 +152,16 @@ jobs:
       - name: Hochladen (SFTP)
         env:
           LFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
         run: |
+          if ! command -v lftp >/dev/null; then
+            # Ersatz ohne apt: gleiche Regeln (löschen, Ausnahmen, Server-Schlüssel aus known_hosts)
+            pip install -q "paramiko>=3.4"
+            PROBE=""
+            [ "$DRY_RUN" = "true" ] && PROBE="--probe"
+            python hochladen.py dist/ "$SFTP_REMOTE_DIR" $PROBE
+            exit 0
+          fi
           DRY=""
           [ "$DRY_RUN" = "true" ] && DRY="--dry-run"
           # mirror --reverse: lädt dist/ hoch; --delete: entfernt auf dem Server, was es lokal nicht mehr gibt;
