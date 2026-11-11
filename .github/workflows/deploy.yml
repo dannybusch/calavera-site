@@ -42,6 +42,10 @@ on:
         description: "Probelauf – nur anzeigen, was hochgeladen und gelöscht würde"
         type: boolean
         default: true
+      alles:
+        description: "Alles neu hochladen (sonst nur Dateien, deren Inhalt sich geändert hat)"
+        type: boolean
+        default: false
 
 # Nie zwei Veröffentlichungen gleichzeitig; eine laufende wird zu Ende gebracht.
 concurrency:
@@ -116,23 +120,6 @@ jobs:
           esac
           echo "Ziel: $SFTP_USER@$SFTP_HOST (Port $SFTP_PORT), Ordner: $SFTP_REMOTE_DIR  –  Probelauf: $DRY_RUN"
 
-      - name: lftp installieren
-        # Klappt das nicht (Paketquellen bei GitHub gestört), lädt unten hochladen.py statt lftp hoch –
-        # daher bricht dieser Schritt nie ab und dauert höchstens 4 Minuten.
-        timeout-minutes: 4
-        continue-on-error: true
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          if command -v lftp >/dev/null; then echo "lftp ist schon da"; exit 0; fi
-          sudo rm -f /var/lib/man-db/auto-update   # man-db-Index nach der Installation nicht neu aufbauen (dauert ewig)
-          for versuch in 1 2; do
-            if sudo timeout 90 apt-get install -y -qq --no-install-recommends -o Acquire::Retries=2 lftp; then break; fi
-            echo "Versuch $versuch fehlgeschlagen – Paketliste neu laden …"
-            sudo timeout 90 apt-get update -qq -o Acquire::Retries=2 || true
-          done
-          command -v lftp >/dev/null || echo "::warning::lftp nicht installierbar – es wird mit hochladen.py (Python) hochgeladen"
-
       - name: Server-Schlüssel hinterlegen
         env:
           KNOWN_HOSTS: ${{ secrets.SFTP_KNOWN_HOSTS }}
@@ -150,36 +137,45 @@ jobs:
           test -s ~/.ssh/known_hosts || { echo "::error::Server-Schlüssel von $SFTP_HOST nicht erhalten"; exit 1; }
 
       - name: Hochladen (SFTP)
+        # hochladen.py (Python, kein apt nötig): lädt nur Dateien hoch, deren Inhalt sich geändert hat,
+        # entfernt auf dem Server, was es in dist/ nicht mehr gibt, und lässt .htaccess, .well-known/
+        # und _behalten/ unangetastet. Server-Schlüssel wird gegen ~/.ssh/known_hosts geprüft.
         env:
-          LFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
           SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          ALLES: ${{ github.event_name == 'workflow_dispatch' && inputs.alles && 'true' || 'false' }}
         run: |
-          if ! command -v lftp >/dev/null; then
-            # Ersatz ohne apt: gleiche Regeln (löschen, Ausnahmen, Server-Schlüssel aus known_hosts)
-            pip install -q "paramiko>=3.4"
-            PROBE=""
-            [ "$DRY_RUN" = "true" ] && PROBE="--probe"
-            python hochladen.py dist/ "$SFTP_REMOTE_DIR" $PROBE
-            exit 0
-          fi
-          DRY=""
-          [ "$DRY_RUN" = "true" ] && DRY="--dry-run"
-          # mirror --reverse: lädt dist/ hoch; --delete: entfernt auf dem Server, was es lokal nicht mehr gibt;
-          # --overwrite: Dateien direkt überschreiben statt erst löschen (sonst fehlen Seiten kurz).
-          # Ausgenommen (bleiben auf dem Server unangetastet): .htaccess, .well-known/ und alles unter _behalten/
-          lftp -c "
-            set cmd:fail-exit yes
-            set net:max-retries 3
-            set net:timeout 30
-            set net:reconnect-interval-base 5
-            set sftp:connect-program 'ssh -a -x -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts'
-            open --env-password -u '$SFTP_USER' -p $SFTP_PORT 'sftp://$SFTP_HOST'
-            mirror --reverse --delete --overwrite --verbose=1 --parallel=4 $DRY \
-              --exclude-glob .htaccess \
-              --exclude .well-known/ \
-              --exclude _behalten/ \
-              dist/ '$SFTP_REMOTE_DIR'
-          "
+          pip install -q "paramiko>=3.4"
+          args=(dist/ "$SFTP_REMOTE_DIR")
+          [ "$DRY_RUN" = "true" ] && args+=(--probe)
+          [ "$ALLES" = "true" ] && args+=(--alles)
+          python hochladen.py "${args[@]}"
+
+      # ── Alternative mit lftp (früher Standard; braucht apt, das bei GitHub zeitweise klemmte) ──
+      # Zum Zurückwechseln: Schritt oben auskommentieren, diese beiden einkommentieren.
+      #
+      # - name: lftp installieren
+      #   run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      #
+      # - name: Hochladen (SFTP, lftp)
+      #   env:
+      #     LFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+      #   run: |
+      #     DRY=""
+      #     [ "$DRY_RUN" = "true" ] && DRY="--dry-run"
+      #     lftp -c "
+      #       set cmd:fail-exit yes
+      #       set net:max-retries 3
+      #       set net:timeout 30
+      #       set net:reconnect-interval-base 5
+      #       set sftp:connect-program 'ssh -a -x -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts'
+      #       open --env-password -u '$SFTP_USER' -p $SFTP_PORT 'sftp://$SFTP_HOST'
+      #       mirror --reverse --delete --overwrite --verbose=1 --parallel=4 $DRY \
+      #         --exclude-glob .htaccess \
+      #         --exclude-glob .calavera-pruefsummen.json \
+      #         --exclude .well-known/ \
+      #         --exclude _behalten/ \
+      #         dist/ '$SFTP_REMOTE_DIR'
+      #     "
 
       - name: Zusammenfassung
         if: always()

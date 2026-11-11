@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-Calavera Bremen – dist/ per SFTP auf den Server spiegeln (Ersatz für lftp, falls das nicht installierbar ist)
+Calavera Bremen – dist/ per SFTP auf den Server spiegeln (ersetzt lftp, braucht nur Python)
 
-Macht dasselbe wie der lftp-Befehl in .github/workflows/deploy.yml:
-  - lädt hoch, was neu ist oder sich geändert hat (Größe oder Zeitstempel),
+  - lädt nur hoch, was neu ist oder dessen Inhalt sich geändert hat: Prüfsummen der hochgeladenen Dateien
+    liegen auf dem Server in .calavera-pruefsummen.json (fehlt die Datei, wird einmal alles hochgeladen),
   - löscht auf dem Server, was es in dist/ nicht mehr gibt,
   - lässt .htaccess (überall), .well-known/ und _behalten/ auf dem Server unangetastet,
   - prüft den Server-Schlüssel gegen ~/.ssh/known_hosts (wie lftp mit StrictHostKeyChecking=yes).
 
   python hochladen.py dist/ /ziel/ordner            hochladen
   python hochladen.py dist/ /ziel/ordner --probe    nur anzeigen
+  python hochladen.py dist/ /ziel/ordner --alles    alles neu hochladen (Prüfsummen ignorieren)
 
 Zugang aus der Umgebung: SFTP_HOST, SFTP_PORT (Standard 22), SFTP_USER, SFTP_PASSWORD
 Braucht: pip install paramiko
@@ -17,6 +18,9 @@ Braucht: pip install paramiko
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
+import json
 import os
 import posixpath
 import stat
@@ -25,7 +29,8 @@ import time
 from pathlib import Path
 
 AUSNAHME_ORDNER = (".well-known", "_behalten")
-AUSNAHME_DATEIEN = (".htaccess",)
+PRUEFSUMMEN = ".calavera-pruefsummen.json"   # liegt im Zielordner; wird nie gelöscht oder gespiegelt
+AUSNAHME_DATEIEN = (".htaccess", PRUEFSUMMEN)
 
 
 def ausgenommen(rel: str) -> bool:
@@ -42,8 +47,7 @@ def lokal_auflisten(quelle: Path) -> tuple[dict, set]:
         if p.is_dir():
             ordner.add(rel)
         elif p.is_file():
-            st = p.stat()
-            dateien[rel] = (st.st_size, int(st.st_mtime))
+            dateien[rel] = (p.stat().st_size, hashlib.sha256(p.read_bytes()).hexdigest())
     return dateien, ordner
 
 
@@ -85,7 +89,33 @@ def verbinden():
     return client, client.open_sftp()
 
 
-def spiegeln(quelle: Path, ziel: str, probe: bool) -> dict:
+def pruefsummen_laden(sftp, ziel: str) -> dict:
+    try:
+        with sftp.open(posixpath.join(ziel, PRUEFSUMMEN), "r") as f:
+            daten = json.loads(f.read().decode("utf-8"))
+        return daten.get("dateien", {}) if isinstance(daten, dict) else {}
+    except (FileNotFoundError, ValueError, OSError):
+        return {}
+
+
+def pruefsummen_schreiben(sftp, ziel: str, summen: dict) -> None:
+    """erst unter anderem Namen, dann umbenennen – nie eine halbe Datei"""
+    inhalt = json.dumps({"hinweis": "von hochladen.py verwaltet – nicht löschen (sonst wird einmal alles neu hochgeladen)",
+                         "stand": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "dateien": summen},
+                        ensure_ascii=False, indent=0, sort_keys=True).encode("utf-8")
+    ziel_datei, tmp = posixpath.join(ziel, PRUEFSUMMEN), posixpath.join(ziel, PRUEFSUMMEN + ".neu")
+    sftp.putfo(io.BytesIO(inhalt), tmp)
+    try:
+        sftp.posix_rename(tmp, ziel_datei)
+    except OSError:   # Server ohne posix-rename: altes löschen, dann umbenennen
+        try:
+            sftp.remove(ziel_datei)
+        except FileNotFoundError:
+            pass
+        sftp.rename(tmp, ziel_datei)
+
+
+def spiegeln(quelle: Path, ziel: str, probe: bool, alles: bool = False) -> dict:
     lok_dateien, lok_ordner = lokal_auflisten(quelle)
     client, sftp = verbinden()
     try:
@@ -94,6 +124,9 @@ def spiegeln(quelle: Path, ziel: str, probe: bool) -> dict:
         except FileNotFoundError:
             sys.exit(f"FEHLER: Zielordner {ziel} gibt es auf dem Server nicht")
         ent_dateien, ent_ordner = entfernt_auflisten(sftp, ziel)
+        summen = {} if alles else pruefsummen_laden(sftp, ziel)
+        if not summen and not alles and ent_dateien:
+            print(f"  (noch keine {PRUEFSUMMEN} auf dem Server – dieses Mal wird alles hochgeladen)")
         zahl = {"hoch": 0, "gleich": 0, "geloescht": 0, "ordner": 0}
 
         for rel in sorted(lok_ordner - ent_ordner, key=lambda r: r.count("/")):
@@ -102,17 +135,19 @@ def spiegeln(quelle: Path, ziel: str, probe: bool) -> dict:
             if not probe:
                 sftp.mkdir(posixpath.join(ziel, rel))
 
-        for rel, (groesse, mtime) in lok_dateien.items():
+        neue_summen = {}
+        for rel, (groesse, summe) in lok_dateien.items():
             alt = ent_dateien.get(rel)
-            if alt and alt[0] == groesse and alt[1] >= mtime:
+            # gleich = auf dem Server vorhanden, gleiche Größe, und zuletzt mit genau diesem Inhalt hochgeladen
+            if alt and alt[0] == groesse and summen.get(rel) == summe:
                 zahl["gleich"] += 1
+                neue_summen[rel] = summe
                 continue
             print(f"  {'Neu' if not alt else 'Aktualisieren'}: {rel}")
             zahl["hoch"] += 1
             if not probe:
-                pfad = posixpath.join(ziel, rel)
-                sftp.put(str(quelle / rel), pfad, confirm=True)
-                sftp.utime(pfad, (mtime, mtime))
+                sftp.put(str(quelle / rel), posixpath.join(ziel, rel), confirm=True)
+                neue_summen[rel] = summe
 
         for rel in sorted(set(ent_dateien) - set(lok_dateien)):
             print(f"  Löschen: {rel}")
@@ -125,7 +160,9 @@ def spiegeln(quelle: Path, ziel: str, probe: bool) -> dict:
                 try:
                     sftp.rmdir(posixpath.join(ziel, rel))
                 except OSError:
-                    print(f"    (nicht leer – enthält ausgenommene Dateien, bleibt stehen)")
+                    print("    (nicht leer – enthält ausgenommene Dateien, bleibt stehen)")
+        if not probe and (zahl["hoch"] or zahl["geloescht"] or neue_summen != summen):
+            pruefsummen_schreiben(sftp, ziel, neue_summen)
         return zahl
     finally:
         sftp.close()
@@ -137,6 +174,7 @@ def main() -> int:
     ap.add_argument("quelle")
     ap.add_argument("ziel")
     ap.add_argument("--probe", action="store_true", help="nur anzeigen, nichts ändern")
+    ap.add_argument("--alles", action="store_true", help="alles neu hochladen (Prüfsummen ignorieren)")
     args = ap.parse_args()
     quelle = Path(args.quelle)
     if not quelle.is_dir():
@@ -147,7 +185,7 @@ def main() -> int:
     ziel = ziel.rstrip("/") or "/"
     for versuch in range(1, 4):   # Spiegeln ist wiederholbar – nach Verbindungsabbruch einfach von vorn
         try:
-            zahl = spiegeln(quelle, ziel, args.probe)
+            zahl = spiegeln(quelle, ziel, args.probe, args.alles)
             print(("Probelauf: " if args.probe else "Fertig: ")
                   + f"{zahl['hoch']} hochgeladen, {zahl['geloescht']} gelöscht, {zahl['ordner']} Ordner neu, {zahl['gleich']} unverändert")
             return 0

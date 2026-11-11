@@ -369,10 +369,11 @@ Ordner `_behalten/` (für Dateien, die nicht aus dem Generator kommen).
 **Erster Start:** Workflow von Hand mit Häkchen „Probelauf“ starten und im Protokoll prüfen, dass
 Ordner und Dateien stimmen. Danach von Hand ohne Häkchen starten oder einfach pushen.
 
-**Hochladen ohne lftp:** Hochgeladen wird mit `lftp` (aus den Ubuntu-Paketquellen). Sind die bei GitHub
-gestört, übernimmt nach spätestens 4 Minuten `hochladen.py` (Python, per `pip`) – mit denselben Regeln:
-Gelöschtes entfernen, Ausnahmen oben nicht anfassen, Server-Schlüssel prüfen. Im Protokoll steht dann die
-Warnung „lftp nicht installierbar“. Von Hand: `SFTP_HOST=… SFTP_USER=… SFTP_PASSWORD=… python hochladen.py dist/ <ordner> --probe`.
+**Hochladen:** übernimmt `hochladen.py` (Python, per `pip` – kein apt/lftp nötig). Es lädt nur Dateien hoch,
+deren Inhalt sich geändert hat: die Prüfsummen merkt es sich auf dem Server in `.calavera-pruefsummen.json`
+(nicht löschen – sonst wird beim nächsten Mal einmal alles hochgeladen). Beim Start von Hand gibt es das Häkchen
+„Alles neu hochladen“. Lokal: `SFTP_HOST=… SFTP_USER=… SFTP_PASSWORD=… python hochladen.py dist/ <ordner> --probe`.
+Die frühere lftp-Variante steht auskommentiert im Workflow.
 
 Hinweise: GitHub startet geplante Läufe manchmal mit Verzögerung. In **öffentlichen** Repositories
 schaltet GitHub den täglichen Lauf nach 60 Tagen ohne Aktivität ab (Actions → Workflow → „Enable workflow“);
