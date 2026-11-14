@@ -104,6 +104,29 @@
       return st.getTime() - (parseFloat(t.getAttribute("data-stunden")) || 6) * 36e5 <= n && n < en;
     })[0] || null;
   }
+  // Titel nie mitten im Wort umbrechen: passt das längste Wort nicht in die Zeile, wird die Schrift kleiner
+  // (bis zur Hälfte). Erst wenn auch das nicht reicht, darf notfalls getrennt werden (CSS-Vorgabe ohne JS).
+  function wortPassen(el) {
+    el.style.fontSize = "";
+    el.style.overflowWrap = "normal";
+    if (!el.clientWidth) return;   // unsichtbar (z. B. ausgeblendete Kachel)
+    var fs = parseFloat(getComputedStyle(el).fontSize), min = fs * 0.5;
+    while (fs > min && el.scrollWidth > el.clientWidth + 1) {
+      fs -= fs > 40 ? 2 : 1;
+      el.style.fontSize = fs + "px";
+    }
+    if (el.scrollWidth > el.clientWidth + 1) { el.style.fontSize = ""; el.style.overflowWrap = ""; }
+  }
+  function allesPassen() { document.querySelectorAll(".t-title, .event-title").forEach(wortPassen); }
+  var passenPlan = 0;
+  window.addEventListener("resize", function () {
+    cancelAnimationFrame(passenPlan);
+    passenPlan = requestAnimationFrame(allesPassen);
+  });
+  allesPassen();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(allesPassen);   // Bebas Neue ist schmaler als die Ersatzschrift
+  window.addEventListener("load", allesPassen);   // nach Bildern/Kachel-Umbau unten noch einmal
+
   function tkZeigen() {
     var t = tkWahl();
     if (t === (tkAktiv && tkAktiv.vorlage)) return;
@@ -112,6 +135,7 @@
     if (!t) return;
     var el = t.content.querySelector(".tile").cloneNode(true);
     heroEl.querySelector(".hero-claim").appendChild(el);
+    el.querySelectorAll(".t-title").forEach(wortPassen);
     tkAktiv = { vorlage: t, el: el, start: new Date(t.getAttribute("data-start")), end: new Date(t.getAttribute("data-end")),
                 lab: el.querySelector("[data-label]"), count: el.querySelector("[data-count]") };
     var d = tkAktiv.count && tkAktiv.count.getAttribute("data-doors");
