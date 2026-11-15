@@ -2,6 +2,11 @@
 {% from "partials/tile.html" import tile %}
 {% set title = "Programm" %}
 {% set description = "Alle kommenden Partys und Konzerte im Calavera, Körnerwall 1, Bremen." %}
+{% block head %}
+<script type="application/ld+json">
+{{ club_ld|tojson }}
+</script>
+{% endblock %}
 {% block content %}
 <section class="page-head wrap">
   <p class="kicker">{{ span or "Calavera Bremen" }}</p>

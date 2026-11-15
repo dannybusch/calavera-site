@@ -484,8 +484,10 @@ def oeffnungszeiten_schema(text: str) -> list[dict]:
              "opens": auf, "closes": zu}]
 
 
-def club_json_ld(cfg: dict) -> dict:
-    """Strukturierte Daten für den Club selbst (Startseite): schema.org/NightClub."""
+def club_json_ld(cfg: dict, events: list | None = None, max_events: int = 20) -> dict:
+    """Strukturierte Daten für den Club selbst (Startseite, Programm): schema.org/NightClub –
+    mit den kommenden Veranstaltungen samt Titel. Ohne sie leiten Suchmaschinen/KI-Antworten aus den
+    Öffnungszeiten ("Fr + Sa") nur namenlose "Party"-Termine für jeden Freitag und Samstag ab."""
     site, club = cfg["site"], cfg["club"]
     base = site["url"].rstrip("/")
     data = {
@@ -510,6 +512,8 @@ def club_json_ld(cfg: dict) -> dict:
     if eintritt:
         data["publicAccess"] = True
         data["description"] = (data["description"] + " Eintritt: " + eintritt + ".").strip()
+    if events:
+        data["event"] = [{k: v for k, v in ev.json_ld(site, club).items() if k != "@context"} for ev in events[:max_events]]
     return {k: v for k, v in data.items() if v not in ("", [], None)}
 
 
@@ -1356,9 +1360,9 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     render("index.html", "/", page_path="/", events=upcoming[:home_max],
            fx_css=fx_css_for([fx for ev in upcoming[:home_max][:fx_n] + uebernahme for fx in ev.effekte]),
            more=max(0, len(upcoming) - home_max), cols=cols, span=months_span(upcoming[:home_max]),
-           uebernahme=uebernahme, uebernahme_h=uebernahme_h, club_ld=club_json_ld(cfg))
+           uebernahme=uebernahme, uebernahme_h=uebernahme_h, club_ld=club_json_ld(cfg, upcoming))
     render("programm.html", "/programm/", page_path="/programm/", events=upcoming, cols=cols, fx_css=fx_list(upcoming),
-           span=months_span(upcoming), has_archive=bool(past))
+           span=months_span(upcoming), has_archive=bool(past), club_ld=club_json_ld(cfg, upcoming, max_events=50))
     render("archiv.html", "/programm/archiv/", page_path="/programm/archiv/", events=past)
 
     reihen = load_reihen(cfg)
