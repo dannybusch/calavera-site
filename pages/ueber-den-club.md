@@ -15,7 +15,7 @@ Im **Februar 2022** hat eine Crowdfunding-Kampagne die drohende Schließung verh
 
 ## Vor dem Calavera
 
-Bevor hier das Calavera eröffnete, hieß der Ort **Planet Claire**, davor **Callas**. Und noch davor war hier das **Pims** – ein Club für bezahlte Kontaktanbahnung.
+Bevor hier das Calavera eröffnete, hieß der Ort **Planet Claire**, davor **Callas**. Und noch davor war hier das **Pims**.
 
 ## Wen wir uns wünschen
 
