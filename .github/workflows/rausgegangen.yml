@@ -3,7 +3,8 @@
 #
 #  Läuft automatisch nach jedem erfolgreichen "Bauen und veröffentlichen"
 #  (dann sind die Bilder schon online) und von Hand: Actions → "rausgegangen" → "Run workflow".
-#  Braucht das Secret RAUSGEGANGEN_API_KEY (Settings → Secrets and variables → Actions).
+#  Braucht das Secret RAUSGEGANGEN_API_KEY – in der Umgebung "calavera-site.env" (Settings → Environments)
+#  oder repository-weit (Settings → Secrets and variables → Actions).
 #  Ohne Secret passiert nichts.
 # ------------------------------------------------------------------
 
@@ -34,7 +35,9 @@ permissions:
 jobs:
   eintragen:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    # Variables/Secrets liegen in der GitHub-Umgebung des Deploys – ohne diese Zeile sind sie leer
+    environment: calavera-site.env
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Projekt holen

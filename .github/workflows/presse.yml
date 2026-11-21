@@ -5,8 +5,9 @@
 #  und startet geplante Läufe manchmal etwas später) geht die Mitteilung für die laufende
 #  Woche an die Adresse(n) unter presse.an in config.yml – zum Prüfen und Weiterleiten.
 #  Von Hand: Actions → "Pressemitteilung" → "Run workflow".
-#  Braucht die Variables SMTP_HOST, SMTP_PORT, SMTP_USER (optional SMTP_SICHERHEIT) und das Secret
-#  SMTP_PASSWORD. Fehlt etwas: von Hand gestartet → rot, geplanter Lauf → gelbe Warnung; Text und HTML
+#  Braucht in der GitHub-Umgebung "calavera-site.env" (Settings → Environments) die Variables
+#  SMTP_HOST, SMTP_PORT, SMTP_USER (optional SMTP_SICHERHEIT) und das Secret SMTP_PASSWORD
+#  (Repository-weite Variables/Secrets gehen auch). Fehlt etwas: von Hand gestartet → rot, geplanter Lauf → gelbe Warnung; Text und HTML
 #  liegen immer unter "Artifacts". Was passiert ist, steht oben in der Zusammenfassung des Laufs.
 # ------------------------------------------------------------------
 
@@ -35,6 +36,8 @@ permissions:
 
 jobs:
   presse:
+    # Variables/Secrets (SMTP_*) liegen in der GitHub-Umgebung des Deploys – ohne diese Zeile sind sie leer
+    environment: calavera-site.env
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:

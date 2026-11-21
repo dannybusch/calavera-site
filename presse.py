@@ -294,7 +294,8 @@ def senden(cfg: dict, m: dict, text: str, html_text: str) -> None:
     if not (host and user and pw):
         fehlt = ", ".join(k for k, v in (("SMTP_HOST", host), ("SMTP_USER", user), ("SMTP_PASSWORD", pw)) if not v)
         meldung = (f"Pressemitteilung NICHT gesendet: es fehlt {fehlt} (GitHub → Settings → Secrets and variables → Actions: "
-                   "SMTP_HOST/SMTP_PORT/SMTP_USER unter Variables, SMTP_PASSWORD unter Secrets).")
+                   "SMTP_HOST/SMTP_PORT/SMTP_USER als Variables, SMTP_PASSWORD als Secret – in der Umgebung "
+                   "calavera-site.env oder repository-weit).")
         if os.environ.get("GITHUB_ACTIONS") and os.environ.get("GITHUB_EVENT_NAME") == "schedule":
             zusammenfassung(meldung, "warning")   # geplanter Lauf vor der Einrichtung: gelb statt jede Woche rot
             return
