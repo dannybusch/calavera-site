@@ -1,0 +1,23 @@
+--- a/.github/workflows/deploy.yml	2026-11-21 16:39:30.228501773 +0000
++++ b/.github/workflows/deploy.yml	2026-11-21 16:44:57.210047553 +0000
+@@ -4,6 +4,7 @@
+ #  Läuft
+ #    - bei jedem Push auf den Branch "main"
+ #    - täglich nach Clubschluss (damit Vergangenes ins Archiv wandert)
++#    - 30.11.–23.12. zusätzlich kurz nach Mitternacht (neue Tür im Adventskalender)
+ #    - von Hand: GitHub → Actions → "Bauen und veröffentlichen" → "Run workflow"
+ #      (dort standardmäßig als Probelauf: zeigt nur an, was passieren würde)
+ #
+@@ -38,6 +39,12 @@
+     # GitHub rechnet in UTC: 04:17 UTC = 05:17 Uhr Winterzeit / 06:17 Uhr Sommerzeit.
+     # (Ungerade Minute, weil GitHub zur vollen Stunde oft stark verzögert.)
+     - cron: "17 4 * * *"
++    # Adventskalender: neue Tür kurz nach Mitternacht. 23:07 UTC = 00:07 Uhr Bremer Zeit (Dezember = Winterzeit),
++    # also am 30.11. für Tür 1 und vom 1. bis 23.12. für Tür 2–24. GitHub startet geplante Läufe teils
++    # mit Verspätung (meist Minuten, selten bis ~1 h); spätestens der Lauf um 05:17 Uhr holt es nach.
++    # hochladen.py lädt dabei nur geänderte Dateien hoch (praktisch nur /adventskalender/, Sitemap, llms.txt).
++    - cron: "7 23 30 11 *"
++    - cron: "7 23 1-23 12 *"
+   workflow_dispatch:
+     inputs:
+       dry_run:

@@ -42,6 +42,7 @@ zwischen den Läufen fest.
 | `events/` | **eine `.md` pro Veranstaltung**, Visual daneben mit gleichem Namen |
 | `pages/` | feste Seiten: Safe Space, Über den Club, Calavera mieten, Kontakt, Datenschutz |
 | `landing/` | Landingpages wie `/dark/` und `/party/`: eigener Text + SEO-Angaben, Termine kommen automatisch |
+| `advent/` | Adventskalender (`adventskalender2026.yml` → `/adventskalender/`) – wird nie ausgeliefert |
 | `templates/` | HTML-Vorlagen (Jinja2) |
 | `static/` | CSS, Script, Schriften, Logo – alles lokal, nichts von Google |
 | `dist/` | Ergebnis, wird bei jedem Build komplett neu geschrieben |
@@ -211,7 +212,7 @@ Calavera“ (damit die Seite auch in Programmpausen etwas zeigt). Alle Möglichk
 | `seo_title` | Titel im Browser-Tab und bei Google (sonst `title`) |
 | `description` | Beschreibung für Google (ca. 155 Zeichen) |
 | `kicker`, `lead`, `link_text` | Zeile über der Überschrift, Satz darunter, Linktext auf anderen Seiten |
-| `rueckverlink: false` | Veranstaltungsseiten und andere Landingpages verlinken nicht hierher, nur `/programm/` (Sammelseite wie `/party/`, keine Reihe) |
+| `rueckverlink: false` | keine sichtbaren Links hierher – weder Programm noch Landingpages noch Veranstaltungsseiten; nur Sitemap/`llms.txt` (Sammelseite wie `/party/`) |
 | `zeigt:` | welche Termine: `reihen: [dark]`, `genres: [...]`, `ohne_reihen: [dark]`, `nur_partys: true` (ohne alles mit `art:`) |
 | `faq:` | Häufige Fragen (`frage:`/`antwort:`) – sichtbar auf der Seite und als FAQ für Google/KI |
 | `archiv`, `leer`, `bild`, `noindex`, `draft` | Anzahl vergangener Termine, Text bei leerem Programm, Vorschaubild, Suchmaschinen aus, Entwurf |
@@ -234,8 +235,46 @@ alles darunter unter den Kacheln (Platz für ausführlicheren Text mit `##`-Zwis
 Derzeit: `/dark/` zeigt alle Termine mit `reihe: dark`, `/party/` alle übrigen Partys (ohne Dark und ohne
 Konzerte/Lesungen). Für Suchmaschinen bekommt jede Landingpage `CollectionPage`-JSON-LD mit allen kommenden
 Terminen, Brotkrumen und ggf. `FAQPage`; sie steht in `sitemap.xml` und `llms.txt`. Verlinkt wird sie aus dem
-Programm (Knöpfe unten) und von jeder passenden Veranstaltungsseite („Alle Dark-Partys →“). Ins Hauptmenü
+Programm (Knöpfe unten) und von jeder passenden Veranstaltungsseite („Alle Dark-Partys →“) – außer bei
+`rueckverlink: false` (so bei `/party/`: keine sichtbaren Links, nur Sitemap und `llms.txt`). Ins Hauptmenü
 kommt sie nur über `config.yml → navigation`.
+
+## Adventskalender (`/adventskalender/`)
+
+24 Türen, hinter jeder ein Lieblingssong von jemandem aus dem Team oder von den DJs, mit ein paar Sätzen
+dazu und Links zu YouTube Music, Bandcamp & Co. Gepflegt wird alles in **`advent/adventskalender2026.yml`**
+(Format oben in der Datei erklärt). Danach `python build.py`.
+
+**Was online steht – und was nicht:**
+
+- Die YAML-Datei wird **nie** hochgeladen (nach `dist/` kommt nur `static/` und das fertige HTML).
+- Ins HTML schreibt der Build nur Türen, deren Tag **schon erreicht** ist (Bremer Zeit, Build-Zeitpunkt).
+  Künftige Türen bestehen nur aus Zahl und Datum. Im Quelltext, im Script, im JSON-LD und in `llms.txt`
+  steht nichts über sie – auch nicht, ob sie schon ausgefüllt sind.
+- Eine Tür erscheint erst, wenn `song`, `kuenstler` und `person` ausgefüllt sind. Ist ihr Tag erreicht und
+  sie ist noch leer, steht „Folgt in Kürze“ auf der Tür (der Build meldet das, bricht aber nicht ab).
+- `draft: true` oben in der Datei: Seite wird gar nicht gebaut (Start: auf `false` setzen).
+
+**Neue Tür um Mitternacht:** Weil die Seite statisch ist, geht eine Tür mit dem ersten Build nach Mitternacht
+auf. Dafür läuft der Deploy vom 30.11. bis 23.12. zusätzlich um 23:07 UTC = **00:07 Uhr** (Dezember =
+Winterzeit). GitHub startet geplante Läufe manchmal verspätet; spätestens der normale Lauf um 05:17 Uhr
+holt es nach. Seiten werden mit `Cache-Control: no-cache` ausgeliefert (`.htaccess`), Browser holen also
+immer den neuen Stand.
+
+**Testen:** `python build.py --now "2026-12-07 12:00" --serve` → `http://localhost:8000/adventskalender/`.
+Einzelne Tür direkt öffnen (auch zum Teilen): `/adventskalender/#tuer-7`.
+
+**Menü:** in `config.yml → navigation` (pflegt Danny):
+
+```yaml
+  - { label: "Adventskalender", href: "/adventskalender/" }
+```
+
+Für Suchmaschinen: `CollectionPage`-JSON-LD mit den geöffneten Türen als `MusicRecording`, Eintrag in
+`sitemap.xml` und `llms.txt` (nur Geöffnetes). Ohne JavaScript stehen die geöffneten Türen als Liste unter dem
+Raster; mit JavaScript öffnen sie sich als Fenster (`static/js/adventskalender.js`, `static/css/adventskalender.css`,
+Template `templates/adventskalender.html`). Für ein neues Jahr: Datei kopieren (`adventskalender2027.yml`),
+die neueste Datei ohne `draft: true` gewinnt.
 
 ## 3 oder 4 Kacheln pro Reihe
 
@@ -445,6 +484,7 @@ Der Workflow läuft:
 
 - bei jedem **Push auf `main`**,
 - **täglich** um 04:17 UTC (05:17 Uhr Winterzeit / 06:17 Uhr Sommerzeit), damit Vergangenes ins Archiv wandert,
+- vom **30.11. bis 23.12. zusätzlich um 23:07 UTC** (00:07 Uhr), damit die neue Tür im Adventskalender aufgeht,
 - **von Hand** unter Actions → „Bauen und veröffentlichen“ → „Run workflow“ – dort standardmäßig als
   **Probelauf**, der nur anzeigt, was hochgeladen und gelöscht würde.
 

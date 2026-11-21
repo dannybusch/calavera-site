@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="de" class="js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf B · Plattenkiste · Adventskalender · Calavera</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../../static/img/calavera_logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../static/css/site.css">
+<style>
+/* ===== Entwurf B – „Plattenkiste“: 24 Plattenhüllen, die Platte rutscht beim Öffnen heraus ===== */
+.ph-band { position: sticky; top: 0; z-index: 50; background: #e9c46a; color: #1a1a1a; font: 500 12px/1 var(--mono); letter-spacing: .1em;
+  text-transform: uppercase; text-align: center; padding: 8px 12px; }
+.ph { text-decoration: underline dotted rgba(233,196,106,.7); text-underline-offset: 4px; text-decoration-thickness: 1.5px; }
+
+.pk-hero { padding-top: calc(var(--logo-h) - var(--bar-h) + 54px); padding-bottom: 36px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 24px; }
+.pk-hero .display--page span { color: var(--accent-display); }
+.pk-hero .lead { margin-top: 18px; }
+.pk-stand { text-align: right; }
+.pk-stand b { display: block; font-family: var(--display); font-weight: 400; font-size: 96px; line-height: .85; color: var(--text); }
+.pk-stand b small { font-size: 44px; color: var(--muted); }
+
+/* Kiste: Platten stehen auf einer Leiste */
+.pk-kiste { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 40px var(--gap); padding-bottom: 110px; }
+.pl { position: relative; aspect-ratio: 1; border: 0; padding: 0; margin: 0; background: none; cursor: pointer; color: inherit; font: inherit; text-align: left; }
+.pl::after { /* Regalbrett-Schatten */ content: ""; position: absolute; left: -4%; right: -4%; bottom: -14px; height: 10px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0,0,0,.9), transparent); z-index: -1; }
+
+/* Platte (schaut bei offenen Türen oben heraus) */
+.pl-vinyl { position: absolute; left: 8%; top: 4%; width: 88%; aspect-ratio: 1; border-radius: 50%; transition: transform .6s cubic-bezier(.2,.7,.2,1);
+  background: radial-gradient(circle, #111 0 3%, var(--accent) 3.4% 17%, #0f0f0f 17.5% 19%, #262422 19.5%, #121212 23%, #252321 26%, #111 30%, #23211f 34%, #121212 39%, #252321 45%, #111 52%, #22201e 60%, #111 68%, #22201e 76%, #101010 84%, #1f1d1b 92%, #0c0c0c 98%);
+  box-shadow: 0 0 0 1px #3a3633, inset 0 0 0 3px #1e1d1c, 0 -2px 12px rgba(255,255,255,.04); }
+.pl.is-offen .pl-vinyl { transform: translateY(-17%); }
+.pl.is-heute .pl-vinyl { transform: translateY(-9%); }
+.pl.is-offen:hover .pl-vinyl, .pl.is-heute:hover .pl-vinyl { transform: translateY(-24%); }
+
+/* Hülle */
+.pl-sleeve { position: absolute; inset: 0; border-radius: 2px; overflow: hidden; background: var(--c1);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 10px 24px rgba(0,0,0,.55); transition: transform .3s ease; }
+.pl:hover .pl-sleeve { transform: translateY(-3px); }
+.pl-num { position: absolute; font-family: var(--display); line-height: .8; color: var(--c3); }
+.pl-meta { position: absolute; left: 10px; bottom: 9px; right: 10px; display: flex; justify-content: space-between; gap: 6px;
+  font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--c3); opacity: .8; }
+
+/* fünf Cover-Muster – nur Farben der Seite: Schwarz, Rot, Hell */
+.m0 { --c1: #b3122e; --c3: #f1ebe2; }
+.m0 .pl-art { position: absolute; inset: 14% 14% auto auto; width: 56%; aspect-ratio: 1; border-radius: 50%; background: #0b0b0b; }
+.m0 .pl-num { left: 10px; bottom: 26px; font-size: 92px; }
+.m1 { --c1: #f1ebe2; --c3: #0b0b0b; }
+.m1 .pl-art { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #0b0b0b 0 9px, transparent 9px 18px); clip-path: inset(0 0 52% 0); }
+.m1 .pl-num { right: 10px; bottom: 24px; font-size: 96px; color: #b3122e; }
+.m2 { --c1: #141414; --c3: #d1cabf; }
+.m2 .pl-art { position: absolute; inset: 0; background: radial-gradient(circle, #b3122e 1.6px, transparent 2.2px) 0 0 / 11px 11px;
+  -webkit-mask: linear-gradient(135deg, #000 30%, transparent 75%); mask: linear-gradient(135deg, #000 30%, transparent 75%); }
+.m2 .pl-num { right: 12px; bottom: 26px; font-size: 104px; }
+.m3 { --c1: #0b0b0b; --c3: #f1ebe2; }
+.m3 .pl-art { position: absolute; inset: 0; background: linear-gradient(160deg, transparent 54%, #b3122e 54.2%); }
+.m3 .pl-num { left: 12px; top: 10px; font-size: 120px; -webkit-text-stroke: 1.5px #f1ebe2; color: transparent; }
+.m4 { --c1: #d1cabf; --c3: #0b0b0b; }
+.m4 .pl-art { position: absolute; left: 50%; top: 50%; width: 70%; aspect-ratio: 1; translate: -50% -55%; border-radius: 50%;
+  background: repeating-radial-gradient(circle, #0b0b0b 0 2px, transparent 2px 7px); opacity: .9; }
+.m4 .pl-num { left: 50%; top: 50%; translate: -50% -62%; font-size: 72px; background: #d1cabf; padding: 4px 8px 0; color: #b3122e; }
+
+/* Noch zu: eingeschweißt, Preisaufkleber mit Datum */
+.pl.is-zu { cursor: not-allowed; }
+.pl.is-zu .pl-sleeve { filter: saturate(.2) brightness(.45); }
+.pl-folie { position: absolute; inset: 0; border-radius: 2px; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.14) 38%, rgba(255,255,255,0) 46%, rgba(255,255,255,0) 62%, rgba(255,255,255,.08) 68%, rgba(255,255,255,0) 74%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+.pl-sticker { position: absolute; right: -8px; top: -8px; width: 62px; height: 62px; border-radius: 50%; background: #f1ebe2; color: #0b0b0b;
+  display: grid; place-items: center; text-align: center; font: 500 10px/1.15 var(--mono); letter-spacing: .04em; text-transform: uppercase;
+  transform: rotate(10deg); box-shadow: 0 4px 10px rgba(0,0,0,.5); }
+.pl-sticker b { display: block; font-family: var(--display); font-weight: 400; font-size: 22px; letter-spacing: 0; line-height: .9; }
+.pl.is-heute .pl-sticker { background: var(--accent); color: #f1ebe2; width: 74px; height: 74px; font-size: 11px; animation: wipp 2.6s ease-in-out infinite; }
+@keyframes wipp { 50% { transform: rotate(-4deg) scale(1.06); } }
+.pl.wackeln .pl-sleeve { animation: ruck .4s ease; }
+@keyframes ruck { 25% { transform: translateX(-4px); } 50% { transform: translateX(3px); } 75% { transform: translateX(-2px); } }
+
+.toast { position: fixed; left: 50%; bottom: 28px; z-index: 60; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: #f1ebe2; color: #0b0b0b; padding: 12px 18px; border-radius: 999px; font: 500 13px/1.3 var(--mono); letter-spacing: .04em;
+  box-shadow: 0 18px 40px rgba(0,0,0,.6); transition: opacity .2s, transform .2s; }
+.toast.zeigen { opacity: 1; transform: translate(-50%, 0); }
+
+/* ===== Geöffnete Tür: Platte zieht sich aus der Hülle und dreht sich ===== */
+dialog.pk { width: min(1120px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: 0; border-radius: 10px; overflow: auto;
+  background: #0f0f0f; color: var(--text); box-shadow: 0 40px 120px rgba(0,0,0,.85), inset 0 0 0 1px #2c2a29; }
+dialog.pk::backdrop { background: rgba(5,5,5,.86); backdrop-filter: blur(3px); }
+.pk-in { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+.pk-buehne { position: relative; padding: 44px 0 44px 40px; min-height: 520px; display: flex; align-items: center;
+  background: radial-gradient(120% 90% at 30% 50%, #1d1b1a, #0f0f0f 70%); overflow: hidden; }
+.pk-buehne .pl-sleeve { position: relative; inset: auto; width: 62%; aspect-ratio: 1; z-index: 2; flex: 0 0 auto; }
+.pk-buehne .pl-num { font-size: 190px !important; }
+.pk-buehne .m4 .pl-num, .pk-buehne.m4 .pl-num { font-size: 140px !important; }
+.pk-platte { position: absolute; left: 40px; top: 50%; width: calc((100% - 40px) * .58); aspect-ratio: 1; margin-top: calc((100% - 40px) * -.29);
+  z-index: 1; animation: raus 1.1s cubic-bezier(.2,.7,.2,1) .15s both; }
+.pk-platte .pl-vinyl { position: absolute; inset: 0; left: 0; top: 0; width: 100%; transform: none !important; animation: dreh 1.8s linear infinite; }
+.pk-platte .pl-vinyl::after { /* Glanz */ content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 20deg, transparent 0 10%, rgba(255,255,255,.07) 14%, transparent 20% 60%, rgba(255,255,255,.05) 64%, transparent 70%); }
+.pk-label { position: absolute; left: 50%; top: 50%; width: 34%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: var(--accent);
+  display: grid; place-items: center; text-align: center; color: #f1ebe2; font: 500 9px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.pk-label b { display: block; font-family: var(--display); font-weight: 400; font-size: 46px; letter-spacing: 0; line-height: .9; }
+.pk-label::after { content: ""; position: absolute; width: 7%; aspect-ratio: 1; border-radius: 50%; background: #0b0b0b; }
+@keyframes raus { from { transform: translateX(0); } to { transform: translateX(66%); } }
+@keyframes dreh { to { rotate: 360deg; } }
+
+.pk-notes { padding: 34px 36px 28px; display: flex; flex-direction: column; gap: 16px; }
+.pk-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.pk-x { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface-3); color: var(--text); cursor: pointer; display: grid; place-items: center; }
+.pk-x:hover { background: #262626; }
+.chip--ph { background: transparent; color: #e9c46a; box-shadow: inset 0 0 0 1px rgba(233,196,106,.5); }
+.pk-seite { font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent-text); }
+.pk-song { margin: 0; font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: clamp(46px, 5.4vw, 76px); line-height: .9; }
+.pk-song:focus { outline: none; }
+.pk-artist { margin: -4px 0 0; font-size: 19px; color: var(--text-2); }
+.pk-who { margin: 0; font: 400 13px/1.5 var(--mono); letter-spacing: .04em; color: var(--text-3); }
+.pk-who strong { color: var(--text); font-weight: 500; }
+.pk-text { margin: 0; font-size: 17px; line-height: 1.6; color: var(--text-2); padding-left: 16px; box-shadow: inset 2px 0 0 var(--accent); }
+.pk-tracks { list-style: none; margin: 4px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.pk-tracks a { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 10px; min-height: 52px; border-bottom: 1px solid var(--line);
+  font: 500 14px/1 var(--mono); letter-spacing: .04em; color: var(--text); }
+.pk-tracks a:hover { color: var(--text); background: var(--surface-2); }
+.pk-tracks .ic { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-3); color: var(--text-2); }
+.pk-tracks li:first-child .ic { background: var(--accent); color: #f1ebe2; }
+.pk-tracks .hint { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding-right: 6px; }
+.pk-nav { margin-top: auto; display: flex; justify-content: space-between; padding-top: 4px; }
+.pk-nav button { background: none; border: 0; color: var(--text-3); font: 500 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; cursor: pointer; padding: 10px 0; }
+.pk-nav button:hover { color: var(--text); }
+.pk-nav button:disabled { opacity: .3; cursor: default; }
+
+@media (max-width: 1100px) { .pk-kiste { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .pk-hero { grid-template-columns: 1fr; }
+  .pk-stand { text-align: left; } .pk-stand b { font-size: 64px; } .pk-stand b small { font-size: 30px; }
+  .pk-kiste { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 12px; }
+  .pl-num { font-size: 52px !important; } .m4 .pl-num { font-size: 40px !important; } .m3 .pl-num { -webkit-text-stroke-width: 1px; }
+  .pl-meta { display: none; }
+  .pl-sticker { width: 46px; height: 46px; font-size: 8px; right: -6px; top: -6px; } .pl-sticker b { font-size: 16px; }
+  .pl.is-heute .pl-sticker { width: 54px; height: 54px; font-size: 8px; }
+  .pk-in { grid-template-columns: 1fr; }
+  .pk-buehne { min-height: 0; padding: 26px 0 26px 20px; }
+  .pk-buehne .pl-sleeve { width: 56%; }
+  .pk-buehne .pl-num { font-size: 84px !important; } .pk-buehne .m4 .pl-num { font-size: 60px !important; }
+  .pk-platte { left: 20px; width: calc((100% - 20px) * .52); margin-top: calc((100% - 20px) * -.26); }
+  .pk-label b { font-size: 26px; } .pk-label { font-size: 6px; }
+  .pk-notes { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pk-platte { animation: none; transform: translateX(66%); } .pk-platte .pl-vinyl, .pl.is-heute .pl-sticker { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="ph-band">Entwurf B · alle Songs, Namen und Texte sind Platzhalter</div>
+<header class="site-header">
+  <div class="bar wrap">
+    <a class="brand" href="#" aria-label="Calavera – Startseite"><span class="brand-rod" aria-hidden="true"></span><span class="brand-rod brand-rod--r" aria-hidden="true"></span>
+      <img src="../../static/img/calavera_logo.svg" alt="Calavera" width="1024" height="789"></a>
+    <nav class="nav" id="hauptmenue" aria-label="Hauptmenü"><ul><li><a href="#">Programm</a></li><li><a href="#" aria-current="page">Advent</a></li><li><a href="#">Über uns</a></li><li><a href="#">Kontakt</a></li></ul></nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="hauptmenue"><span class="menu-label">Menü</span>
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path class="i-open" d="M4 7h16M4 12h16M4 17h16"/><path class="i-close" d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+</header>
+
+<main class="site-main">
+  <section class="wrap pk-hero">
+    <div>
+      <p class="kicker">Calavera · Advent 2026</p>
+      <h1 class="display display--page">Die <span>Platten&shy;kiste</span></h1>
+      <p class="lead ph">Platzhalter für Dannys Einleitung: 24 Platten bis Heiligabend. Jeden Tag zieht jemand aus dem Team oder von den DJs eine Lieblingsplatte aus der Kiste – und erzählt, warum.</p>
+    </div>
+    <p class="pk-stand"><span class="label">Schon gezogen</span><b id="stand"></b></p>
+  </section>
+  <section class="wrap"><div class="pk-kiste" id="kiste"></div></section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<dialog class="pk" id="dlg" aria-labelledby="dlg-song">
+  <div class="pk-in">
+    <div class="pk-buehne" id="dlg-buehne"></div>
+    <div class="pk-notes">
+      <div class="pk-top"><span class="pk-seite" id="dlg-seite"></span><span><span class="chip chip--ph">Platzhalter</span></span>
+        <button class="pk-x" type="button" data-zu aria-label="Schließen"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <h2 class="pk-song ph" id="dlg-song" tabindex="-1" autofocus></h2>
+      <p class="pk-artist ph" id="dlg-artist"></p>
+      <p class="pk-who">Aus der Kiste gezogen von <strong class="ph" id="dlg-person"></strong> <span class="ph" id="dlg-rolle"></span></p>
+      <p class="pk-text ph" id="dlg-text"></p>
+      <ul class="pk-tracks" id="dlg-links"></ul>
+      <div class="pk-nav"><button type="button" id="dlg-prev">← Vorige Platte</button><button type="button" id="dlg-next">Nächste Platte →</button></div>
+    </div>
+  </div>
+</dialog>
+
+<script src="daten.js"></script>
+<script>
+(function () {
+  var A = window.ADVENT, kiste = document.getElementById("kiste"), dlg = document.getElementById("dlg"), aktuell = 0;
+  var offenAnz = Math.min(A.heute, 24);
+  document.getElementById("stand").innerHTML = offenAnz + "<small>/24</small>";
+  function muster(n) { return "m" + ((n * 3) % 5); }
+  function huelle(t) {
+    return '<span class="pl-sleeve ' + muster(t.tag) + '"><span class="pl-art"></span><span class="pl-num">' + t.tag + '</span>' +
+      '<span class="pl-meta"><span>Calavera</span><span>Advent · ' + ("0" + t.tag).slice(-2) + '</span></span></span>';
+  }
+
+  A.tueren.forEach(function (t) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "pl is-" + t.status; b.dataset.tag = t.tag;
+    b.setAttribute("aria-label", "Platte " + t.tag + (t.status === "zu" ? ", ab " + t.datum : t.status === "heute" ? ", heute neu" : ", " + t.song));
+    var sticker = t.status === "zu" ? '<span class="pl-sticker"><span>ab<b>' + t.datum + '</b></span></span>'
+                : t.status === "heute" ? '<span class="pl-sticker"><span><b>Neu</b>heute</span></span>' : "";
+    b.innerHTML = '<span class="pl-vinyl"></span>' + huelle(t) + (t.status === "zu" ? '<span class="pl-folie"></span>' : "") + sticker;
+    kiste.appendChild(b);
+  });
+
+  var toast = document.getElementById("toast"), tt;
+  kiste.addEventListener("click", function (e) {
+    var b = e.target.closest(".pl"); if (!b) return;
+    var t = A.tueren[b.dataset.tag - 1];
+    if (t.status === "zu") {
+      b.classList.remove("wackeln"); void b.offsetWidth; b.classList.add("wackeln");
+      toast.textContent = "Noch eingeschweißt – Platte " + t.tag + " gibt's am " + t.wochentag + " " + t.datum;
+      toast.classList.add("zeigen"); clearTimeout(tt); tt = setTimeout(function () { toast.classList.remove("zeigen"); }, 2600);
+      return;
+    }
+    zeige(t.tag);
+  });
+
+  function zeige(n) {
+    var t = A.tueren[n - 1]; aktuell = n;
+    var bu = document.getElementById("dlg-buehne");
+    bu.innerHTML = '<span class="pk-platte"><span class="pl-vinyl"><span class="pk-label"><span><b>' + ("0" + n).slice(-2) + '</b>Calavera<br>Advent</span></span></span></span>' + huelle(t);
+    document.getElementById("dlg-seite").textContent = "Platte " + ("0" + n).slice(-2) + " · " + t.wochentag + " " + t.datum;
+    document.getElementById("dlg-song").textContent = t.song;
+    document.getElementById("dlg-artist").textContent = t.kuenstler + " · " + t.jahr;
+    document.getElementById("dlg-person").textContent = t.person;
+    document.getElementById("dlg-rolle").textContent = "(" + t.rolle + ")";
+    document.getElementById("dlg-text").textContent = t.text;
+    document.getElementById("dlg-links").innerHTML = t.links.map(function (l, i) {
+      return '<li><a href="' + l.url + '" rel="noopener"><span class="ic">' + ADVENT_ICON("play") + '</span><span>' + l.dienst + '</span><span class="hint">' + (i ? "Öffnen" : "Abspielen") + ' ↗</span></a></li>';
+    }).join("");
+    document.getElementById("dlg-prev").disabled = n <= 1;
+    document.getElementById("dlg-next").disabled = n >= offenAnz;
+    if (!dlg.open) dlg.showModal();
+  }
+  document.getElementById("dlg-prev").onclick = function () { zeige(aktuell - 1); };
+  document.getElementById("dlg-next").onclick = function () { zeige(aktuell + 1); };
+  dlg.addEventListener("click", function (e) { if (e.target === dlg || e.target.closest("[data-zu]")) dlg.close(); });
+  if (A.offen && A.offen <= offenAnz) zeige(A.offen);
+})();
+</script>
+</body>
+</html>

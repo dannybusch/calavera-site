@@ -13,8 +13,9 @@ description: "Ein Satz für Google, höchstens ca. 155 Zeichen. Was gibt es hier
 kicker: "Calavera Dark"                         # kleine Zeile über der Überschrift (hinter "Programm /")
 lead: "Ein kurzer Satz direkt unter der Überschrift."   # optional
 link_text: "Calavera Dark"                      # Linktext auf Veranstaltungsseiten und im Programm (sonst: title)
-# rueckverlink: false           # Veranstaltungsseiten und andere Landingpages verlinken NICHT hierher.
-#                               # Für Sammelseiten ohne eigene Reihe (z. B. /party/); nur /programm/ verlinkt weiterhin.
+# rueckverlink: false           # Keine sichtbaren Links hierher (Programm, Landingpages, Veranstaltungsseiten).
+#                               # Für Sammelseiten ohne eigene Reihe (z. B. /party/) – erreichbar nur über
+#                               # Suchmaschinen, sitemap.xml und llms.txt.
 
 # Welche Veranstaltungen gehören auf die Seite? (Kombinationen möglich)
 zeigt:

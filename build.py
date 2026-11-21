@@ -9,6 +9,7 @@ Liest
                     Visual daneben mit gleichem Namen oder per "visual:"
   pages/*.md        feste Seiten (Safe Space, Über den Club, …)
   landing/*.md      Landingpages (/dark/, /party/, …): eigener Text + passende Veranstaltungen
+  advent/*.yml      Adventskalender (/adventskalender/): nur bereits geöffnete Türen landen im HTML
   templates/        Jinja2-Vorlagen
   static/           CSS, JS, Schriften, Logo
 
@@ -187,6 +188,11 @@ def fx_particles(n: int, seed: str) -> list[dict]:
 def warn(msg: str) -> None:
     problems.append(msg)
     print(f"  ! {msg}")
+
+
+def hinweis(msg: str) -> None:
+    """Nur anzeigen, nicht als Problem zählen (bricht auch mit --strict den Deploy nicht ab)."""
+    print(f"  · {msg}")
 
 
 # ------------------------------------------------------------------ Hilfen
@@ -581,7 +587,8 @@ def club_json_ld(cfg: dict, events: list | None = None, max_events: int = 20) ->
     return {k: v for k, v in data.items() if v not in ("", [], None)}
 
 
-def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str, landings: list | None = None) -> str:
+def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str, landings: list | None = None,
+             advent: tuple | None = None) -> str:
     """llms.txt – klare Kurzfassung für KI-Suchdienste (https://llmstxt.org): wer, wo, wann, was es kostet, nächste Termine."""
     site, club = cfg["site"], cfg["club"]
     base = site["url"].rstrip("/")
@@ -616,6 +623,12 @@ def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str, landings
         for l in landings:
             if l.in_sitemap:
                 zeilen.append(f"- [{l.seo_title}]({base}{l.url})" + (f": {l.description}" if l.description else ""))
+    if advent and advent[0].in_sitemap:   # (Advent, geöffnete Türen) – nur Geöffnetes, nie Künftiges
+        a, offen = advent
+        zeilen += ["", f"## {a.seo_title}", "", f"- [{a.seo_title}]({base}{a.url}): {a.description}"]
+        for t in offen:
+            zeilen.append(f"- [Tür {t.tag} ({t.datum:%d.%m.}): {t.song} – {t.kuenstler}]({base}{a.url}#tuer-{t.tag})"
+                          f", ausgewählt von {t.person}" + (f" ({t.rolle})" if t.rolle else ""))
     zeilen += ["", "## Seiten", ""]
     for p in pages:
         if p.in_sitemap:
@@ -1422,6 +1435,175 @@ def process_landing_image(l: Landing, out: Path) -> None:
     l.bild_url = f"/media/landing/{l.slug}/{l.bild.name}"
 
 
+# ------------------------------------------------------------------ Adventskalender
+
+# Die Datei advent/adventskalender<jahr>.yml wird nie ausgeliefert (static/ ist der einzige kopierte Ordner).
+# Ins HTML kommen nur Türen, deren Tag erreicht ist; künftige Türen bestehen nur aus Zahl und Datum –
+# ob sie schon ausgefüllt sind, ist von außen nicht zu erkennen.
+ADVENT_SLUG = "adventskalender"
+ADVENT_DIENSTE = {"youtube_music": "YouTube Music", "bandcamp": "Bandcamp", "spotify": "Spotify",
+                  "apple_music": "Apple Music", "tidal": "Tidal", "soundcloud": "SoundCloud", "deezer": "Deezer"}
+# Reihenfolge im Raster: klassisch durcheinander, aber fest (sonst springt es bei jedem Build)
+ADVENT_MISCHUNG = (17, 3, 22, 9, 1, 14, 6, 20, 11, 24, 4, 15, 8, 19, 2, 12, 23, 7, 16, 10, 5, 21, 13, 18)
+ADVENT_GROSS = {24: "w2 h2", 6: "w2 keep", 13: "w2", 19: "w2"}   # größere Türen fürs Raster
+
+
+@dataclass
+class AdventTuer:
+    tag: int
+    datum: date
+    song: str = ""
+    kuenstler: str = ""
+    erschienen: str = ""
+    person: str = ""
+    rolle: str = ""
+    text_html: str = ""
+    links: list[dict] = field(default_factory=list)    # [{dienst, url}] in der Reihenfolge der Datei
+
+    @property
+    def fertig(self) -> bool:
+        return bool(self.song and self.kuenstler and self.person)
+
+
+@dataclass
+class Advent:
+    jahr: int
+    titel: str
+    kicker: str
+    einleitung: str
+    seo_title: str
+    description: str
+    tueren: dict[int, AdventTuer]
+    source: Path
+    in_sitemap: bool = True
+
+    @property
+    def url(self) -> str:
+        return f"/{ADVENT_SLUG}/"
+
+    @property
+    def titel_teile(self) -> tuple[str, str]:
+        """Überschrift aufteilen: der letzte Satz erscheint rot (wie der Claim auf der Startseite)."""
+        saetze = re.findall(r"[^.!?]+[.!?]*\s*", self.titel)
+        if len(saetze) < 2:
+            return self.titel, ""
+        return "".join(saetze[:-1]).strip(), saetze[-1].strip()
+
+
+def _advent_links(roh, wo: str) -> list[dict]:
+    links = []
+    if not isinstance(roh, dict):
+        return links
+    for key, wert in roh.items():
+        eintraege = ([(str(a.get("name") or "Link"), a.get("url")) for a in wert if isinstance(a, dict)]
+                     if key == "andere" and isinstance(wert, list) else [(ADVENT_DIENSTE.get(key, str(key)), wert)])
+        for name, url in eintraege:
+            url = str(url or "").strip()
+            if not url:
+                continue
+            if not re.match(r"https?://", url):
+                hinweis(f"{wo}: Link \"{url}\" beginnt nicht mit https:// – wird ignoriert")
+                continue
+            links.append({"dienst": name, "url": url})
+    return links
+
+
+def load_advent(belegt: set[str]) -> Advent | None:
+    """Neueste advent/adventskalender*.yml ohne draft: true. Ohne Datei: keine Seite."""
+    folder = ROOT / "advent"
+    if not folder.is_dir():
+        return None
+    for path in sorted(folder.glob("adventskalender*.yml"), reverse=True):
+        try:
+            d = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            if d.get("draft"):
+                continue
+            if ADVENT_SLUG in belegt:
+                warn(f"advent/{path.name}: Adresse /{ADVENT_SLUG}/ ist schon vergeben – Seite wird übersprungen")
+                return None
+            jahr = int(d.get("jahr") or 0)
+            if not 2000 <= jahr <= 2100:
+                warn(f"advent/{path.name}: jahr: fehlt oder ist ungültig – Seite wird übersprungen")
+                continue
+            tueren = {}
+            for e in d.get("tueren") or []:
+                if not isinstance(e, dict):
+                    continue
+                try:
+                    tag = int(e.get("tag"))
+                except (TypeError, ValueError):
+                    hinweis(f"advent/{path.name}: Tür ohne gültigen tag: – wird ignoriert")
+                    continue
+                if not 1 <= tag <= 24 or tag in tueren:
+                    hinweis(f"advent/{path.name}: tag: {tag} ist doppelt oder nicht 1–24 – wird ignoriert")
+                    continue
+                txt = lambda k: str(e.get(k) or "").strip()  # noqa: E731
+                tueren[tag] = AdventTuer(
+                    tag=tag, datum=date(jahr, 12, tag), song=txt("song"), kuenstler=txt("kuenstler"),
+                    erschienen=txt("erschienen"), person=txt("person"), rolle=txt("rolle"),
+                    text_html=md(txt("text")) if txt("text") else "",
+                    links=_advent_links(e.get("links"), f"advent/{path.name}, Tür {tag}"))
+            einleitung = str(d.get("einleitung") or "").strip()
+            titel = str(d.get("titel") or "Adventskalender").strip()
+            return Advent(
+                jahr=jahr, titel=titel, kicker=str(d.get("kicker") or f"Calavera · Advent {jahr}").strip(),
+                einleitung=einleitung, seo_title=str(d.get("seo_title") or f"Adventskalender {jahr}").strip(),
+                description=str(d.get("description") or "").strip() or shorten(einleitung, 160)
+                            or f"Der Calavera-Adventskalender {jahr}: jeden Tag ein Lieblingssong aus dem Team und von den DJs.",
+                tueren=tueren, source=path, in_sitemap=not d.get("noindex", False))
+        except Exception as exc:  # noqa: BLE001
+            warn(f"advent/{path.name}: {exc} – Seite wird übersprungen")
+    return None
+
+
+def advent_stand(a: Advent, now: datetime) -> dict:
+    """Was am Build-Zeitpunkt sichtbar ist. Künftige Türen: nur tag + Datum, keine Daten aus der Datei."""
+    heute = now.date()
+    offen, kacheln = [], {}
+    for tag in range(1, 25):
+        d = date(a.jahr, 12, tag)
+        k = {"tag": tag, "wt": WOCHENTAG[d.weekday()], "datum": d.strftime("%d.%m."), "gross": ADVENT_GROSS.get(tag, ""),
+             "zustand": "zu", "tuer": None}
+        if d <= heute:
+            t = a.tueren.get(tag)
+            if t and t.fertig:
+                k["zustand"], k["tuer"] = ("heute" if d == heute else "offen"), t
+                offen.append(t)
+            else:
+                k["zustand"] = "folgt"
+                hinweis(f"advent/{a.source.name}: Tür {tag} ist dran, aber song/kuenstler/person fehlen – "
+                     "auf der Seite steht „folgt in Kürze“")
+        kacheln[tag] = k
+    vor_start = heute < date(a.jahr, 12, 1)
+    return {"kacheln": [kacheln[t] for t in ADVENT_MISCHUNG], "offen": offen, "vor_start": vor_start,
+            "alle_offen": heute >= date(a.jahr, 12, 24)}
+
+
+def advent_json_ld(a: Advent, cfg: dict, offen: list[AdventTuer]) -> dict:
+    """CollectionPage mit den geöffneten Türen als MusicRecording (nur geöffnete!) + Brotkrumen."""
+    site = cfg["site"]
+    base = site["url"].rstrip("/")
+    seite = {
+        "@type": "CollectionPage", "@id": base + a.url, "url": base + a.url,
+        "name": a.seo_title, "description": a.description, "inLanguage": site.get("language", "de"),
+        "isPartOf": {"@type": "WebSite", "name": site["name"], "url": base + "/"},
+        "about": {"@id": base + "/#club"},
+        "breadcrumb": {"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": site["name"], "item": base + "/"},
+            {"@type": "ListItem", "position": 2, "name": a.seo_title, "item": base + a.url}]},
+    }
+    if offen:
+        items = []
+        for i, t in enumerate(offen, start=1):
+            rec = {"@type": "MusicRecording", "name": t.song, "byArtist": {"@type": "MusicGroup", "name": t.kuenstler},
+                   "url": f"{base}{a.url}#tuer-{t.tag}"}
+            if t.links:
+                rec["sameAs"] = [l["url"] for l in t.links]
+            items.append({"@type": "ListItem", "position": i, "item": rec})
+        seite["mainEntity"] = {"@type": "ItemList", "itemListElement": items}
+    return {"@context": "https://schema.org", "@graph": [seite]}
+
+
 # ------------------------------------------------------------------ Kalender (.ics)
 
 def ics_escape(s: str) -> str:
@@ -1494,6 +1676,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     pages = load_pages()
     landings = load_landings(load_reihen(cfg), {p.slug for p in pages})
     landing_slugs = {l.slug for l in landings}
+    advent = load_advent({p.slug for p in pages} | landing_slugs | {"programm", "intern", "static", "media"})
     for ev in events:
         for slug in ev.auch_auf:
             if slug not in landing_slugs:
@@ -1638,6 +1821,14 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         render("landing.html", l.url, page_path=l.url, l=l, events=l_kommend, past_events=l_vorbei, cols=cols,
                fx_css=fx_list(l_kommend), landing_ld=landing_json_ld(l, cfg, l_kommend))
 
+    # Adventskalender: Stand zum Build-Zeitpunkt (der Deploy läuft im Dezember kurz nach Mitternacht)
+    advent_offen: list = []
+    if advent:
+        stand = advent_stand(advent, now)
+        advent_offen = stand["offen"]
+        render("adventskalender.html", advent.url, page_path=advent.url, a=advent, **stand,
+               advent_ld=advent_json_ld(advent, cfg, advent_offen))
+
     for old, new in (cfg.get("redirects") or {}).items():
         render("redirect.html", f"/{str(old).strip('/')}/", target=new)
 
@@ -1653,6 +1844,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
 
     base = cfg["site"]["url"].rstrip("/")
     urls = (["/", "/programm/", "/programm/archiv/"] + [l.url for l in landings if l.in_sitemap]
+            + ([advent.url] if advent and advent.in_sitemap else [])
             + [p.url for p in pages if p.in_sitemap] + [e.url for e in events])
     (out / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -1668,10 +1860,11 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
             (out / f"{indexnow_key}.txt").write_text(indexnow_key, encoding="utf-8")
         else:
             warn("INDEXNOW_KEY ungültig (8–128 Zeichen a–z, A–Z, 0–9, -) – keine Schlüsseldatei erzeugt")
-    (out / "llms.txt").write_text(llms_txt(cfg, upcoming, pages, env.globals["kalender_url"], landings), encoding="utf-8")
+    (out / "llms.txt").write_text(llms_txt(cfg, upcoming, pages, env.globals["kalender_url"], landings,
+                                              (advent, advent_offen) if advent else None), encoding="utf-8")
     (out / "build.json").write_text(json.dumps({
         "built_at": now.isoformat(), "upcoming": len(upcoming), "past": len(past), "pages": len(pages),
-        "landingpages": len(landings)
+        "landingpages": len(landings), "adventskalender": bool(advent)
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
     bild_cache_aufraeumen()
@@ -1679,7 +1872,8 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         print(f"  Bilder: {_cache_zahlen['neu']} neu berechnet, {_cache_zahlen['cache']} aus dem Cache"
               + ("" if bild_cache_an else " (Cache aus)"))
     print(f"  ✓ {len(upcoming)} kommende, {len(past)} vergangene Veranstaltungen, {len(pages)} feste Seiten, "
-          f"{len(landings)} Landingpage(s) → {out}")
+          f"{len(landings)} Landingpage(s)"
+          + (f", Adventskalender ({len(advent_offen)} Türen offen)" if advent else "") + f" → {out}")
     if problems:
         print(f"  {len(problems)} Hinweis(e), siehe oben.")
     return 1 if (strict and problems) else 0

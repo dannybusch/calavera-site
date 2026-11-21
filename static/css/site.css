@@ -91,7 +91,9 @@ a:hover { color: var(--accent-text); }
 .brand img { position: relative; height: var(--logo-h); width: auto; filter: drop-shadow(0 14px 18px rgba(0,0,0,.65)); }
 .brand-rod { position: absolute; left: 34%; top: -6px; width: 4px; height: 30px; background: #2c2c2c; }
 .brand-rod--r { left: 64%; }
-.nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 30px; }
+/* Menü bleibt rechts neben dem Wappen (Wappen ≈ 228 px breit) und bricht auf Tablets lieber in eine zweite Zeile um */
+.nav { padding-left: calc(var(--logo-h) * 1.3 + 24px); }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 30px; }
 .nav a { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--mono); font-size: 14px; font-weight: 500;
          letter-spacing: .06em; text-transform: uppercase; color: var(--text-2); }
 .nav a:hover, .nav a[aria-current="page"] { color: var(--text); }

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="de" class="js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf C · Fallblatt-Tafel · Adventskalender · Calavera</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../../static/img/calavera_logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../static/css/site.css">
+<style>
+/* ===== Entwurf C – „Fallblatt-Tafel“: 24 Zeilen wie eine Abfahrtstafel/Setlist, die Zeile klappt auf ===== */
+.ph-band { position: sticky; top: 0; z-index: 50; background: #e9c46a; color: #1a1a1a; font: 500 12px/1 var(--mono); letter-spacing: .1em;
+  text-transform: uppercase; text-align: center; padding: 8px 12px; }
+.ph { text-decoration: underline dotted rgba(233,196,106,.7); text-underline-offset: 4px; text-decoration-thickness: 1.5px; }
+
+.fb-hero { padding-top: calc(var(--logo-h) - var(--bar-h) + 54px); padding-bottom: 34px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: end; }
+.fb-hero .display--page span { color: var(--accent-display); }
+.fb-hero .lead { margin-top: 18px; }
+
+/* Countdown als Fallblatt */
+.fb-count { display: grid; gap: 10px; justify-items: end; }
+.fb-count .label { color: var(--text-3); }
+.flaps { display: flex; gap: 4px; align-items: center; }
+.flap { position: relative; width: 44px; height: 62px; border-radius: 4px; background: linear-gradient(#1d1d1d 0 50%, #171717 50%); display: grid; place-items: center;
+  font-family: var(--display); font-size: 50px; line-height: 1; color: #f1ebe2; box-shadow: inset 0 0 0 1px #2a2827, 0 6px 14px rgba(0,0,0,.5); overflow: hidden; }
+.flap::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: #0b0b0b; }
+.flaps .sep { font-family: var(--display); font-size: 40px; color: var(--muted); padding: 0 2px; }
+.flap.r { color: var(--accent-display); }
+
+/* Tafel */
+.tafel { position: relative; margin-bottom: 110px; background: #0f0f0f; border-radius: 10px; box-shadow: inset 0 0 0 1px #2c2a29; padding: 56px 0 10px; overflow: hidden; }
+/* Lichterkette über der Tafel (eigene Variante des Effekts „lichterkette“) */
+.kette { position: absolute; left: 0; right: 0; top: 0; height: 44px; pointer-events: none; }
+.kette svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.kette path { fill: none; stroke: #2e2a26; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.kette i { position: absolute; left: var(--x); top: var(--y); width: 8px; height: 12px; margin-left: -4px; border-radius: 45% 45% 50% 50%; background: var(--c);
+  box-shadow: 0 0 6px 2px var(--g), 0 0 18px 6px var(--g2); animation: glimm var(--tw) ease-in-out var(--td) infinite alternate; }
+.kette i::before { content: ""; position: absolute; left: 1px; right: 1px; top: -3px; height: 4px; border-radius: 1px; background: #3a342e; }
+.kette .c0 { --c: #fff1c9; --g: rgba(255,214,140,.7); --g2: rgba(255,200,120,.22); }
+.kette .c1 { --c: #ffb347; --g: rgba(255,170,60,.7); --g2: rgba(255,150,40,.22); }
+.kette .c2 { --c: #ff5468; --g: rgba(255,70,90,.7); --g2: rgba(255,60,80,.22); }
+@keyframes glimm { 0% { opacity: 1; } 45% { opacity: .8; } 55% { opacity: .35; } 70% { opacity: 1; } 100% { opacity: .75; } }
+
+.t-head, .zeile-btn { display: grid; grid-template-columns: 120px 110px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 190px; align-items: center; gap: 18px; padding: 0 24px; }
+.t-head { padding-bottom: 12px; border-bottom: 1px solid var(--line); font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.zeile { border-bottom: 1px solid #1c1c1c; }
+.zeile:last-child { border-bottom: 0; }
+.zeile-btn { width: 100%; min-height: 76px; border: 0; background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: background .15s; }
+.zeile-btn:hover { background: #151515; }
+.z-nr { display: flex; gap: 3px; }
+.z-nr .flap { width: 36px; height: 50px; font-size: 40px; }
+.z-dat { font: 500 13px/1.3 var(--mono); letter-spacing: .06em; color: var(--text-3); text-transform: uppercase; }
+.z-song { font-family: var(--display); font-size: 30px; line-height: 1; text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.z-art, .z-wer { font-size: 15px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.z-wer { color: var(--text-3); }
+.z-st { justify-self: end; display: inline-flex; align-items: center; gap: 8px; font: 500 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.z-st svg { flex: 0 0 auto; }
+
+/* Geschlossene Zeile: leere Blätter */
+.zeile.is-zu .zeile-btn { cursor: not-allowed; }
+.zeile.is-zu .z-nr .flap { color: #4a4643; }
+.leer { display: flex; gap: 3px; }
+.leer span { width: 16px; height: 24px; border-radius: 2px; background: linear-gradient(#1a1a1a 0 50%, #161616 50%); box-shadow: inset 0 0 0 1px #242322; position: relative; }
+.leer span::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #0b0b0b; }
+.zeile.is-zu .z-art .leer span:nth-child(n+7), .zeile.is-zu .z-wer .leer span:nth-child(n+6) { display: none; }
+
+/* Heute */
+.zeile.is-heute { background: linear-gradient(90deg, rgba(var(--accent-rgb), .16), transparent 70%); box-shadow: inset 3px 0 0 var(--accent); }
+.zeile.is-heute .z-nr .flap { background: linear-gradient(#c41634 0 50%, #ad1029 50%); box-shadow: inset 0 0 0 1px #c9233f, 0 0 22px var(--glow); }
+.zeile.is-heute .z-st { color: #f1ebe2; background: var(--accent); padding: 10px 14px; border-radius: 999px; }
+.zeile.is-heute .z-st .dot { width: 7px; height: 7px; border-radius: 50%; background: #f1ebe2; animation: blink 1.2s steps(2, jump-none) infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+.zeile.is-offen .z-st { color: var(--accent-text); }
+
+/* Aufgeklappt */
+.z-mehr { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.2,.7,.2,1); }
+.zeile.auf .z-mehr { grid-template-rows: 1fr; }
+.z-mehr > div { overflow: hidden; }
+.z-inhalt { display: grid; grid-template-columns: 120px 110px minmax(0, 1.5fr) minmax(0, 2fr); gap: 18px; padding: 6px 24px 30px; }
+.z-inhalt .zi-text { grid-column: 3; margin: 0; font-size: 17px; line-height: 1.6; color: var(--text-2); }
+.z-inhalt .zi-side { grid-column: 4; display: grid; gap: 14px; align-content: start; }
+.zi-wer { display: flex; align-items: center; gap: 12px; }
+.zi-ava { width: 46px; height: 46px; border-radius: 50%; background: var(--surface-3); box-shadow: inset 0 0 0 1px #34302c; display: grid; place-items: center;
+  font-family: var(--display); font-size: 20px; color: var(--muted); flex: 0 0 auto; }
+.zi-wer p { margin: 0; line-height: 1.35; }
+.zi-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.zi-links .btn { min-height: 42px; padding: 0 16px; font-size: 12px; }
+.chip--ph { background: transparent; color: #e9c46a; box-shadow: inset 0 0 0 1px rgba(233,196,106,.5); justify-self: start; }
+.zeile.auf .zeile-btn { background: #141414; }
+.zeile.auf .z-st .pfeil { transform: rotate(180deg); }
+.z-st .pfeil { transition: transform .3s; }
+
+.toast { position: fixed; left: 50%; bottom: 28px; z-index: 60; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: var(--surface-3); color: var(--text); padding: 12px 18px; border-radius: 999px; font: 500 13px/1.3 var(--mono); letter-spacing: .04em;
+  box-shadow: inset 0 0 0 1px #34302c, 0 18px 40px rgba(0,0,0,.6); transition: opacity .2s, transform .2s; }
+.toast.zeigen { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 1180px) {
+  .t-head, .zeile-btn { grid-template-columns: 96px minmax(0, 1.4fr) minmax(0, 1fr) 170px; }
+  .t-head .h-dat, .t-head .h-wer, .z-dat, .z-wer { display: none; }
+  .z-inhalt { grid-template-columns: 96px minmax(0, 1fr) minmax(0, 1fr); }
+  .z-inhalt .zi-text { grid-column: 2; } .z-inhalt .zi-side { grid-column: 3; }
+}
+@media (max-width: 760px) {
+  .fb-hero { grid-template-columns: 1fr; } .fb-count { justify-items: start; }
+  .flap { width: 34px; height: 48px; font-size: 38px; } .flaps .sep { font-size: 30px; }
+  .tafel { border-radius: 8px; padding-top: 46px; margin-left: -12px; margin-right: -12px; }
+  .t-head { display: none; }
+  .zeile-btn { grid-template-columns: 80px minmax(0, 1fr); grid-template-areas: "nr song" "nr art" "nr st"; gap: 2px 14px; padding: 14px 16px; }
+  .z-nr { grid-area: nr; align-self: start; } .z-nr .flap { width: 36px; height: 50px; font-size: 40px; }
+  .z-song { grid-area: song; font-size: 26px; } .z-art { grid-area: art; font-size: 14px; }
+  .z-st { grid-area: st; justify-self: start; margin-top: 8px; font-size: 11px; }
+  .zeile.is-heute .z-st { padding: 8px 12px; }
+  .z-inhalt { grid-template-columns: 1fr; padding: 4px 16px 24px 110px; }
+  .z-inhalt .zi-text, .z-inhalt .zi-side { grid-column: 1; }
+  .leer span { width: 12px; height: 18px; }
+  .kette i:nth-of-type(even) { display: none; }
+}
+@media (max-width: 420px) { .z-inhalt { padding-left: 16px; } }
+@media (prefers-reduced-motion: reduce) { .kette i, .zeile.is-heute .z-st .dot { animation: none; } .z-mehr { transition: none; } }
+</style>
+</head>
+<body>
+<div class="ph-band">Entwurf C · alle Songs, Namen und Texte sind Platzhalter</div>
+<header class="site-header">
+  <div class="bar wrap">
+    <a class="brand" href="#" aria-label="Calavera – Startseite"><span class="brand-rod" aria-hidden="true"></span><span class="brand-rod brand-rod--r" aria-hidden="true"></span>
+      <img src="../../static/img/calavera_logo.svg" alt="Calavera" width="1024" height="789"></a>
+    <nav class="nav" id="hauptmenue" aria-label="Hauptmenü"><ul><li><a href="#">Programm</a></li><li><a href="#" aria-current="page">Advent</a></li><li><a href="#">Über uns</a></li><li><a href="#">Kontakt</a></li></ul></nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="hauptmenue"><span class="menu-label">Menü</span>
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path class="i-open" d="M4 7h16M4 12h16M4 17h16"/><path class="i-close" d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+</header>
+
+<main class="site-main">
+  <section class="wrap fb-hero">
+    <div>
+      <p class="kicker">Calavera · Advent 2026</p>
+      <h1 class="display display--page">Advents&shy;<span>tafel</span></h1>
+      <p class="lead ph">Platzhalter für Dannys Einleitung: Bis Heiligabend klappt jeden Tag eine neue Zeile um – ein Song, ausgewählt von jemandem aus dem Team oder von den DJs, und ein paar Sätze dazu.</p>
+    </div>
+    <div class="fb-count" aria-live="off">
+      <span class="label" id="count-lab"></span>
+      <div class="flaps" id="count" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="tafel">
+      <div class="kette" id="kette" aria-hidden="true"></div>
+      <div class="t-head" aria-hidden="true"><span>Tür</span><span class="h-dat">Datum</span><span>Song</span><span>Künstler:in</span><span class="h-wer">Ausgewählt von</span><span style="justify-self:end">Status</span></div>
+      <div id="liste"></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="daten.js"></script>
+<script>
+(function () {
+  var A = window.ADVENT, liste = document.getElementById("liste");
+  function zz(n) { return ("0" + n).slice(-2); }
+  function flaps(s, cls) { return s.split("").map(function (c) { return '<span class="flap' + (cls || "") + '">' + c + '</span>'; }).join(""); }
+  function leer(n) { var h = ""; for (var i = 0; i < n; i++) h += "<span></span>"; return '<span class="leer">' + h + '</span>'; }
+  var lock = '<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  var pfeil = '<svg class="pfeil" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+
+  // Lichterkette
+  var k = document.getElementById("kette"), birnen = 34, pfad = "M0,4";
+  for (var i = 0; i < 6; i++) pfad += " Q" + (i * 100 / 6 + 100 / 12) + ",34 " + ((i + 1) * 100 / 6) + ",4";
+  var kh = '<svg viewBox="0 0 100 44" preserveAspectRatio="none"><path d="' + pfad + '"/></svg>';
+  for (var b = 0; b < birnen; b++) {
+    var x = (b + .5) * 100 / birnen, ph = (x % (100 / 6)) / (100 / 6), y = 4 + 30 * 4 * ph * (1 - ph) * .5 + 2;
+    kh += '<i class="c' + (b % 3) + '" style="--x:' + x + '%;--y:' + y + 'px;--tw:' + (1.6 + (b * 7 % 10) / 5) + 's;--td:-' + (b * 3 % 7) / 3 + 's"></i>';
+  }
+  k.innerHTML = kh;
+
+  A.tueren.forEach(function (t) {
+    var z = document.createElement("div");
+    z.className = "zeile is-" + t.status; z.dataset.tag = t.tag;
+    var zu = t.status === "zu";
+    var st = zu ? lock + "Öffnet " + t.datum + " · 00:00"
+           : t.status === "heute" ? '<span class="dot"></span>Jetzt öffnen' : "Anhören " + pfeil;
+    z.innerHTML =
+      '<button class="zeile-btn" type="button" aria-expanded="false"' + (zu ? ' aria-disabled="true"' : "") + ' aria-label="Tür ' + t.tag + (zu ? ', öffnet am ' + t.datum : t.status === "heute" ? ', heute' : ', ' + t.song) + '">' +
+        '<span class="z-nr">' + flaps(zz(t.tag)) + '</span>' +
+        '<span class="z-dat">' + t.wochentag + ' ' + t.datum + '</span>' +
+        '<span class="z-song' + (zu ? '' : ' ph') + '" data-song>' + (zu ? leer(12) : t.status === "heute" ? leer(12) : t.song) + '</span>' +
+        '<span class="z-art' + (zu ? '' : ' ph') + '">' + (zu || t.status === "heute" ? leer(10) : t.kuenstler) + '</span>' +
+        '<span class="z-wer' + (zu ? '' : ' ph') + '">' + (zu || t.status === "heute" ? leer(8) : t.person) + '</span>' +
+        '<span class="z-st">' + st + '</span>' +
+      '</button>' +
+      (zu ? "" : '<div class="z-mehr"><div><div class="z-inhalt">' +
+        '<p class="zi-text ph">' + t.text + '</p>' +
+        '<div class="zi-side"><span class="chip chip--ph">Platzhalter</span>' +
+          '<div class="zi-wer"><span class="zi-ava">' + zz(t.tag) + '</span><p><span class="label">Ausgewählt von</span><br><strong class="ph">' + t.person + '</strong> <span class="muted ph">· ' + t.rolle + '</span></p></div>' +
+          '<div class="zi-links">' + t.links.map(function (l, i) {
+            return '<a class="btn ' + (i ? 'btn-ghost' : 'btn-red') + '" href="' + l.url + '" rel="noopener">' + ADVENT_ICON(i ? "ext" : "play") + l.dienst + '</a>'; }).join("") + '</div>' +
+        '</div></div></div></div>');
+    liste.appendChild(z);
+  });
+
+  // Fallblatt-Effekt: Buchstaben rattern durch, bis der echte Text steht
+  var ZEICHEN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  function rattern(el, ziel, done) {
+    var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, schritt = 0, max = 14;
+    if (reduce) { el.textContent = ziel; done && done(); return; }
+    var iv = setInterval(function () {
+      schritt++;
+      el.textContent = ziel.split("").map(function (c, i) {
+        if (c === " " || schritt > i * .7 + 4) return c;
+        return ZEICHEN[(Math.random() * ZEICHEN.length) | 0];
+      }).join("");
+      if (schritt > max + ziel.length * .7) { clearInterval(iv); el.textContent = ziel; done && done(); }
+    }, 45);
+  }
+
+  var toast = document.getElementById("toast"), tt;
+  liste.addEventListener("click", function (e) {
+    var btn = e.target.closest(".zeile-btn"); if (!btn) return;
+    var z = btn.parentNode, t = A.tueren[z.dataset.tag - 1];
+    if (t.status === "zu") {
+      toast.textContent = "Tür " + t.tag + " klappt am " + t.wochentag + " " + t.datum + " um 00:00 um";
+      toast.classList.add("zeigen"); clearTimeout(tt); tt = setTimeout(function () { toast.classList.remove("zeigen"); }, 2600);
+      return;
+    }
+    if (t.status === "heute" && !z.dataset.enthuellt) {
+      z.dataset.enthuellt = "1";
+      var s = z.querySelector("[data-song]"), a = z.querySelector(".z-art"), w = z.querySelector(".z-wer");
+      rattern(s, t.song.toUpperCase(), function () { s.textContent = t.song; });
+      setTimeout(function () { rattern(a, t.kuenstler); }, 180);
+      setTimeout(function () { rattern(w, t.person); }, 320);
+      z.querySelector(".z-st").innerHTML = "Anhören " + pfeil;
+    }
+    var auf = !z.classList.contains("auf");
+    z.classList.toggle("auf", auf); btn.setAttribute("aria-expanded", auf);
+  });
+
+  // Countdown bis zur nächsten Tür (echte Uhrzeit, simulierter Tag)
+  var lab = document.getElementById("count-lab"), cnt = document.getElementById("count");
+  function tick() {
+    if (A.heute >= 24) { lab.textContent = "Alle Türen offen"; cnt.innerHTML = flaps("24", " r"); return; }
+    var j = new Date(), m = new Date(j); m.setHours(24, 0, 0, 0);
+    var s = Math.max(0, (m - j) / 1000 | 0);
+    lab.textContent = "Tür " + zz(A.heute + 1) + " klappt um in";
+    cnt.innerHTML = flaps(zz(s / 3600 | 0)) + '<span class="sep">:</span>' + flaps(zz((s % 3600) / 60 | 0)) + '<span class="sep">:</span>' + flaps(zz(s % 60), " r");
+  }
+  tick(); setInterval(tick, 1000);
+
+  if (A.offen) {
+    var z0 = liste.querySelector('[data-tag="' + A.offen + '"] .zeile-btn');
+    if (z0) z0.click();
+  }
+})();
+</script>
+</body>
+</html>

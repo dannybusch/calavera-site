@@ -1,0 +1,303 @@
+# ------------------------------------------------------------------
+#  Calavera-Adventskalender 2026  →  www.calavera.club/adventskalender/
+#  Pro Tag eine Tür: ein Lieblingssong von jemandem aus dem Team oder von den DJs.
+#
+#  Diese Datei wird NIE ausgeliefert. build.py schreibt nur die Türen ins HTML, deren Tag schon
+#  erreicht ist (Bremer Zeit). Von künftigen Türen steht nichts auf der Seite – nur Zahl und Datum.
+#  Eine Tür erscheint erst, wenn song, kuenstler und person ausgefüllt sind; sonst „folgt in Kürze“.
+#  Neue Tür: der Deploy läuft vom 1. bis 24.12. zusätzlich kurz nach Mitternacht.
+#  Testen:  python build.py --now "2026-12-07 12:00" --serve
+#  Texte in "Anführungszeichen" setzen (wegen : und # im Text).
+# ------------------------------------------------------------------
+
+draft: true                                   # true = Seite wird nicht gebaut. Zum Start auf false setzen
+                                              #   (und Menüpunkt in config.yml → navigation ergänzen)
+jahr: 2026
+titel: "24 Türen. 24 Lieblingssongs."         # große Überschrift (letzter Satz erscheint rot)
+kicker: "Calavera · Advent 2026"              # kleine Zeile darüber
+einleitung: ""                                # 1–3 Sätze unter der Überschrift (leer = keine)
+seo_title: "Adventskalender 2026"             # Titel im Browser-Tab und bei Google (" · Calavera Bremen" kommt dazu)
+description: ""                               # ein Satz für Google, höchstens ca. 155 Zeichen (sonst: Einleitung)
+
+# So sieht eine ausgefüllte Tür aus (Werte hier nur Beispiele für das Format):
+#
+#  - tag: 1
+#    song: "Titel des Songs"
+#    kuenstler: "Name der Band / Künstler:in"
+#    erschienen: 1987                         # optional: Erscheinungsjahr
+#    person: "Vorname oder DJ-Name"
+#    rolle: DJ                                # DJ oder Team
+#    text: "Zwei bis vier Sätze von der Person selbst: warum dieser Song, was er mit dem Calavera zu tun hat."
+#                                             # (Markdown geht: *kursiv*, **fett**, [Link](https://…))
+#    links:                                   # nur ausfüllen, was es gibt – Reihenfolge = Reihenfolge der Knöpfe,
+#      youtube_music: "https://music.youtube.com/watch?v=…"   #   der erste Knopf ist rot
+#      bandcamp: "https://….bandcamp.com/track/…"
+#      spotify: "https://open.spotify.com/track/…"
+#      # apple_music, tidal, soundcloud, deezer gehen auch
+#      # andere Dienste:  andere: [{name: "Mixcloud", url: "https://…"}]
+
+tueren:
+
+  - tag: 1                                   # Di 01.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 2                                   # Mi 02.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 3                                   # Do 03.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 4                                   # Fr 04.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 5                                   # Sa 05.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 6                                   # So 06.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 7                                   # Mo 07.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 8                                   # Di 08.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 9                                   # Mi 09.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 10                                  # Do 10.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 11                                  # Fr 11.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 12                                  # Sa 12.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 13                                  # So 13.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 14                                  # Mo 14.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 15                                  # Di 15.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 16                                  # Mi 16.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 17                                  # Do 17.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 18                                  # Fr 18.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 19                                  # Sa 19.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 20                                  # So 20.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 21                                  # Mo 21.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 22                                  # Di 22.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 23                                  # Mi 23.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""
+
+  - tag: 24                                  # Do 24.12.
+    song: ""
+    kuenstler: ""
+    erschienen:
+    person: ""
+    rolle: ""
+    text: ""
+    links:
+      youtube_music: ""
+      bandcamp: ""

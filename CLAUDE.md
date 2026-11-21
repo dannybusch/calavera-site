@@ -56,6 +56,7 @@ Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Ho
 |---|---|
 | `build.py` | Generator: Events laden, Bilder (inkl. 16:9 `breit.jpg`), Seiten, ICS, JSON-LD, `llms.txt` |
 | `landing/` | Landingpages (`/dark/`, `/party/`): Text + SEO-Kopf pflegt Danny; Auswahl der Termine per `zeigt:` (siehe `_vorlage.md`) |
+| `advent/` | Adventskalender `adventskalender<jahr>.yml` → `/adventskalender/` (`load_advent`, `advent_stand`): **nur Türen bis heute ins HTML, YAML nie ausliefern**; Deploy 30.11.–23.12. zusätzlich 00:07 |
 | `templates/` | Jinja2: `base`, `index`, `programm`, `event`, `archiv`, `page`, `landing`, `intern_*`; `partials/tile.html`, `effekte.html`, `kellerfunk.html` |
 | `static/js/site.js` | Live-Logik im Browser: vergangene Termine ausblenden, „Heute/Läuft gerade“, Startseiten-Übernahme, On-Air-Band, Titel-Einpassen (`wortPassen`) |
 | `static/js/seiteneffekte.js` | globale Seiteneffekte (`spinne`, `logo`, `rip`) |

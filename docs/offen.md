@@ -24,6 +24,11 @@ Stand: 21.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entschei
   nach dem ersten Deploy prüfen, dass `www.calavera.club/<schlüssel>.txt` erreichbar ist und der Schritt
   „Suchmaschinen benachrichtigen“ grün ist. Optional Bing Webmaster Tools anmelden.
 - **Google:** `sitemap.xml` (jetzt mit `lastmod`) einmal in der Search Console einreichen.
+- **Adventskalender** (siehe 0020): **Zuerst** die zwei `cron`-Zeilen für 00:07 Uhr in `.github/workflows/deploy.yml`
+  eintragen (`deploy-yml-adventskalender.patch`; Claude darf Workflow-Dateien nicht schreiben). Dann `advent/adventskalender2026.yml` füllen (24 Türen), `einleitung`/`description`
+  schreiben, `draft: false`; Menüzeile `- { label: "Adventskalender", href: "/adventskalender/" }` in
+  `config.yml → navigation`; nach dem 1.12. prüfen, dass der Lauf um 00:07 Uhr kommt. Entwürfe unter
+  `entwuerfe/adventskalender/` können danach weg.
 
 ## Ideen, nicht begonnen
 

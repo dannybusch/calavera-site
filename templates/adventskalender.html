@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{# Adventskalender aus advent/adventskalender<jahr>.yml (siehe build.py → load_advent, advent_stand).
+   Wichtig: Von künftigen Türen ("zu") kommt NICHTS aus der Datei ins HTML – nur Zahl und Datum.
+   "folgt" = Tag erreicht, aber Tür noch nicht ausgefüllt; sieht von außen aus wie eine geschlossene Tür.
+   Geöffnete Türen stehen als <article id="tuer-N"> unten auf der Seite (ohne JS als Liste lesbar,
+   für Suchmaschinen echter Text); adventskalender.js zeigt sie beim Klick als Fenster. #}
+{% set title = a.seo_title %}
+{% set description = a.description %}
+{% if not a.in_sitemap %}{% set noindex = true %}{% endif %}
+{% set n_offen = offen|length %}
+{% block head %}
+<link rel="stylesheet" href="{{ asset('css/adventskalender.css') }}">
+<script type="application/ld+json">
+{{ advent_ld|tojson }}
+</script>
+{% endblock %}
+{% block body_class %}page advent{% endblock %}
+{% block content %}
+{% set vorne, rot = a.titel_teile %}
+<section class="page-head wrap adv-head">
+  <p class="kicker">{{ a.kicker }}</p>
+  <h1 class="display display--page">{{ vorne }}{% if rot %} <em>{{ rot }}</em>{% endif %}</h1>
+  {% if a.einleitung %}<p class="lead">{{ a.einleitung }}</p>{% endif %}
+  <div class="chips">
+    {% if vor_start %}
+    <span class="chip chip--strong">Ab {{ "1. Dezember" }} öffnet sich jeden Tag eine Tür</span>
+    {% elif alle_offen %}
+    <span class="chip chip--strong">Alle Türen offen</span>
+    {% else %}
+    <span class="chip chip--strong">{{ n_offen }} {{ "Tür" if n_offen == 1 else "Türen" }} offen</span>
+    <span class="chip">Neue Tür jeden Tag kurz nach Mitternacht</span>
+    {% endif %}
+  </div>
+</section>
+
+<section class="wrap" aria-label="Türchen">
+  <div class="adv-grid">
+    {% for k in kacheln %}
+    {% set nr = "%02d"|format(k.tag) %}
+    {% if k.tuer %}
+    {% set t = k.tuer %}
+    <a class="door is-{{ k.zustand }}{% if k.zustand == 'offen' %} is-auf{% endif %} {{ k.gross }}" href="#tuer-{{ k.tag }}" data-tuer="{{ k.tag }}"
+       aria-label="Tür {{ k.tag }}{% if k.zustand == 'heute' %}, heute{% endif %}: {{ t.song }} – {{ t.kuenstler }}">
+      <span class="door-in" aria-hidden="true"><span class="di-num">{{ nr }}</span><span class="di-song">{{ t.song }}</span><span class="di-by">von {{ t.person }}</span><span class="di-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg> Anhören</span></span>
+      <span class="door-front" aria-hidden="true"><span class="df-num">{{ k.tag }}</span><span class="df-lab">{% if k.zustand == 'heute' %}Heute · Öffnen{% endif %}</span></span>
+    </a>
+    {% else %}
+    <button class="door is-zu {{ k.gross }}" type="button" data-ab="{% if k.zustand == 'folgt' %}{% else %}{{ k.wt }} {{ k.datum }}{% endif %}"
+       aria-label="Tür {{ k.tag }}, {% if k.zustand == 'folgt' %}folgt in Kürze{% else %}öffnet am {{ k.datum }}{% endif %}">
+      <span class="door-front" aria-hidden="true"><span class="df-num">{{ k.tag }}</span><span class="df-lab"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>{% if k.zustand == 'folgt' %}Folgt<span class="wt"> in Kürze</span>{% else %}<span class="wt">ab {{ k.wt }} </span>{{ k.datum }}{% endif %}</span></span>
+    </button>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{% if offen %}
+<section class="wrap adv-liste" aria-labelledby="adv-liste-titel">
+  <h2 class="h-section h-section--sm" id="adv-liste-titel">Bisher geöffnet</h2>
+  {% for t in offen|reverse %}
+  <article class="adv-tuer" id="tuer-{{ t.tag }}" data-tuer="{{ t.tag }}" aria-labelledby="tuer-{{ t.tag }}-song">
+    <div class="adv-side" aria-hidden="true">
+      <img src="{{ asset('img/calavera_logo.svg') }}" alt="" width="1024" height="789" loading="lazy">
+      <span class="as-lab">Türchen · {{ t.datum|wd }} {{ "%02d.12."|format(t.tag) }}</span>
+      <span class="as-num">{{ "%02d"|format(t.tag) }}</span>
+    </div>
+    <div class="adv-body">
+      <h3 class="ab-song" id="tuer-{{ t.tag }}-song">{{ t.song }}</h3>
+      <p class="ab-artist">{{ t.kuenstler }}{% if t.erschienen %} · {{ t.erschienen }}{% endif %}</p>
+      <div class="ab-who">
+        <span class="ab-ava" aria-hidden="true">{{ t.person[:1]|upper }}</span>
+        <p><span class="label">Ausgewählt von</span><strong>{{ t.person }}</strong>{% if t.rolle %} <span class="muted">· {{ t.rolle }}</span>{% endif %}</p>
+      </div>
+      {% if t.text_html %}<div class="ab-text">{{ t.text_html|safe }}</div>{% endif %}
+      {% if t.links %}
+      <div class="ab-hoeren">
+        <p class="label">Anhören bei</p>
+        <div class="ab-links">
+          {% for l in t.links %}
+          <a class="btn {{ 'btn-red' if loop.first else 'btn-ghost' }}" href="{{ l.url }}" target="_blank" rel="noopener">
+            {% if loop.first %}<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>{% else %}<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>{% endif %}{{ l.dienst }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+
+<div class="adv-toast" role="status" aria-live="polite"></div>
+<dialog class="adv-dlg" aria-label="Geöffnete Tür">
+  <button class="adv-x" type="button" data-zu aria-label="Schließen"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="adv-dlg-inhalt"></div>
+  <div class="adv-nav"><button type="button" data-schritt="-1">← Vorige Tür</button><button type="button" data-schritt="1">Nächste Tür →</button></div>
+</dialog>
+<script src="{{ asset('js/adventskalender.js') }}" defer></script>
+{% endblock %}
