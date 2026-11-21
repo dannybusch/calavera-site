@@ -96,7 +96,8 @@ Titel werden nie mitten im Wort getrennt – lieber Schrift verkleinern.
   On-Air-Band (rot live, grauer Countdown < 60 min), Reels, Wochenbild und Presse lesen ihn.
   Offline testen mit `--plan datei.yml`.
 - **Landingpages:** `landing/*.md` → `Landing` in `build.py` (`load_landings`, `Landing.passt`, `landing_json_ld`),
-  Template `landing.html`. Text über/unter den Kacheln getrennt durch `<!-- mehr -->`. Texte gehören Danny – nur Entwürfe vorschlagen.
+  Template `landing.html`. Text über/unter den Kacheln getrennt durch `<!-- mehr -->`.
+  Event-Feld `auch_auf: [slug]` holt einzelne Events zusätzlich auf eine Landingpage, ohne Reihe/Reihen-Link. Texte gehören Danny – nur Entwürfe vorschlagen.
 - **SEO/KI:** Event-Seiten `MusicEvent`-JSON-LD; Startseite + Programm `NightClub` **mit** allen kommenden
   Events (sonst erfinden KI-Antworten aus „Fr + Sa“ namenlose Partys); `dist/llms.txt`.
 

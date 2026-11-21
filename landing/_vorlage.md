@@ -20,6 +20,8 @@ zeigt:
   # genres: [Gothic, Wave]      # … oder mit einem dieser Genres (Groß-/Kleinschreibung egal)
   # ohne_reihen: [dark]         # alle AUSSER diesen Reihen (z. B. für "alle anderen Partys")
   # nur_partys: true            # Veranstaltungen mit "art:" (Konzert, Lesung, …) weglassen
+# Einzelne Veranstaltungen zusätzlich hierher holen, ohne sie einer Reihe zuzuordnen: in der events/*.md
+#   auch_auf: [dark]            # (Dateiname dieser Landingpage ohne .md) – siehe README, „Landingpages“
 
 # archiv: 8                     # so viele vergangene Termine unten als Liste (0 = keine), Standard 8
 # leer: "Gerade steht nichts an – schaut bald wieder rein."   # Text, wenn nichts Passendes im Programm ist

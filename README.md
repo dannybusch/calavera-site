@@ -215,6 +215,18 @@ Calavera“ (damit die Seite auch in Programmpausen etwas zeigt). Alle Möglichk
 | `faq:` | Häufige Fragen (`frage:`/`antwort:`) – sichtbar auf der Seite und als FAQ für Google/KI |
 | `archiv`, `leer`, `bild`, `noindex`, `draft` | Anzahl vergangener Termine, Text bei leerem Programm, Vorschaubild, Suchmaschinen aus, Entwurf |
 
+**Einzelne Veranstaltung zusätzlich auf einer Landingpage**, ohne sie zur Reihe zu machen (z. B. die
+Depeche-Mode-Party auf `/dark/`, ohne dass sie als „Weitere Dunkelveranstaltung“ auftaucht): in der Event-Datei
+
+```yaml
+auch_auf: [dark]          # Dateinamen der Landingpages ohne .md, mehrere möglich: [dark, wave]
+```
+
+Die Veranstaltung erscheint dann auf `/dark/` ganz normal nach Datum zwischen den anderen Kacheln (und im
+JSON-LD der Seite) und weiterhin überall, wo sie ohnehin hingehört (z. B. `/party/`). Sie zählt aber **nicht**
+zur Reihe: kein „Weitere Dunkelveranstaltungen“, und auf ihrer eigenen Seite verlinkt sie nicht auf `/dark/`.
+Ein Tippfehler (Landingpage gibt es nicht) wird beim Build gemeldet.
+
 Der Text unter dem Kopf ist Markdown. Alles über der Zeile `<!-- mehr -->` steht über den Kacheln,
 alles darunter unter den Kacheln (Platz für ausführlicheren Text mit `##`-Zwischenüberschriften).
 

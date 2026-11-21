@@ -427,6 +427,7 @@ class Event:
     facebook: str = ""           # Link zum Facebook-Event, sobald angelegt (für /intern/)
     social_images: dict = field(default_factory=dict)   # Bilder für Facebook/Instagram (für /intern/)
     reihe: str = ""              # Kürzel der Reihe aus config.yml → reihen (z. B. "dark")
+    auch_auf: list[str] = field(default_factory=list)   # zusätzlich auf diesen Landingpages (z. B. ["dark"]), ohne zur Reihe zu gehören
     stream_url: str = ""         # gesetzt, wenn der Abend auch im Stream läuft (hybrid)
     stream_label: str = ""
     is_past: bool = False
@@ -1058,6 +1059,7 @@ def load_events(cfg: dict, tz: ZoneInfo) -> list[Event]:
                 highlight=("Highlight" if meta.get("highlight") is True
                            else str(meta.get("highlight") or "").strip()),
                 reihe=str(meta.get("reihe") or "").strip().lower(),
+                auch_auf=[a.strip("/").lower() for a in as_list(meta.get("auch_auf"))],
                 social_title=str(meta.get("social_title") or meta.get("titel_social") or "").strip(),
                 facebook=str(meta.get("facebook") or "").strip(),
             )
@@ -1301,7 +1303,11 @@ class Landing:
     def url(self) -> str:
         return f"/{self.slug}/"
 
-    def passt(self, ev: "Event") -> bool:
+    def passt(self, ev: "Event", auch_auf: bool = True) -> bool:
+        """Gehört die Veranstaltung auf diese Seite? auch_auf=False: nur nach Regeln aus "zeigt:" – ohne
+        Veranstaltungen, die sich per "auch_auf:" nur dazugestellt haben (für Links auf Veranstaltungsseiten)."""
+        if auch_auf and self.slug in ev.auch_auf:
+            return True
         if self.nur_partys and ev.kind:
             return False
         if self.ohne_reihen and ev.reihe in self.ohne_reihen:
@@ -1485,6 +1491,11 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     events = load_events(cfg, tz)
     pages = load_pages()
     landings = load_landings(load_reihen(cfg), {p.slug for p in pages})
+    landing_slugs = {l.slug for l in landings}
+    for ev in events:
+        for slug in ev.auch_auf:
+            if slug not in landing_slugs:
+                warn(f"{ev.source.name}: auch_auf: \"{slug}\" – keine Landingpage landing/{slug}.md – wird ignoriert")
     if strict and problems:
         print("Abbruch wegen --strict.")
         return 1
@@ -1608,7 +1619,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         termin_ics = ics_for([ev], cfg, now, ev.title)
         render("event.html", ev.url, page_path=ev.url, ev=ev, fx_css=fx_css_for(ev.effekte),
                more_same=more_same, more_rest=more_rest, reihe=reihen.get(ev.reihe),
-               landing=next((l for l in landings if l.passt(ev)), None),
+               landing=next((l for l in landings if l.passt(ev, auch_auf=False)), None),
                termin_url=f"termin.ics?v={ics_version(termin_ics)}")
         (out / ev.url.lstrip("/") / "termin.ics").write_text(termin_ics, encoding="utf-8", newline="")
 
