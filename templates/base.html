@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {# Startseite (und Seiten ohne eigenen Titel): Name · Zusatz aus config.yml → site.titel_zusatz (leer = nur der Name) #}
 {% set zusatz = site.titel_zusatz if site.titel_zusatz is defined else "Kellerclub im Viertel" %}
-{% set full_title = (title ~ " · " ~ site.name) if title is defined and title else (site.name ~ (" · " ~ zusatz if zusatz else "")) %}
+{# Bringt der Zusatz schon ein eigenes Trennzeichen mit (" | …", " – …"), wird kein " · " davorgesetzt #}
+{% set zusatz_mit_trenner = zusatz and zusatz.lstrip()[:1] in ["|", "·", "–", "-", "—", ":"] %}
+{% set full_title = (title ~ " · " ~ site.name) if title is defined and title else (site.name ~ ((zusatz if zusatz_mit_trenner else " · " ~ zusatz) if zusatz else "")) %}
 <title>{{ full_title }}</title>
 <meta name="description" content="{{ description if description is defined and description else site.description }}">
 <meta name="theme-color" content="#0b0b0b">
