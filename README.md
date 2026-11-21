@@ -229,6 +229,29 @@ kommt sie nur über `config.yml → navigation`.
 `config.yml` → `programm.spalten: 3` oder `4`. Auf dem Tablet werden es automatisch 2,
 auf dem Handy eine Liste.
 
+
+### Wenige Termine
+
+Stehen in einem Programm-Raster (Startseite, `/programm/`, Landingpages) nur wenige Termine, passt der große
+Teaser über die volle Breite nicht. Auf großen Bildschirmen gilt deshalb:
+
+- **1 Termin:** großer Teaser wie gewohnt.
+- **2 Termine (Muster A):** kein großer Teaser – beide gleich groß als Querkarten nebeneinander;
+  der nächste behält Etikett („Als Nächstes“) und rotes Datum.
+- **3 bis 4 Termine (Muster B):** großer Teaser links, die übrigen als Leiste „Danach“ rechts daneben
+  (bei 3 in der Leiste ohne Teasertext und Etiketten, damit sie nicht höher wird als der Teaser).
+- **ab 5 Terminen:** normales Raster.
+
+Die Obergrenze für Muster B lässt sich in `config.yml` einstellen (Standard 4):
+
+```yaml
+programm:
+  leiste_bis: 4
+```
+
+Handy und Tablet bleiben unverändert. Der Build legt die Darstellung vor, `site.js` rechnet im Browser
+nach, sobald Termine vorbei sind (testen mit `?now=`, z. B. `/programm/?now=2026-12-05T10:00`).
+
 ## Kellerfunk
 
 Die Startseite liest im Browser die `config.yml` von live.calavera.club – dieselbe Datei wie die

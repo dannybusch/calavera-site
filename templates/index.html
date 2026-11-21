@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "partials/tile.html" import tile %}
+{% from "partials/tile.html" import tile, program_grid %}
 {% block body_class %}home{% endblock %}
 {% block head %}
 <script type="application/ld+json">
@@ -41,9 +41,7 @@
     <span class="label">{{ span }}</span>
   </div>
   {% if events %}
-  <div class="program-grid cols-{{ cols }}">
-    {% for ev in events %}{{ tile(ev, loop.first, loop.index <= fx_kacheln) }}{% endfor %}
-  </div>
+  {{ program_grid(events, cols) }}
   {% endif %}
   <p class="program-empty"{% if events %} hidden{% endif %}>Gerade steht nichts im Programm – schaut bald wieder rein oder folgt uns auf Instagram.</p>
   <div class="section-foot">

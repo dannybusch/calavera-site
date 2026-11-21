@@ -8,10 +8,11 @@
                    welche, siehe config.yml → programm.effekte_kacheln) #}
 {#   - takeover=true: Fassung für die Startseiten-Übernahme (größeres Bild, Countdown) – steckt in einem
                    <template>, site.js setzt sie an die Stelle des Claims #}
-{% macro tile(ev, is_next=false, fx=true, takeover=false) %}
+{#   - first=true:   erster Termin ohne große Fassung (Raster mit wenigen Terminen, Muster A) – behält Etikett + rotes Datum #}
+{% macro tile(ev, is_next=false, fx=true, takeover=false, first=false) %}
 {% set use_fx = fx and ev.effekte %}
 {% set bild = (ev.visual_og or ev.visual_thumb) if takeover else ev.visual_thumb %}
-<article class="tile{% if takeover %} is-takeover{% endif %}{% if is_next %} is-next{% endif %}{% if ev.highlight %} is-highlight{% endif %}{% if use_fx %} {{ ev.fx_classes }}{% endif %}"{% if use_fx %} style="--fx-delay: {{ ev.fx_delay }}"{% endif %} data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}">
+<article class="tile{% if takeover %} is-takeover{% endif %}{% if is_next %} is-next{% endif %}{% if first %} is-first{% endif %}{% if ev.highlight %} is-highlight{% endif %}{% if use_fx %} {{ ev.fx_classes }}{% endif %}"{% if use_fx %} style="--fx-delay: {{ ev.fx_delay }}"{% endif %} data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}">
   <a class="tile-link" href="{{ ev.url }}">
     {% if use_fx %}{{ tile_fx(ev) }}{% endif %}
     <span class="t-flags">
@@ -43,4 +44,17 @@
     <span class="t-more">{% if takeover %}Alle Infos{% else %}Mehr erfahren{% endif %} <span aria-hidden="true">→</span></span>
   </a>
 </article>
+{% endmacro %}
+
+{# Programm-Raster (Startseite, /programm/, Landingpages). Bei wenigen Terminen eine Sonderdarstellung
+   (nur auf großen Bildschirmen, siehe site.css „Wenige Termine“):
+     2 Termine         → Muster A: beide gleich groß nebeneinander, kein großer Teaser
+     3 bis leiste_bis  → Muster B: großer Teaser links, die übrigen als Leiste „Danach“ rechts
+   Der Build legt die Darstellung vor; site.js rechnet im Browser nach, wenn Termine inzwischen vorbei sind. #}
+{% macro program_grid(events, cols) %}
+{% set n = events|length %}
+{% set modus = wenig_modus(n) %}
+<div class="program-grid cols-{{ cols }}{% if modus %} is-wenig wenig-{{ modus }}{% endif %}" data-n="{{ n }}" data-leiste-bis="{{ leiste_bis }}">
+  {% for ev in events %}{{ tile(ev, loop.first and modus != "a", loop.index <= fx_kacheln, false, loop.first and modus == "a") }}{% endfor %}
+</div>
 {% endmacro %}

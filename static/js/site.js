@@ -170,9 +170,18 @@
     });
     if (left.length && heroEl && heroEl.classList.contains("is-takeover")) {
       /* Übernahme aktiv: kein zweites großes Bild im Programm */
+      grid.classList.remove("is-wenig", "wenig-a", "wenig-b");
+      left.forEach(function (t) { t.classList.remove("is-first"); });
     } else if (left.length) {
       var first = left[0];
-      first.classList.add("is-next");
+      /* Wenige Termine (siehe site.css): 2 → Muster A (gleich groß), 3 bis data-leiste-bis → Muster B (Teaser + Leiste) */
+      var bis = parseInt(grid.getAttribute("data-leiste-bis"), 10) || 4;
+      var modus = left.length === 2 ? "a" : (left.length >= 3 && left.length <= bis ? "b" : "");
+      grid.classList.remove("is-wenig", "wenig-a", "wenig-b");
+      left.forEach(function (t) { t.classList.remove("is-first"); });
+      if (modus) grid.classList.add("is-wenig", "wenig-" + modus);
+      grid.setAttribute("data-n", left.length);
+      first.classList.add(modus === "a" ? "is-first" : "is-next");
       var start = new Date(first.getAttribute("data-start"));
       var lab = first.querySelector("[data-label]");
       var rel = relLabel(start, new Date(first.getAttribute("data-end")), n);

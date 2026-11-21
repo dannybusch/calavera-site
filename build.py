@@ -1565,6 +1565,10 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     env.globals["fx_particles"] = fx_particles
     # Effekte nur auf den vordersten Kacheln im Programm (Startseite und /programm/); Veranstaltungsseiten immer
     env.globals["fx_kacheln"] = int(cfg.get("programm", {}).get("effekte_kacheln", 2))
+    # Wenige Termine: 2 → Muster A (gleich groß), 3 bis leiste_bis → Muster B (Teaser + Leiste), sonst normal
+    leiste_bis = int(cfg.get("programm", {}).get("leiste_bis", 4))
+    env.globals["leiste_bis"] = leiste_bis
+    env.globals["wenig_modus"] = lambda n: "a" if n == 2 else ("b" if 3 <= n <= leiste_bis else "")
     env.globals["kalender_url"] = f"/kalender.ics?v={ics_version(programm_ics)}"
 
     def render(template: str, dest: str, **ctx) -> None:

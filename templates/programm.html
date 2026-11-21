@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "partials/tile.html" import tile %}
+{% from "partials/tile.html" import tile, program_grid %}
 {% set title = "Programm" %}
 {% set description = "Alle kommenden Partys und Konzerte im Calavera, Körnerwall 1, Bremen." %}
 {% block head %}
@@ -15,9 +15,7 @@
 </section>
 <section class="programm wrap" aria-label="Kommende Veranstaltungen">
   {% if events %}
-  <div class="program-grid cols-{{ cols }}">
-    {% for ev in events %}{{ tile(ev, loop.first, loop.index <= fx_kacheln) }}{% endfor %}
-  </div>
+  {{ program_grid(events, cols) }}
   {% endif %}
   <p class="program-empty"{% if events %} hidden{% endif %}>Gerade steht nichts im Programm – schaut bald wieder rein.</p>
   <div class="section-foot">

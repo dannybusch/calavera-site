@@ -751,3 +751,57 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 .faq-answer { padding: 0 18px 4px; font-size: 17px; }
 .landing-archive .h-section { margin-bottom: 20px; }
 .section-head-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+
+/* ==========================================================================
+   Wenige Termine (nur große Bildschirme; Handy/Tablet bleiben wie sonst)
+   Klassen setzt partials/tile.html → program_grid, site.js rechnet live nach.
+   ========================================================================== */
+@media (min-width: 1024px) {
+  /* Muster A – 2 Termine: beide gleich groß als Querkarten nebeneinander, kein großer Teaser */
+  .program-grid.wenig-a { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wenig-a .tile-link { display: grid; column-gap: 22px; row-gap: 8px; padding: 22px;
+    grid-template-columns: minmax(150px, 40%) minmax(0, 1fr);
+    grid-template-areas: "flyer flags" "flyer date" "flyer title" "flyer by" "flyer teaser" "flyer tags" "flyer more";
+    grid-template-rows: auto auto auto auto auto 1fr auto; align-content: start; }
+  .wenig-a .t-flyer { grid-area: flyer; align-self: start; }
+  .wenig-a .t-flags { grid-area: flags; flex-wrap: wrap; gap: 6px; }
+  .wenig-a .tile.is-first .t-flags, .wenig-a .tile.is-highlight .t-flags { display: flex; }
+  .wenig-a .tile.is-first .t-badge { display: inline-flex; font-size: 11px; padding: 5px 10px; }
+  .wenig-a .tile.is-highlight .t-flags .t-hl { display: inline-flex; font-size: 11px; padding: 5px 10px; }
+  .wenig-a .tile.is-highlight .t-flyer .t-hl { display: none; }
+  .wenig-a .t-date { grid-area: date; }
+  .wenig-a .t-num { font-size: 56px; }
+  .wenig-a .tile.is-first .t-num { color: var(--accent-display); }
+  .wenig-a .t-title { grid-area: title; font-size: clamp(30px, 2.6vw, 40px); line-height: .98; }
+  .wenig-a .t-by { grid-area: by; margin: 0; font-size: 16px; }
+  .wenig-a .t-teaser { grid-area: teaser; -webkit-line-clamp: 4; line-clamp: 4; font-size: 15px; }
+  .wenig-a .t-tags { grid-area: tags; align-self: end; }
+  .wenig-a .t-more { grid-area: more; display: inline-flex; gap: 6px; font-family: var(--mono); font-size: 12px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--accent-text); }
+
+  /* Muster B – 3 bis leiste_bis Termine: großer Teaser links, die übrigen als Leiste „Danach“ rechts */
+  .program-grid.wenig-b { grid-template-columns: minmax(0, 2.1fr) minmax(300px, 1fr); align-items: start; }
+  .wenig-b .tile.is-next { grid-column: 1; grid-row: 1 / span 3; align-self: stretch; }
+  .wenig-b[data-n="3"] .tile.is-next { grid-row: 1 / span 2; }
+  .wenig-b .tile.is-next .tile-link { grid-template-columns: minmax(200px, 260px) minmax(0, 1fr) auto; }
+  .wenig-b .tile.is-next .t-title { font-size: clamp(40px, 3.8vw, 60px); }
+  .wenig-b .tile:not(.is-next) { grid-column: 2; }
+  .wenig-b .tile:not(.is-next) .tile-link { display: grid; grid-template-columns: minmax(0, 1fr) 92px; column-gap: 16px; row-gap: 4px;
+    grid-template-areas: "flags flyer" "date flyer" "title flyer" "by flyer" "teaser flyer" "tags flyer"; align-content: start; padding: 16px; }
+  .wenig-b .tile:not(.is-next) .t-flyer { grid-area: flyer; align-self: start; }
+  .wenig-b .tile:not(.is-next) .t-flags { grid-area: flags; }
+  .wenig-b .tile.is-highlight:not(.is-next) .t-flags { display: flex; }
+  .wenig-b .tile.is-highlight:not(.is-next) .t-flags .t-hl { display: inline-flex; padding: 3px 8px; font-size: 10px; letter-spacing: .1em; }
+  .wenig-b .tile.is-highlight:not(.is-next) .t-flyer .t-hl { display: none; }
+  .wenig-b .tile:not(.is-next) .t-date { grid-area: date; justify-content: flex-start; gap: 12px; align-items: baseline; }
+  .wenig-b .tile:not(.is-next) .t-num { font-size: 34px; }
+  .wenig-b .tile:not(.is-next) .t-title { grid-area: title; font-size: 24px; }
+  .wenig-b .tile:not(.is-next) .t-by { grid-area: by; margin: 0; font-size: 14px; }
+  .wenig-b .tile:not(.is-next) .t-teaser { grid-area: teaser; -webkit-line-clamp: 2; line-clamp: 2; font-size: 14px; }
+  .wenig-b .tile:not(.is-next) .t-tags { grid-area: tags; margin-top: 6px; }
+  .wenig-b .tile:not(.is-next) .chip--genre { display: none; }
+  /* ab 3 Terminen in der Leiste: ohne Teasertext, damit die Leiste nicht höher wird als der große Teaser */
+  .wenig-b:not([data-n="3"]) .tile:not(.is-next) :is(.t-teaser, .t-tags) { display: none; }
+  .wenig-b .tile.is-next + .tile::before { content: "Danach"; display: block; margin: 0 0 8px; font-family: var(--mono); font-size: 12px;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+}
