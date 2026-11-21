@@ -135,3 +135,9 @@ redirects:
 rausgegangen:
   location: "f4de137c-3c19-4989-abfc-1830b67e3a1b"
   veroeffentlichen: true
+  
+presse:
+  an: ["team@calavera.club"]
+  von: "presse@calavera.club"
+  kontakt: "Danny Busch * team@calavera.club * 0176/83012528"
+

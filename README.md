@@ -640,6 +640,38 @@ RAUSGEGANGEN_API_KEY=… python rausgegangen.py status   # was steht dort, was f
   kinder-und-familien, konzerte-und-musik, markt, party, shows-und-performances, sport, theater).
 - **Gelöscht/umbenannt:** wird dort nicht automatisch gelöscht – `status` listet solche Events, dann in der Zentrale entfernen.
 
+## Wöchentliche Pressemitteilung (`presse.py`)
+
+Jeden Montagmorgen kommt per Mail eine fertige Pressemitteilung „Diese Woche im Calavera“ für die laufende
+Woche (Mo–So) – zum Prüfen und Weiterleiten an den eigenen Presseverteiler. Inhalt: Überschrift, Einleitung
+mit allen Terminen, je Veranstaltung ein Abschnitt (Tag, Uhrzeit, DJ/Act, Genres, Beschreibung aus der
+Event-Datei, Eintritt, Link), Kellerfunk-Sendungen (klar als Livestream gekennzeichnet), Links zu den Flyern
+als Pressefotos, „Über das Calavera“ und Pressekontakt. Keine erfundenen Zitate – nur, was in den Dateien steht.
+Fehlt bei einem Termin der Text oder steht noch ein Platzhalter drin, steht oben ein Hinweiskasten
+(„vor dem Weiterleiten löschen“). Gibt es in einer Woche keine Termine, kommt keine Mail.
+
+```bash
+python presse.py                 # Probelauf: Mitteilung zeigen + presse/out/presse-2026-kw47.txt/.html
+python presse.py --naechste      # für die kommende Woche
+python presse.py --senden        # per Mail verschicken (braucht SMTP_* als Umgebungsvariablen)
+```
+
+**Einrichten:** In GitHub die Secrets `SMTP_HOST`, `SMTP_PORT` (465 = SSL, 587 = STARTTLS), `SMTP_USER`,
+`SMTP_PASSWORD` anlegen (bei STRATO z. B. `smtp.strato.de`, Port 465, Postfach-Adresse und -Passwort).
+In `config.yml`:
+
+```yaml
+presse:
+  an: ["team@calavera.club"]           # bekommt die Mitteilung zum Prüfen
+  von: "presse@calavera.club"          # Absender (Standard: SMTP_USER) – muss zum Postfach passen
+  kontakt: "Name · presse@calavera.club · Telefon"   # Pressekontakt (Standard: club.email)
+  bildrechte: "Calavera Bremen"        # Bildnachweis der Flyer
+  ueber: "Das Calavera ist …"          # eigener Absatz "Über das Calavera" (optional)
+```
+
+Läuft automatisch montags gegen 6:17 Uhr (Sommerzeit 7:17 Uhr); von Hand unter Actions → „Pressemitteilung“,
+wahlweise für die kommende Woche oder nur als Probelauf (Text/HTML dann unter „Artifacts“).
+
 ## Lizenzen
 
 Schriften Bebas Neue, Space Grotesk, IBM Plex Mono: SIL Open Font License (siehe `static/fonts/`).

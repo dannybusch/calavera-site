@@ -1,0 +1,73 @@
+# ------------------------------------------------------------------
+#  Calavera Bremen – wöchentliche Pressemitteilung
+#
+#  Jeden Montagmorgen (ca. 6:17 Uhr im Winter, 7:17 Uhr im Sommer – GitHub kennt nur UTC
+#  und startet geplante Läufe manchmal etwas später) geht die Mitteilung für die laufende
+#  Woche an die Adresse(n) unter presse.an in config.yml – zum Prüfen und Weiterleiten.
+#  Von Hand: Actions → "Pressemitteilung" → "Run workflow".
+#  Braucht die Secrets SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD (optional SMTP_SICHERHEIT).
+#  Ohne Secrets wird nichts gesendet; Text und HTML liegen dann unter "Artifacts".
+# ------------------------------------------------------------------
+
+name: Pressemitteilung
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+    inputs:
+      naechste:
+        description: "Für die kommende Woche statt für die laufende"
+        type: boolean
+        default: false
+      probelauf:
+        description: "Nur erzeugen, nicht per Mail senden"
+        type: boolean
+        default: false
+
+concurrency:
+  group: presse
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  presse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Projekt holen
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Pakete installieren
+        run: pip install -r requirements.txt
+
+      - name: Pressemitteilung erzeugen und senden
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_SICHERHEIT: ${{ secrets.SMTP_SICHERHEIT }}
+          NAECHSTE: ${{ inputs.naechste }}
+          PROBELAUF: ${{ inputs.probelauf }}
+        run: |
+          args=()
+          [ "$PROBELAUF" != "true" ] && args+=(--senden)
+          [ "$NAECHSTE" = "true" ] && args+=(--naechste)
+          python presse.py "${args[@]}"
+
+      - name: Text und HTML bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: pressemitteilung
+          path: presse/out/
+          if-no-files-found: ignore
+          retention-days: 14

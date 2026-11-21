@@ -29,6 +29,8 @@ on:
       - ".github/workflows/media.yml"
       - "rausgegangen.py"
       - ".github/workflows/rausgegangen.yml"
+      - "presse.py"
+      - ".github/workflows/presse.yml"
       - "events/*.mp3"
       - "events/*.m4a"
       - "events/*.wav"

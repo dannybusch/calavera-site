@@ -11,3 +11,6 @@ reels/.cache/
 # Bilder (media.py): Ausgabe und Arbeitsordner
 media/out/
 media/.cache/
+
+# Pressemitteilung (presse.py): Ausgabe
+presse/out/
