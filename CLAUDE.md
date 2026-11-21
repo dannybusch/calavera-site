@@ -26,7 +26,7 @@ Ansprechpartner ist Danny. Kommunikation, Code-Kommentare, Ausgaben und Oberflä
 - **Kellerfunk immer klar als Livestream kennzeichnen** („Nur im Livestream · live.calavera.club“), damit
   niemand vor verschlossener Tür steht – auf Bildern, in Reels, in der Pressemitteilung.
 - **Nichts erfinden** in öffentlichen Texten (keine Zitate, keine Fakten, die nicht in den Dateien stehen).
-- Committen/Pushen nur auf Ansage. Kleine, nachvollziehbare Änderungen; README mitpflegen.
+- **Nie committen oder pushen – Danny committet immer selbst.** Auch nicht danach fragen. Kleine, nachvollziehbare Änderungen; README mitpflegen.
 
 ## Befehle
 
