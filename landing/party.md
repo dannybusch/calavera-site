@@ -9,6 +9,7 @@ description: "Partys im Calavera, dem kleinen Club im Bremer Viertel: Indie, Pop
 kicker: "Party"
 lead: "Indie, Pop, Rock, Punk, Hip-Hop, 80s, 90s und mehr – und alles, was sich gut gemeinsam feiern lässt."
 link_text: "Alle Partys"
+rueckverlink: false   # Sammelseite für Suchmaschinen, keine Reihe: Veranstaltungsseiten verlinken nicht hierher
 
 zeigt:
   ohne_reihen: [dark]   # Dark-Partys haben ihre eigene Seite (/dark/)

@@ -1293,6 +1293,7 @@ class Landing:
     archiv: int = 8                # so viele vergangene Termine unten als Liste (0 = keine)
     leer: str = ""                 # Text, wenn gerade nichts Passendes im Programm steht
     link_text: str = ""            # Linktext auf Veranstaltungsseiten und im Programm
+    rueckverlink: bool = True      # False: Veranstaltungsseiten verlinken nicht hierher (Sammelseite, keine Reihe)
     faq: list[dict] = field(default_factory=list)          # [{frage, antwort}] → sichtbar + FAQPage-JSON-LD
     bild: Path | None = None       # og:image (Vorschaubild beim Teilen)
     bild_url: str = ""
@@ -1373,6 +1374,7 @@ def load_landings(reihen: dict[str, dict], seiten_slugs: set[str]) -> list[Landi
                 archiv=int(meta.get("archiv", 8) or 0),
                 leer=str(meta.get("leer") or "Gerade steht hier nichts im Programm – schaut bald wieder rein."),
                 link_text=str(meta.get("link_text") or title),
+                rueckverlink=meta.get("rueckverlink", True) is not False,
                 faq=faq, bild=bild,
                 in_sitemap=not meta.get("noindex", False),
                 source=path,
@@ -1619,7 +1621,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         termin_ics = ics_for([ev], cfg, now, ev.title)
         render("event.html", ev.url, page_path=ev.url, ev=ev, fx_css=fx_css_for(ev.effekte),
                more_same=more_same, more_rest=more_rest, reihe=reihen.get(ev.reihe),
-               landing=next((l for l in landings if l.passt(ev, auch_auf=False)), None),
+               landing=next((l for l in landings if l.rueckverlink and l.passt(ev, auch_auf=False)), None),
                termin_url=f"termin.ics?v={ics_version(termin_ics)}")
         (out / ev.url.lstrip("/") / "termin.ics").write_text(termin_ics, encoding="utf-8", newline="")
 
