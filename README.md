@@ -881,7 +881,7 @@ anlegen, Datei danach löschen. Sheet A mit der Adresse des Dienstkontos als **B
 Lokal: `GOOGLE_SA_JSON="$(cat schluessel.json)" python planer.py --schreiben`. Zum gefahrlosen Ausprobieren
 eine Kopie von Sheet A anlegen (Datei → Kopie erstellen), ebenfalls mit dem Dienstkonto teilen und deren ID
 (aus der Adresse, zwischen `/d/` und `/edit`) als `PLANER_SHEET_A=<id>` mitgeben – Sheet B wird auch so abgewiesen.
-Workflow: `planer-workflow.yml` nach `.github/workflows/planer.yml` kopieren. Läuft dann täglich gegen 5:23 und
+Workflow: `.github/workflows/planer.yml`. Läuft täglich gegen 5:23 und
 16:23 Uhr; von Hand unter Actions → „Planungskalender“ (wahlweise Probelauf oder mit `fuelle_bis`).
 
 Neue Quelle: Datei in `planer/quellen/` mit `SPALTE`, `STADT` und `hole(http, von, bis, einstellungen, warn)`,

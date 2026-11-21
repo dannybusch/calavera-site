@@ -32,8 +32,8 @@ Stand: 21.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entschei
 
 - **Planungskalender** (siehe 0021): Service-Account anlegen und Sheet A als Bearbeiter freigeben (Schritte in
   der README, Abschnitt Planungskalender), Secret `GOOGLE_SA_JSON`. Dann einmal lokal oder per Actions
-  `python planer.py --schreiben` und das Ergebnis in Sheet A ansehen. Danach `planer-workflow.yml` nach
-  `.github/workflows/planer.yml` kopieren und die Vorschlagsdatei löschen.
+  `python planer.py --schreiben` und das Ergebnis in Sheet A ansehen. Workflow `.github/workflows/planer.yml`
+  ist angelegt (Ausnahme von der Workflow-Regel, von Danny bestätigt am 21.11.); `planer-workflow.yml` löschen.
 
 ## Ideen, nicht begonnen
 
