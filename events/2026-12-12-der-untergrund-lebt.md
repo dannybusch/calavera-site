@@ -5,7 +5,7 @@ end: "2026-12-13 04:00"
 djs: ["DJ Warg"]
 genres: ["EBM", "Darkwave", "Gothic", "Industrial"]
 tags: ["Rauchfrei"]
-teaser: "Der dunkle Einstieg in den Advent - Untergrund-Musik für die dunkle Jahreszeit"
+teaser: "Dunkelmusik im Keller: Darkwave, Gothic, EBM und Industrial mit DJ Warg."
 reihe: "dark"
 effekte: ["rauschnebel", "superdark"]
 ---
