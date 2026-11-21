@@ -17,7 +17,7 @@ faq:
   - frage: "Wo finde ich das Calavera?"
     antwort: "Körnerwall 1, 28203 Bremen – im Viertel, zwischen Sielwall-Kreuzung und Osterdeich."
   - frage: "Was kostet der Eintritt?"
-    antwort: "Wenn beim Termin nichts anderes steht: 5 €, Azubis & Studis frei. nur Abendkasse."
+    antwort: "Wenn beim Termin nichts anderes steht: 5 €, Azubis & Studis frei. Nur Abendkasse."
   - frage: "Wann geht es los?"
     antwort: "Wenn beim Termin nichts anderes steht, ab 22 Uhr."
   - frage: "Kann ich mit eC-Karte bezahlen?"
