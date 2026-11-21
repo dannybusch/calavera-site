@@ -44,7 +44,8 @@ python reels.py kellerfunk --monat 2026-12                           # Kellerfun
 python media.py [--vorlage a,b,c] [--naechste|--woche 48]            # „Diese Woche“-Bild, JPG 1080×1350
 python presse.py [--naechste] [--senden]                             # Wochen-Pressemitteilung (Probelauf ohne --senden)
 python rausgegangen.py [status|location] [--senden]                  # rausgegangen.de (Probelauf ohne --senden)
-python hochladen.py dist/ <zielordner> --probe                       # SFTP-Spiegel wie im Deploy
+python hochladen.py dist/ <zielordner> --probe                       # SFTP-Spiegel wie im Deploy (+ sitemap lastmod)
+python indexnow.py geaendert.txt --probe                             # geänderte Seiten an IndexNow (Bing & Co.)
 ```
 
 Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Hochladen nur mit ausdrücklichem Schalter.
@@ -63,7 +64,8 @@ Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Ho
 | `media.py` + `media/vorlagen/` | Wochenbild in 3 Vorlagen: `programmzettel`, `plakatwand`, `wochenstreifen` |
 | `presse.py` | Wochen-Pressemitteilung als Mail (SMTP) an Danny zum Weiterleiten |
 | `rausgegangen.py` | Events per Rausgegangen-API v2 eintragen (Upsert über `mapping_id` `calavera-<slug>`) |
-| `hochladen.py` | SFTP-Spiegel mit Prüfsummen (`.calavera-pruefsummen.json` auf dem Server) |
+| `hochladen.py` | SFTP-Spiegel mit Prüfsummen (`.calavera-pruefsummen.json` auf dem Server); setzt `<lastmod>` in sitemap.xml, Liste geänderter Seiten |
+| `indexnow.py` | geänderte Seiten an IndexNow melden (Bing, Yandex, Seznam …); Google liest die Sitemap |
 | `.github/workflows/` | `deploy` (Push + täglich), `rausgegangen` (nach Deploy), `presse` (Mo früh), `reels`, `media` (von Hand) |
 
 ## Design
@@ -113,5 +115,6 @@ Für Experimente mit Event-Dateien eine Kopie des Projekts verwenden (wegen `eve
 | `RAUSGEGANGEN_API_KEY` | Secret | rausgegangen.py (Token von zentrale@rausgegangen.de) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER` (optional `SMTP_SICHERHEIT`) | Variables | presse.py |
 | `SMTP_PASSWORD` | Secret | presse.py |
+| `INDEXNOW_KEY` | Variable | build.py (Schlüsseldatei) + indexnow.py (Meldung an Bing & Co.) |
 
 Fehlt ein Zugang: geplante Läufe enden mit gelber Warnung, von Hand gestartete werden rot (nie still grün).

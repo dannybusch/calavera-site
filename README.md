@@ -363,6 +363,35 @@ Der Build erzeugt dafür automatisch:
 - **`llms.txt`** – eine klare Kurzfassung für KI-Suchdienste (ChatGPT, Perplexity, Gemini …): wer, wo, wann,
   Eintritt, Kontakt, Kellerfunk und die nächsten 16 Veranstaltungen mit Links; bei jedem Build aktuell.
 
+#### Suchmaschinen über Änderungen informieren (IndexNow, Sitemap)
+
+- **Bing, Yandex, Seznam, Naver, Yep** (und über Bing auch DuckDuckGo/Ecosia): Nach jedem Upload meldet
+  `indexnow.py` die Seiten, deren Inhalt sich geändert hat, an [IndexNow](https://www.indexnow.org). Eine Meldung
+  an `api.indexnow.org` geht an alle teilnehmenden Suchmaschinen.
+- **Google** macht bei IndexNow nicht mit; den früheren „Sitemap-Ping“ gibt es seit 2023 nicht mehr, und die
+  Indexing-API ist nur für Stellenanzeigen und Live-Videos erlaubt. Google liest `sitemap.xml` – dort setzt
+  `hochladen.py` je Seite **`<lastmod>`** auf den Zeitpunkt, an dem sich ihr Inhalt zuletzt wirklich geändert hat.
+  Sitemap einmal in der Search Console einreichen; danach holt Google sie regelmäßig selbst.
+
+„Inhalt geändert“ heißt: Die Seite sieht anders aus als beim letzten Upload. Nicht mitgezählt werden die
+Versionsanhänge `?v=…` (ändern sich bei jeder CSS-/JS-Änderung auf allen Seiten) und Bereiche zwischen
+`<!-- lastmod:ohne -->` und `<!-- /lastmod:ohne -->` (derzeit „Weitere Termine“ auf Veranstaltungsseiten).
+Der Stand je Seite liegt mit in `.calavera-pruefsummen.json` auf dem Server.
+
+**Einrichten (einmalig):**
+
+1. Schlüssel erzeugen, z. B. `python -c "import secrets; print(secrets.token_hex(16))"` (8–128 Zeichen a–z, 0–9, -).
+2. In GitHub als **Variable** `INDEXNOW_KEY` anlegen (Environment `calavera-site.env`). Der Schlüssel ist nicht
+   geheim: `build.py` legt ihn als `www.calavera.club/<schlüssel>.txt` ab, damit die Suchmaschinen prüfen können,
+   dass die Meldung von uns kommt.
+3. Optional: Seite in den [Bing Webmaster Tools](https://www.bing.com/webmasters) anmelden – dort sieht man die
+   IndexNow-Meldungen.
+
+Von Hand: `python indexnow.py https://www.calavera.club/dark/ --probe` (ohne `--probe` wird gesendet).
+Fehlt der Schlüssel, endet der Schritt im Deploy bei Zeitplan/Push mit gelber Warnung, bei manuellem Start rot.
+Wird `hochladen.py` lokal ohne `INDEXNOW_KEY` beim Build benutzt, löscht es die Schlüsseldatei auf dem Server –
+dann beim nächsten Deploy wieder da.
+
 Am meisten bringt außerhalb der Seite: das Google-Unternehmensprofil pflegen, überall dieselben Angaben zu
 Name, Adresse und Öffnungszeiten, Einträge in Bremer Veranstaltungskalendern (Texte: `/intern/`).
 

@@ -115,6 +115,8 @@
         {% if o.teaser %}<span class="mi-teaser">{{ o.teaser }}</span>{% endif %}
       </a></li>
   {% endmacro %}
+  {#- lastmod/IndexNow (hochladen.py) zählen diesen Bereich nicht mit: er wechselt, sobald ein anderer Termin vorbei ist -#}
+  <!-- lastmod:ohne -->
   {% if more_same or more_rest %}
   <section class="more" aria-labelledby="mehr-titel">
     <div class="section-head">
@@ -140,5 +142,6 @@
     </div>
   </section>
   {% endif %}
+  <!-- /lastmod:ohne -->
 </div>
 {% endblock %}

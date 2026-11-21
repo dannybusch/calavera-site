@@ -20,6 +20,11 @@ Stand: 21.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entschei
 - **Landingpages `/dark/` und `/party/`** (siehe 0017): Entwurfstexte in `landing/dark.md` und `landing/party.md`
   lesen und umschreiben; ggf. Menüeintrag in `config.yml → navigation`; nach dem Deploy in der Search Console einreichen.
 
+- **IndexNow einrichten** (siehe 0019): Variable `INDEXNOW_KEY` im Environment `calavera-site.env` anlegen;
+  nach dem ersten Deploy prüfen, dass `www.calavera.club/<schlüssel>.txt` erreichbar ist und der Schritt
+  „Suchmaschinen benachrichtigen“ grün ist. Optional Bing Webmaster Tools anmelden.
+- **Google:** `sitemap.xml` (jetzt mit `lastmod`) einmal in der Search Console einreichen.
+
 ## Ideen, nicht begonnen
 
 - `config.yml → site.description` nutzt „1/4 Bremen“; für Suchmaschinen wäre „Viertel“ besser (Danny entscheidet).

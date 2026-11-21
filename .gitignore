@@ -16,3 +16,6 @@ media/.cache/
 
 # Pressemitteilung (presse.py): Ausgabe
 presse/out/
+
+# hochladen.py --geaendert-liste (für indexnow.py)
+geaendert.txt

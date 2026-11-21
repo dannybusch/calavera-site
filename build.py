@@ -1647,6 +1647,14 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         + "</urlset>\n", encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /intern/\nSitemap: {base}/sitemap.xml\n",
                                     encoding="utf-8")
+    # IndexNow (Bing & Co.): Schlüsseldatei im Wurzelordner, damit die Suchmaschinen Meldungen von indexnow.py
+    # prüfen können. Der Schlüssel ist nicht geheim, kommt aber wie alle Zugänge aus der Umgebung (GitHub Variable).
+    indexnow_key = os.environ.get("INDEXNOW_KEY", "").strip()
+    if indexnow_key:
+        if re.fullmatch(r"[A-Za-z0-9-]{8,128}", indexnow_key):
+            (out / f"{indexnow_key}.txt").write_text(indexnow_key, encoding="utf-8")
+        else:
+            warn("INDEXNOW_KEY ungültig (8–128 Zeichen a–z, A–Z, 0–9, -) – keine Schlüsseldatei erzeugt")
     (out / "llms.txt").write_text(llms_txt(cfg, upcoming, pages, env.globals["kalender_url"], landings), encoding="utf-8")
     (out / "build.json").write_text(json.dumps({
         "built_at": now.isoformat(), "upcoming": len(upcoming), "past": len(past), "pages": len(pages),
