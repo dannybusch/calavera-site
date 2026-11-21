@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "partials/tile.html" import tile %}
+{# Landingpage aus landing/<slug>.md: eigener Text (über und unter den Kacheln), SEO-Angaben aus dem Kopf,
+   dazu automatisch die passenden Veranstaltungen (kommende als Kacheln, vergangene als Liste). #}
+{% set title = l.seo_title %}
+{% set description = l.description %}
+{% if l.bild_url %}{% set og_image = l.bild_url %}{% elif events and events[0].visual_og %}{% set og_image = events[0].visual_og %}{% endif %}
+{% if not l.in_sitemap %}{% set noindex = true %}{% endif %}
+{% block head %}
+<script type="application/ld+json">
+{{ landing_ld|tojson }}
+</script>
+{% endblock %}
+{% block body_class %}landing landing-{{ l.slug }}{% endblock %}
+{% block content %}
+<section class="page-head wrap">
+  <p class="kicker"><a href="/programm/">Programm</a> / {{ l.kicker or l.title }}</p>
+  <h1 class="display display--page">{{ l.title }}</h1>
+  {% if l.lead %}<p class="lead">{{ l.lead }}</p>{% endif %}
+</section>
+
+{% if l.intro_html %}
+<div class="wrap">
+  <div class="prose landing-intro">{{ l.intro_html|safe }}</div>
+</div>
+{% endif %}
+
+<section class="programm wrap" aria-label="Kommende Termine: {{ l.title }}">
+  {% if events %}
+  <div class="program-grid cols-{{ cols }}">
+    {% for ev in events %}{{ tile(ev, loop.first, loop.index <= fx_kacheln) }}{% endfor %}
+  </div>
+  {% endif %}
+  <p class="program-empty"{% if events %} hidden{% endif %}>{{ l.leer }}</p>
+  <div class="section-foot">
+    <a class="btn btn-ghost" href="/programm/">Ganzes Programm</a>
+    {% for o in landings if o.slug != l.slug %}<a class="btn btn-ghost" href="{{ o.url }}">{{ o.link_text }}</a>{% endfor %}
+  </div>
+</section>
+
+{% if l.outro_html %}
+<div class="wrap">
+  <div class="prose landing-outro">{{ l.outro_html|safe }}</div>
+</div>
+{% endif %}
+
+{% if l.faq %}
+<section class="wrap landing-faq" id="faq" aria-labelledby="faq-titel">
+  <h2 class="h-section h-section--sm" id="faq-titel">Häufige Fragen</h2>
+  <div class="faq-list">
+    {% for f in l.faq %}
+    <details class="faq-item">
+      <summary>{{ f.frage }}</summary>
+      <div class="prose faq-answer">{{ f.antwort_html|safe }}</div>
+    </details>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if past_events %}
+<section class="wrap archive landing-archive" aria-labelledby="zuletzt-titel">
+  <h2 class="h-section h-section--sm" id="zuletzt-titel">Zuletzt im Calavera</h2>
+  <ol class="archive-list">
+    {% for ev in past_events %}
+    <li><a class="archive-row" href="{{ ev.url }}">
+      <span class="ar-date">{{ ev.start|ddmmyyyy }}<span class="muted"> {{ ev.start|wd }}</span></span>
+      <span class="ar-title">{{ ev.title }}</span>
+      <span class="ar-by muted">{{ ev.byline }}</span>
+    </a></li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+{% endblock %}

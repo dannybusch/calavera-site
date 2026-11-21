@@ -89,6 +89,17 @@ jobs:
       - name: Pakete installieren
         run: pip install -r requirements.txt
 
+      # Bild-Cache von build.py (.cache/bilder/): Flyer, Social-Bilder und Effekt-Texturen werden nur
+      # neu berechnet, wenn sich Bild oder Code geändert haben. Jeder Lauf speichert einen neuen Stand
+      # (Schlüssel mit run_id) und übernimmt den jüngsten vorhandenen. Fehlt der Cache, rechnet der
+      # Build einfach alles neu – das Ergebnis ist dasselbe.
+      - name: Bild-Cache holen
+        uses: actions/cache@v4
+        with:
+          path: .cache/bilder
+          key: bilder-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: bilder-${{ runner.os }}-
+
       - name: Website bauen
         # --strict: bricht ab, wenn eine Event-Datei fehlerhaft ist – dann wird nichts veröffentlicht
         run: python build.py --strict

@@ -733,3 +733,21 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 /* während des Abends: ruhiger Punkt statt pulsierendem Glühen */
 .tile.has-fx.is-takeover .t-count.is-live { color: var(--text-3); }
 .tile.has-fx.is-takeover .tc-dot { width: 8px; height: 8px; box-shadow: none; animation: none; }
+
+/* ------------------------------------------------------------------ Landingpages (/dark/, /party/, …) */
+.landing .page-head { padding-bottom: 32px; }
+.landing-intro { padding-bottom: 8px; }
+.landing .programm { padding-top: 48px; }
+.landing-outro { padding-bottom: 64px; }
+.landing-faq { padding-bottom: 64px; }
+.landing-faq .h-section { margin-bottom: 20px; }
+.faq-list { display: flex; flex-direction: column; gap: 6px; max-width: 760px; }
+.faq-item { background: var(--surface-1); border-radius: var(--radius); }
+.faq-item summary { cursor: pointer; padding: 16px 18px; font-weight: 500; color: var(--text); list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: "+"; font-family: var(--mono); color: var(--muted); }
+.faq-item[open] summary::after { content: "–"; }
+.faq-item summary:focus-visible { outline: 2px solid var(--accent-display); outline-offset: 2px; }
+.faq-answer { padding: 0 18px 4px; font-size: 17px; }
+.landing-archive .h-section { margin-bottom: 20px; }
+.section-head-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }

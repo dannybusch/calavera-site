@@ -21,9 +21,18 @@ python build.py                          # baut nach dist/
 python build.py --serve                  # baut und zeigt die Seite auf http://localhost:8000
 python build.py --now "2026-11-08 12:00" # tut so, als wäre es diese Zeit (zum Testen)
 python build.py --strict                 # Abbruch mit Fehlercode, wenn eine Event-Datei kaputt ist
+python build.py --ohne-cache             # alle Bilder neu berechnen (Bild-Cache weder lesen noch schreiben)
 ```
 
 Im Browser kann man die Uhrzeit ebenfalls simulieren: `/?now=2026-10-23T23:00`.
+
+**Bild-Cache:** Flyer-Fassungen (640/1200/breit), Bilder für Facebook/Instagram, Seitenbilder und die
+Effekt-Texturen landen zusätzlich in `.cache/bilder/` (nicht im Git). Der Schlüssel ist eine Prüfsumme aus
+Quellbild, Einstellungen, dem Code der erzeugenden Funktion und der Pillow-Version – nur neue oder geänderte
+Bilder werden neu berechnet, der Rest wird kopiert (Build ≈ 1 s statt ≈ 20 s, wächst nicht mehr mit dem
+Archiv). Nicht mehr benötigte Einträge räumt der Build selbst weg. Den Cache kann man jederzeit löschen;
+anderer Ort per Umgebungsvariable `CALAVERA_BILD_CACHE`. Im Deploy-Workflow hält `actions/cache` ihn
+zwischen den Läufen fest.
 
 ## Ordner
 
@@ -32,6 +41,7 @@ Im Browser kann man die Uhrzeit ebenfalls simulieren: `/?now=2026-10-23T23:00`.
 | `config.yml` | Name, Adresse, Öffnungszeiten, Menü, Standardwerte, Spalten im Programm, Kellerfunk |
 | `events/` | **eine `.md` pro Veranstaltung**, Visual daneben mit gleichem Namen |
 | `pages/` | feste Seiten: Safe Space, Über den Club, Calavera mieten, Kontakt, Datenschutz |
+| `landing/` | Landingpages wie `/dark/` und `/party/`: eigener Text + SEO-Angaben, Termine kommen automatisch |
 | `templates/` | HTML-Vorlagen (Jinja2) |
 | `static/` | CSS, Script, Schriften, Logo – alles lokal, nichts von Google |
 | `dist/` | Ergebnis, wird bei jedem Build komplett neu geschrieben |
@@ -186,6 +196,33 @@ Zuerst stehen bis zu zwei kommende Termine aus derselben Reihe (Überschrift = `
 „Außerdem im Programm“ mit dem übrigen Programm, ohne Doppelte. Ohne Reihe oder ohne weitere
 Termine der Reihe sieht der Bereich aus wie bisher. Anzahl einstellbar unter `programm.weitere_termine`
 und `programm.aus_der_reihe`. Ein Tippfehler bei `reihe:` wird beim Build gemeldet.
+
+## Landingpages (`/dark/`, `/party/`, …)
+
+Je Datei in `landing/` entsteht eine Seite unter `www.calavera.club/<dateiname>/`. Den Text und die
+Angaben für Suchmaschinen schreibt man selbst in die `.md`; die passenden Veranstaltungen kommen
+automatisch aus `events/` dazu: kommende als Kacheln (wie im Programm), vergangene als Liste „Zuletzt im
+Calavera“ (damit die Seite auch in Programmpausen etwas zeigt). Alle Möglichkeiten stehen in
+`landing/_vorlage.md`.
+
+| Feld im Kopf | Wofür |
+|---|---|
+| `title` | große Überschrift |
+| `seo_title` | Titel im Browser-Tab und bei Google (sonst `title`) |
+| `description` | Beschreibung für Google (ca. 155 Zeichen) |
+| `kicker`, `lead`, `link_text` | Zeile über der Überschrift, Satz darunter, Linktext auf anderen Seiten |
+| `zeigt:` | welche Termine: `reihen: [dark]`, `genres: [...]`, `ohne_reihen: [dark]`, `nur_partys: true` (ohne alles mit `art:`) |
+| `faq:` | Häufige Fragen (`frage:`/`antwort:`) – sichtbar auf der Seite und als FAQ für Google/KI |
+| `archiv`, `leer`, `bild`, `noindex`, `draft` | Anzahl vergangener Termine, Text bei leerem Programm, Vorschaubild, Suchmaschinen aus, Entwurf |
+
+Der Text unter dem Kopf ist Markdown. Alles über der Zeile `<!-- mehr -->` steht über den Kacheln,
+alles darunter unter den Kacheln (Platz für ausführlicheren Text mit `##`-Zwischenüberschriften).
+
+Derzeit: `/dark/` zeigt alle Termine mit `reihe: dark`, `/party/` alle übrigen Partys (ohne Dark und ohne
+Konzerte/Lesungen). Für Suchmaschinen bekommt jede Landingpage `CollectionPage`-JSON-LD mit allen kommenden
+Terminen, Brotkrumen und ggf. `FAQPage`; sie steht in `sitemap.xml` und `llms.txt`. Verlinkt wird sie aus dem
+Programm (Knöpfe unten) und von jeder passenden Veranstaltungsseite („Alle Dark-Partys →“). Ins Hauptmenü
+kommt sie nur über `config.yml → navigation`.
 
 ## 3 oder 4 Kacheln pro Reihe
 

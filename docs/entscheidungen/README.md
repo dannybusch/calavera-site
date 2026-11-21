@@ -21,3 +21,5 @@ Je Grundsatzentscheidung eine Datei: Kontext, Entscheidung, Folgen. Neue Datei m
 | [0014](0014-seo-und-ki.md) | Suchmaschinen und KI-Antworten | gilt |
 | [0015](0015-facebook.md) | Facebook: Veranstaltungen und Automatisierung | teils offen |
 | [0016](0016-pressemitteilung.md) | Wöchentliche Pressemitteilung (`presse.py`) | gilt (SMTP-Einrichtung offen) |
+| [0017](0017-landingpages.md) | Landingpages `/dark/` und `/party/` aus `landing/*.md` | gilt |
+| [0018](0018-bild-cache.md) | Bild-Cache mit Prüfsumme in `build.py` | gilt |

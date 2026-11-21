@@ -23,6 +23,7 @@
   <div class="section-foot">
     <a class="btn btn-ghost" href="{{ kalender_url }}">Programm in den Kalender</a>
     {% if has_archive %}<a class="btn btn-ghost" href="/programm/archiv/">Vergangene Veranstaltungen</a>{% endif %}
+    {% for l in landings %}<a class="btn btn-ghost" href="{{ l.url }}">{{ l.link_text }}</a>{% endfor %}
   </div>
 </section>
 {% endblock %}

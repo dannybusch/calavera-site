@@ -8,6 +8,7 @@ Liest
   events/*.md       eine Datei pro Veranstaltung (YAML-Kopf + Markdown-Text),
                     Visual daneben mit gleichem Namen oder per "visual:"
   pages/*.md        feste Seiten (Safe Space, Über den Club, …)
+  landing/*.md      Landingpages (/dark/, /party/, …): eigener Text + passende Veranstaltungen
   templates/        Jinja2-Vorlagen
   static/           CSS, JS, Schriften, Logo
 
@@ -26,6 +27,7 @@ import argparse
 import hashlib
 import html
 import http.server
+import inspect
 import json
 import os
 import re
@@ -251,6 +253,67 @@ def copy_public(src: Path, dest: Path) -> None:
     """Datei kopieren und für den Webserver lesbar machen (Rechte der Quelle nicht übernehmen)."""
     shutil.copyfile(src, dest)
     os.chmod(dest, 0o644)
+
+
+# ------------------------------------------------------------------ Bild-Cache
+# Erzeugte Bilder (Flyer-Fassungen, Social-Bilder, Seitenbilder, Effekt-Texturen) werden in
+# .cache/bilder/<art>-<prüfsumme>/ aufgehoben. Die Prüfsumme umfasst den Inhalt der Quellbilder, die
+# Einstellungen, den Code der erzeugenden Funktion und die Pillow-Version – ändert sich eines davon,
+# wird neu gerechnet. Sonst wird nur kopiert. Einträge, die ein Build nicht mehr braucht, räumt er weg.
+
+BILD_CACHE = Path(os.environ.get("CALAVERA_BILD_CACHE") or ROOT / ".cache" / "bilder")
+bild_cache_an = True                        # --ohne-cache schaltet ihn ab (alles neu rechnen, Cache unberührt)
+_cache_benutzt: set[str] = set()
+_cache_zahlen = {"cache": 0, "neu": 0}
+
+
+def aus_cache(art: str, quellen: list[Path], einstellungen, code: tuple, ziel: Path, erzeugen) -> None:
+    """Legt die Bilder, die erzeugen(ordner) schreibt, in ziel ab – aus dem Cache, wenn möglich."""
+    ziel.mkdir(parents=True, exist_ok=True)
+    if not bild_cache_an:
+        erzeugen(ziel)
+        _cache_zahlen["neu"] += 1
+        return
+    h = hashlib.sha256()
+    for teil in (art, getattr(Image, "__version__", ""), repr(einstellungen), *(inspect.getsource(f) for f in code)):
+        h.update(teil.encode("utf-8") + b"\0")
+    for q in quellen:
+        h.update(hashlib.sha256(q.read_bytes()).digest())
+    name = f"{art}-{h.hexdigest()[:24]}"
+    eintrag = BILD_CACHE / name
+    if (eintrag / ".fertig").is_file():
+        _cache_zahlen["cache"] += 1
+    else:
+        tmp = BILD_CACHE / f".tmp-{name}-{os.getpid()}"
+        try:
+            shutil.rmtree(tmp, ignore_errors=True)
+            tmp.mkdir(parents=True)
+        except OSError as exc:                                # Cache nicht beschreibbar → direkt erzeugen
+            warn(f"Bild-Cache {BILD_CACHE} nicht nutzbar ({exc}) – Bilder werden ohne Cache erzeugt")
+            globals()["bild_cache_an"] = False
+            return aus_cache(art, quellen, einstellungen, code, ziel, erzeugen)
+        try:
+            erzeugen(tmp)
+            (tmp / ".fertig").touch()
+            shutil.rmtree(eintrag, ignore_errors=True)
+            tmp.rename(eintrag)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        _cache_zahlen["neu"] += 1
+    _cache_benutzt.add(name)
+    for f in sorted(eintrag.iterdir()):
+        if f.name != ".fertig":
+            copy_public(f, ziel / f.name)
+
+
+def bild_cache_aufraeumen() -> None:
+    """Nach einem vollständigen Build: Einträge löschen, die er nicht benutzt hat (alte Flyer, alter Code)."""
+    if not bild_cache_an or not BILD_CACHE.is_dir():
+        return
+    for d in BILD_CACHE.iterdir():
+        # nur eigene Einträge anfassen – falls CALAVERA_BILD_CACHE auf einen Ordner mit anderem Inhalt zeigt
+        if d.is_dir() and re.fullmatch(r"(?:fx|flyer|social|seite)-[0-9a-f]{24}", d.name) and d.name not in _cache_benutzt:
+            shutil.rmtree(d, ignore_errors=True)
 
 
 def md(text: str) -> str:
@@ -517,7 +580,7 @@ def club_json_ld(cfg: dict, events: list | None = None, max_events: int = 20) ->
     return {k: v for k, v in data.items() if v not in ("", [], None)}
 
 
-def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str) -> str:
+def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str, landings: list | None = None) -> str:
     """llms.txt – klare Kurzfassung für KI-Suchdienste (https://llmstxt.org): wer, wo, wann, was es kostet, nächste Termine."""
     site, club = cfg["site"], cfg["club"]
     base = site["url"].rstrip("/")
@@ -547,6 +610,11 @@ def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str) -> str:
         zeilen.append(f"- [{' – '.join(teile)}]({base}{ev.url})" + (f": {ev.teaser}" if ev.teaser else ""))
     if not upcoming:
         zeilen.append("- Gerade steht nichts im Programm.")
+    if landings:
+        zeilen += ["", "## Partys nach Musikrichtung", ""]
+        for l in landings:
+            if l.in_sitemap:
+                zeilen.append(f"- [{l.seo_title}]({base}{l.url})" + (f": {l.description}" if l.description else ""))
     zeilen += ["", "## Seiten", ""]
     for p in pages:
         if p.in_sitemap:
@@ -744,8 +812,11 @@ def make_fx_textures(out: Path) -> None:
     if Image is None:
         warn("Pillow fehlt – Nebelbilder nicht erzeugt (pip install -r requirements.txt)")
         return
-    target = out / "static" / "img" / "fx"
-    target.mkdir(parents=True, exist_ok=True)
+    aus_cache("fx", [], None, (_fx_texturen, _fractal, _noise), out / "static" / "img" / "fx", _fx_texturen)
+
+
+def _fx_texturen(target: Path) -> None:
+    """Rechnet die Effekt-Texturen nach target (über den Bild-Cache aufgerufen)."""
     w, h = 1024, 256
 
     def profile(bottom: float, top: float, gamma: float) -> "Image.Image":
@@ -899,8 +970,8 @@ def make_social_images(ev: "Event", out: Path) -> None:
         return
     from PIL import ImageEnhance, ImageFilter
     target = out / "media" / "events" / ev.slug
-    target.mkdir(parents=True, exist_ok=True)
-    try:
+
+    def erzeugen(ordner: Path) -> None:
         with Image.open(ev.visual_src) as src:
             im = ImageOps.exif_transpose(src).convert("RGB")
         for key, (w, h, label) in SOCIAL_FORMATS.items():
@@ -910,9 +981,13 @@ def make_social_images(ev: "Event", out: Path) -> None:
             scale = min((w - 2 * margin) / im.width, (h - 2 * margin) / im.height)
             fg = im.resize((max(1, round(im.width * scale)), max(1, round(im.height * scale))), Image.LANCZOS)
             bg.paste(fg, ((w - fg.width) // 2, (h - fg.height) // 2))
+            bg.save(ordner / f"{key}-{w}x{h}.jpg", "JPEG", quality=88, optimize=True, progressive=True)
+
+    try:
+        aus_cache("social", [ev.visual_src], {k: (w, h) for k, (w, h, _) in SOCIAL_FORMATS.items()},
+                  (make_social_images,), target, erzeugen)
+        for key, (w, h, label) in SOCIAL_FORMATS.items():
             name = f"{key}-{w}x{h}.jpg"
-            bg.save(target / name, "JPEG", quality=88, optimize=True, progressive=True)
-            os.chmod(target / name, 0o644)
             ev.social_images[key] = {"url": f"/media/events/{ev.slug}/{name}", "w": w, "h": h,
                                      "label": label, "file": f"{ev.slug}-{key}.jpg"}
     except Exception as exc:  # noqa: BLE001
@@ -1054,7 +1129,8 @@ def process_visual(ev: Event, out: Path) -> None:
     ev.visual_url = ev.visual_thumb = ev.visual_og = f"{base}/{original.name}"
     if Image is None:
         return
-    try:
+
+    def erzeugen(ordner: Path) -> None:
         with Image.open(src) as im:
             im = ImageOps.exif_transpose(im)
             rgb = im.convert("RGB")
@@ -1063,7 +1139,7 @@ def process_visual(ev: Event, out: Path) -> None:
                 copy = rgb.copy()
                 if copy.width > width:
                     copy.thumbnail((width, width * 4), Image.LANCZOS)
-                copy.save(target_dir / name, fmt, **opts)
+                copy.save(ordner / name, fmt, **opts)
             # 16:9-Fassung (für rausgegangen.py): ganzer Flyer mittig auf unscharfem, abgedunkeltem Hintergrund
             W, H = 1600, 900
             hg = ImageOps.fit(rgb, (W, H), Image.LANCZOS).filter(ImageFilter.GaussianBlur(36))
@@ -1071,7 +1147,10 @@ def process_visual(ev: Event, out: Path) -> None:
             vorn = rgb.copy()
             vorn.thumbnail((W - 80, H - 80), Image.LANCZOS)
             hg.paste(vorn, ((W - vorn.width) // 2, (H - vorn.height) // 2))
-            hg.save(target_dir / "breit.jpg", "JPEG", quality=85, optimize=True, progressive=True)
+            hg.save(ordner / "breit.jpg", "JPEG", quality=85, optimize=True, progressive=True)
+
+    try:
+        aus_cache("flyer", [src], None, (process_visual,), target_dir, erzeugen)
         ev.visual_thumb = f"{base}/640.webp"
         ev.visual_og = f"{base}/1200.jpg"
     except Exception as exc:  # noqa: BLE001
@@ -1172,16 +1251,167 @@ def process_page_images(page: Page, out: Path) -> None:
         item["url"] = item["full"] = f"/media/pages/{page.slug}/{src.name}"
         if Image is None:
             continue
-        try:
+        small = f"{src.stem}-900.webp"
+
+        def erzeugen(ordner: Path, src=src, small=small) -> None:
             with Image.open(src) as im:
                 im = ImageOps.exif_transpose(im).convert("RGB")
                 if im.width > 900:
                     im.thumbnail((900, 900 * 4), Image.LANCZOS)
-                small = f"{src.stem}-900.webp"
-                im.save(target / small, "WEBP", quality=84)
+                im.save(ordner / small, "WEBP", quality=84)
+
+        try:
+            aus_cache("seite", [src], small, (process_page_images,), target, erzeugen)
             item["url"] = f"/media/pages/{page.slug}/{small}"
         except Exception as exc:  # noqa: BLE001
             warn(f"pages/{page.slug}: Bild {src.name} konnte nicht verkleinert werden ({exc})")
+
+
+# ------------------------------------------------------------------ Landingpages (/dark/, /party/, …)
+# Je Datei in landing/ eine Seite: eigener Einleitungstext + SEO-Angaben im Kopf, darunter die
+# passenden Veranstaltungen als Kacheln (automatisch aus events/). Ausführlich: landing/_vorlage.md
+
+LANDING_MEHR = "<!-- mehr -->"   # trennt im Text der .md: oberhalb = Einleitung, unterhalb = Text unter den Kacheln
+
+
+@dataclass
+class Landing:
+    slug: str
+    title: str                     # Überschrift (H1)
+    seo_title: str                 # <title> und og:title
+    description: str               # meta description
+    kicker: str
+    lead: str
+    intro_html: str                # Text über den Kacheln
+    outro_html: str                # Text unter den Kacheln (für Suchmaschinen: gern ausführlicher)
+    reihen: list[str] = field(default_factory=list)       # nur Veranstaltungen dieser Reihen …
+    ohne_reihen: list[str] = field(default_factory=list)  # … oder alle außer diesen Reihen
+    genres: list[str] = field(default_factory=list)       # zusätzlich: mit einem dieser Genres
+    nur_partys: bool = False       # Veranstaltungen mit "art:" (Konzert, Lesung, …) weglassen
+    archiv: int = 8                # so viele vergangene Termine unten als Liste (0 = keine)
+    leer: str = ""                 # Text, wenn gerade nichts Passendes im Programm steht
+    link_text: str = ""            # Linktext auf Veranstaltungsseiten und im Programm
+    faq: list[dict] = field(default_factory=list)          # [{frage, antwort}] → sichtbar + FAQPage-JSON-LD
+    bild: Path | None = None       # og:image (Vorschaubild beim Teilen)
+    bild_url: str = ""
+    in_sitemap: bool = True
+    source: Path | None = None
+
+    @property
+    def url(self) -> str:
+        return f"/{self.slug}/"
+
+    def passt(self, ev: "Event") -> bool:
+        if self.nur_partys and ev.kind:
+            return False
+        if self.ohne_reihen and ev.reihe in self.ohne_reihen:
+            return False
+        treffer = []
+        if self.reihen:
+            treffer.append(ev.reihe in self.reihen)
+        if self.genres:
+            eigene = {g.strip().lower() for g in ev.genres}
+            treffer.append(any(g in eigene for g in self.genres))
+        return any(treffer) if treffer else True
+
+
+def _kleine_liste(value) -> list[str]:
+    return [s.strip().lower() for s in as_list(value) if s.strip()]
+
+
+def load_landings(reihen: dict[str, dict], seiten_slugs: set[str]) -> list[Landing]:
+    folder = ROOT / "landing"
+    if not folder.is_dir():
+        return []
+    landings = []
+    for path in sorted(folder.glob("*.md")):
+        if path.name.startswith(("_", ".")):
+            continue
+        try:
+            meta, body = read_front_matter(path)
+            if meta.get("draft"):
+                continue
+            slug = str(meta.get("slug") or path.stem).strip("/").lower()
+            if slug in seiten_slugs or slug in ("programm", "intern", "static", "media"):
+                warn(f"landing/{path.name}: Adresse /{slug}/ ist schon vergeben – Seite wird übersprungen")
+                continue
+            vorne, _, hinten = body.partition(LANDING_MEHR)
+            intro_html, outro_html = md(vorne.strip()), md(hinten.strip())
+            zeigt = meta.get("zeigt") or {}
+            if not isinstance(zeigt, dict):
+                zeigt = {}
+            l_reihen = _kleine_liste(zeigt.get("reihen") or zeigt.get("reihe"))
+            l_ohne = _kleine_liste(zeigt.get("ohne_reihen") or zeigt.get("ohne_reihe"))
+            for tag in l_reihen + l_ohne:
+                if tag not in reihen:
+                    warn(f"landing/{path.name}: Reihe \"{tag}\" steht nicht in config.yml unter reihen:")
+            faq = []
+            for i, f in enumerate(meta.get("faq") or [], start=1):
+                if not isinstance(f, dict) or not (f.get("frage") and f.get("antwort")):
+                    warn(f"landing/{path.name}: FAQ-Eintrag {i} braucht frage: und antwort: – wird ignoriert")
+                    continue
+                antwort_html = md(str(f["antwort"]).strip())
+                faq.append({"frage": str(f["frage"]).strip(), "antwort_html": antwort_html,
+                            "antwort_text": plain_text(antwort_html)})
+            title = str(meta.get("title") or slug.replace("-", " ").title())
+            bild = _page_image(path, meta.get("bild"), "bild") if meta.get("bild") else None
+            landings.append(Landing(
+                slug=slug, title=title,
+                seo_title=str(meta.get("seo_title") or title),
+                description=str(meta.get("description") or shorten(plain_text(intro_html), 160)),
+                kicker=str(meta.get("kicker") or ""),
+                lead=str(meta.get("lead") or ""),
+                intro_html=intro_html, outro_html=outro_html,
+                reihen=l_reihen, ohne_reihen=l_ohne, genres=_kleine_liste(zeigt.get("genres")),
+                nur_partys=bool(zeigt.get("nur_partys", False)),
+                archiv=int(meta.get("archiv", 8) or 0),
+                leer=str(meta.get("leer") or "Gerade steht hier nichts im Programm – schaut bald wieder rein."),
+                link_text=str(meta.get("link_text") or title),
+                faq=faq, bild=bild,
+                in_sitemap=not meta.get("noindex", False),
+                source=path,
+            ))
+        except Exception as exc:  # noqa: BLE001
+            warn(f"landing/{path.name}: {exc} – Seite wird übersprungen")
+    return landings
+
+
+def landing_json_ld(l: Landing, cfg: dict, events: list["Event"], max_events: int = 30) -> dict:
+    """Strukturierte Daten: CollectionPage mit den kommenden Veranstaltungen (MusicEvent, samt Titel),
+    Brotkrumen und – wenn vorhanden – FAQPage. Der Club selbst steckt per @id in der Startseite."""
+    site, club = cfg["site"], cfg["club"]
+    base = site["url"].rstrip("/")
+    seite = {
+        "@type": "CollectionPage", "@id": base + l.url, "url": base + l.url,
+        "name": l.seo_title, "description": l.description, "inLanguage": site.get("language", "de"),
+        "isPartOf": {"@type": "WebSite", "name": site["name"], "url": base + "/"},
+        "about": {"@id": base + "/#club"},
+        "breadcrumb": {"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": site["name"], "item": base + "/"},
+            {"@type": "ListItem", "position": 2, "name": l.title, "item": base + l.url}]},
+    }
+    if l.bild_url:
+        seite["image"] = base + l.bild_url
+    if events:
+        seite["mainEntity"] = {"@type": "ItemList", "itemListElement": [
+            {"@type": "ListItem", "position": i,
+             "item": {k: v for k, v in ev.json_ld(site, club).items() if k != "@context"}}
+            for i, ev in enumerate(events[:max_events], start=1)]}
+    graph = [seite]
+    if l.faq:
+        graph.append({"@type": "FAQPage", "@id": base + l.url + "#faq", "mainEntity": [
+            {"@type": "Question", "name": f["frage"],
+             "acceptedAnswer": {"@type": "Answer", "text": f["antwort_text"]}} for f in l.faq]})
+    return {"@context": "https://schema.org", "@graph": graph}
+
+
+def process_landing_image(l: Landing, out: Path) -> None:
+    if not l.bild:
+        return
+    target = out / "media" / "landing" / l.slug
+    target.mkdir(parents=True, exist_ok=True)
+    copy_public(l.bild, target / l.bild.name)
+    l.bild_url = f"/media/landing/{l.slug}/{l.bild.name}"
 
 
 # ------------------------------------------------------------------ Kalender (.ics)
@@ -1254,6 +1484,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
 
     events = load_events(cfg, tz)
     pages = load_pages()
+    landings = load_landings(load_reihen(cfg), {p.slug for p in pages})
     if strict and problems:
         print("Abbruch wegen --strict.")
         return 1
@@ -1325,7 +1556,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
                        asset=asset, now=now, relative_label=relative_label, year=now.year,
                        palette=accent_palette(cfg["site"].get("accent", "#b3122e")),
                        textpal=text_palette(cfg["site"].get("text", "#d1cabf")),
-                       pages={p.slug: p for p in pages},
+                       pages={p.slug: p for p in pages}, landings=landings,
                        seiteneffekte=seiteneffekte_aus(cfg, tz, now))
 
     # Programm-Kalender vorab erzeugen: Links darauf bekommen ?v=…, damit Handys nach einer
@@ -1373,12 +1604,22 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         termin_ics = ics_for([ev], cfg, now, ev.title)
         render("event.html", ev.url, page_path=ev.url, ev=ev, fx_css=fx_css_for(ev.effekte),
                more_same=more_same, more_rest=more_rest, reihe=reihen.get(ev.reihe),
+               landing=next((l for l in landings if l.passt(ev)), None),
                termin_url=f"termin.ics?v={ics_version(termin_ics)}")
         (out / ev.url.lstrip("/") / "termin.ics").write_text(termin_ics, encoding="utf-8", newline="")
 
     for page in pages:
         process_page_images(page, out)
         render("page.html", page.url, page_path=page.url, page=page)
+
+    # Landingpages: eigener Text aus landing/*.md + passende Veranstaltungen (kommende als Kacheln,
+    # vergangene als Liste – so bleibt die Seite für Suchmaschinen auch in Programmpausen gefüllt)
+    for l in landings:
+        process_landing_image(l, out)
+        l_kommend = [e for e in upcoming if l.passt(e)]
+        l_vorbei = [e for e in past if l.passt(e)][:max(0, l.archiv)]
+        render("landing.html", l.url, page_path=l.url, l=l, events=l_kommend, past_events=l_vorbei, cols=cols,
+               fx_css=fx_list(l_kommend), landing_ld=landing_json_ld(l, cfg, l_kommend))
 
     for old, new in (cfg.get("redirects") or {}).items():
         render("redirect.html", f"/{str(old).strip('/')}/", target=new)
@@ -1394,19 +1635,26 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         render("intern_event.html", f"/intern/{ev.slug}/", page_path=f"/intern/{ev.slug}/", ev=ev, s=social[ev.slug])
 
     base = cfg["site"]["url"].rstrip("/")
-    urls = ["/", "/programm/", "/programm/archiv/"] + [p.url for p in pages if p.in_sitemap] + [e.url for e in events]
+    urls = (["/", "/programm/", "/programm/archiv/"] + [l.url for l in landings if l.in_sitemap]
+            + [p.url for p in pages if p.in_sitemap] + [e.url for e in events])
     (out / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "".join(f"  <url><loc>{html.escape(base + u)}</loc></url>\n" for u in urls)
         + "</urlset>\n", encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /intern/\nSitemap: {base}/sitemap.xml\n",
                                     encoding="utf-8")
-    (out / "llms.txt").write_text(llms_txt(cfg, upcoming, pages, env.globals["kalender_url"]), encoding="utf-8")
+    (out / "llms.txt").write_text(llms_txt(cfg, upcoming, pages, env.globals["kalender_url"], landings), encoding="utf-8")
     (out / "build.json").write_text(json.dumps({
-        "built_at": now.isoformat(), "upcoming": len(upcoming), "past": len(past), "pages": len(pages)
+        "built_at": now.isoformat(), "upcoming": len(upcoming), "past": len(past), "pages": len(pages),
+        "landingpages": len(landings)
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print(f"  ✓ {len(upcoming)} kommende, {len(past)} vergangene Veranstaltungen, {len(pages)} feste Seiten → {out}")
+    bild_cache_aufraeumen()
+    if _cache_zahlen["cache"] or _cache_zahlen["neu"]:
+        print(f"  Bilder: {_cache_zahlen['neu']} neu berechnet, {_cache_zahlen['cache']} aus dem Cache"
+              + ("" if bild_cache_an else " (Cache aus)"))
+    print(f"  ✓ {len(upcoming)} kommende, {len(past)} vergangene Veranstaltungen, {len(pages)} feste Seiten, "
+          f"{len(landings)} Landingpage(s) → {out}")
     if problems:
         print(f"  {len(problems)} Hinweis(e), siehe oben.")
     return 1 if (strict and problems) else 0
@@ -1439,6 +1687,8 @@ def main() -> int:
     ap.add_argument("--out", default=str(ROOT / "dist"), help="Zielordner (Standard: dist/)")
     ap.add_argument("--now", help='Zeitpunkt simulieren, z. B. "2026-11-08 12:00"')
     ap.add_argument("--strict", action="store_true", help="bei Fehlern in Event-Dateien mit Code 1 abbrechen")
+    ap.add_argument("--ohne-cache", action="store_true",
+                    help="alle Bilder neu berechnen, Bild-Cache (.cache/bilder/) weder lesen noch schreiben")
     ap.add_argument("--serve", nargs="?", const=8000, type=int, metavar="PORT",
                     help="nach dem Bauen eine Vorschau starten (Standard-Port 8000)")
     args = ap.parse_args()
@@ -1446,6 +1696,9 @@ def main() -> int:
     cfg_tz = ZoneInfo(yaml.safe_load((ROOT / "config.yml").read_text(encoding="utf-8"))["site"].get("timezone", "Europe/Berlin"))
     now = parse_when(args.now, cfg_tz, what="--now") if args.now else None
     out = Path(args.out).resolve()
+    if args.ohne_cache:
+        global bild_cache_an
+        bild_cache_an = False
     code = build(out, now, args.strict)
     if args.serve and code == 0:
         serve(out, args.serve)

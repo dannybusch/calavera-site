@@ -54,7 +54,8 @@ Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Ho
 | Pfad | Inhalt |
 |---|---|
 | `build.py` | Generator: Events laden, Bilder (inkl. 16:9 `breit.jpg`), Seiten, ICS, JSON-LD, `llms.txt` |
-| `templates/` | Jinja2: `base`, `index`, `programm`, `event`, `archiv`, `page`, `intern_*`; `partials/tile.html`, `effekte.html`, `kellerfunk.html` |
+| `landing/` | Landingpages (`/dark/`, `/party/`): Text + SEO-Kopf pflegt Danny; Auswahl der Termine per `zeigt:` (siehe `_vorlage.md`) |
+| `templates/` | Jinja2: `base`, `index`, `programm`, `event`, `archiv`, `page`, `landing`, `intern_*`; `partials/tile.html`, `effekte.html`, `kellerfunk.html` |
 | `static/js/site.js` | Live-Logik im Browser: vergangene Termine ausblenden, „Heute/Läuft gerade“, Startseiten-Übernahme, On-Air-Band, Titel-Einpassen (`wortPassen`) |
 | `static/js/seiteneffekte.js` | globale Seiteneffekte (`spinne`, `logo`, `rip`) |
 | `static/css/site.css`, `fx/*.css`, `seiteneffekte/*.css` | Grundlayout, je Effekt eine Datei |
@@ -78,6 +79,8 @@ Titel werden nie mitten im Wort getrennt – lieber Schrift verkleinern.
   `effekte`, `eintritt`, `einlass`, `stream`, `highlight`, `reihe`, `fans_of`, `social_title`, `draft`, …;
   erklärt in `events/_vorlage.md`) + Markdown-Text. Dateiname = Slug = URL. Flyer gleichnamig daneben.
   Vergangen = Ende erreicht (ohne `end` +6 h). Optional für Scripts: `rausgegangen: false`, `rausgegangen_kategorie`.
+- **Bild-Cache:** alle Pillow-Bilder über `aus_cache()` in `build.py` → `.cache/bilder/` (Prüfsumme aus Quelle,
+  Einstellungen, Funktionscode, Pillow-Version). Neue Bildarten ebenso einbinden; `--ohne-cache` zum Vergleichen.
 - **Zeit:** Build-Zeitpunkt kann veraltet sein → `site.js` entscheidet live (`window.calaveraJetzt`, `?now=`).
 - **Effekte (43):** Makro `fx_<name>(ev, wo, img)` in `partials/effekte.html` (wo = flyer/tile/page),
   CSS in `static/css/fx/<name>.css`, Eintrag in `EFFEKTE` (+ ggf. `EFFEKT_ALIAS`, `EFFEKT_CSS`) in `build.py`.
@@ -90,6 +93,8 @@ Titel werden nie mitten im Wort getrennt – lieber Schrift verkleinern.
 - **Kellerfunk:** Sendeplan kommt von `https://live.calavera.club/config.yml` (`shows:`); Website-Karte,
   On-Air-Band (rot live, grauer Countdown < 60 min), Reels, Wochenbild und Presse lesen ihn.
   Offline testen mit `--plan datei.yml`.
+- **Landingpages:** `landing/*.md` → `Landing` in `build.py` (`load_landings`, `Landing.passt`, `landing_json_ld`),
+  Template `landing.html`. Text über/unter den Kacheln getrennt durch `<!-- mehr -->`. Texte gehören Danny – nur Entwürfe vorschlagen.
 - **SEO/KI:** Event-Seiten `MusicEvent`-JSON-LD; Startseite + Programm `NightClub` **mit** allen kommenden
   Events (sonst erfinden KI-Antworten aus „Fr + Sa“ namenlose Partys); `dist/llms.txt`.
 

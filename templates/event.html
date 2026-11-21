@@ -119,7 +119,10 @@
   <section class="more" aria-labelledby="mehr-titel">
     <div class="section-head">
       <h2 class="h-section h-section--sm" id="mehr-titel">Weitere Termine</h2>
-      <a class="label" href="/programm/">Ganzes Programm →</a>
+      <span class="section-head-links">
+        {% if landing %}<a class="label" href="{{ landing.url }}">{{ landing.link_text }} →</a>{% endif %}
+        <a class="label" href="/programm/">Ganzes Programm →</a>
+      </span>
     </div>
     <div class="more-groups">
       {% if more_same %}

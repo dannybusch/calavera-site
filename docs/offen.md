@@ -17,9 +17,11 @@ Stand: 21.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entschei
 - **Google:** Startseite und /programm/ in der Search Console neu crawlen lassen; prüfen, ob die KI-Antwort
   nun echte Titel nennt (siehe 0014).
 
+- **Landingpages `/dark/` und `/party/`** (siehe 0017): Entwurfstexte in `landing/dark.md` und `landing/party.md`
+  lesen und umschreiben; ggf. Menüeintrag in `config.yml → navigation`; nach dem Deploy in der Search Console einreichen.
+
 ## Ideen, nicht begonnen
 
-- Genre-/„Dark“-Landingpages (z. B. Reihe „dark“ mit eigener Seite für Wave/Gothic/Postpunk) – nur gesammelt.
 - `config.yml → site.description` nutzt „1/4 Bremen“; für Suchmaschinen wäre „Viertel“ besser (Danny entscheidet).
 - `social.py`: Wochenbild (media.py) montags und Reels automatisch auf Facebook-Seite/Instagram posten
   (Meta-App, Seiten-Token als Secret, IG-Profikonto nötig).
