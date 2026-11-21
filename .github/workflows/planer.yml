@@ -27,6 +27,7 @@ permissions:
 jobs:
   planer:
     runs-on: ubuntu-24.04
+    environment: calavera-site.env
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
