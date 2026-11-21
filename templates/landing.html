@@ -32,7 +32,7 @@
   <p class="program-empty"{% if events %} hidden{% endif %}>{{ l.leer }}</p>
   <div class="section-foot">
     <a class="btn btn-ghost" href="/programm/">Ganzes Programm</a>
-    {% for o in landings if o.slug != l.slug %}<a class="btn btn-ghost" href="{{ o.url }}">{{ o.link_text }}</a>{% endfor %}
+    {% for o in landings if o.slug != l.slug and o.rueckverlink %}<a class="btn btn-ghost" href="{{ o.url }}">{{ o.link_text }}</a>{% endfor %}
   </div>
 </section>
 

@@ -211,7 +211,7 @@ Calavera“ (damit die Seite auch in Programmpausen etwas zeigt). Alle Möglichk
 | `seo_title` | Titel im Browser-Tab und bei Google (sonst `title`) |
 | `description` | Beschreibung für Google (ca. 155 Zeichen) |
 | `kicker`, `lead`, `link_text` | Zeile über der Überschrift, Satz darunter, Linktext auf anderen Seiten |
-| `rueckverlink: false` | Veranstaltungsseiten verlinken nicht auf diese Landingpage (Sammelseite wie `/party/`, keine Reihe) |
+| `rueckverlink: false` | Veranstaltungsseiten und andere Landingpages verlinken nicht hierher, nur `/programm/` (Sammelseite wie `/party/`, keine Reihe) |
 | `zeigt:` | welche Termine: `reihen: [dark]`, `genres: [...]`, `ohne_reihen: [dark]`, `nur_partys: true` (ohne alles mit `art:`) |
 | `faq:` | Häufige Fragen (`frage:`/`antwort:`) – sichtbar auf der Seite und als FAQ für Google/KI |
 | `archiv`, `leer`, `bild`, `noindex`, `draft` | Anzahl vergangener Termine, Text bei leerem Programm, Vorschaubild, Suchmaschinen aus, Entwurf |
