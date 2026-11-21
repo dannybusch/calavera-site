@@ -3,6 +3,9 @@
 Statische Website, erzeugt von einem Python-Script. Kein Server-Code, keine Datenbank, keine Cookies:
 Am Ende liegt in `dist/` ein Ordner mit fertigen HTML-Dateien, der auf jeden Webspace passt.
 
+Hintergründe zu Entscheidungen stehen in `docs/entscheidungen/`, offene Punkte in `docs/offen.md`,
+eine Kurzfassung für Claude in `CLAUDE.md`.
+
 ## Einmal einrichten
 
 ```bash
@@ -656,8 +659,10 @@ python presse.py --naechste      # für die kommende Woche
 python presse.py --senden        # per Mail verschicken (braucht SMTP_* als Umgebungsvariablen)
 ```
 
-**Einrichten:** In GitHub die Secrets `SMTP_HOST`, `SMTP_PORT` (465 = SSL, 587 = STARTTLS), `SMTP_USER`,
-`SMTP_PASSWORD` anlegen (bei STRATO z. B. `smtp.strato.de`, Port 465, Postfach-Adresse und -Passwort).
+**Einrichten:** In GitHub unter Settings → Secrets and variables → Actions die **Variables** `SMTP_HOST`,
+`SMTP_PORT` (465 = SSL, 587 = STARTTLS), `SMTP_USER` und das **Secret** `SMTP_PASSWORD` anlegen (bei STRATO z. B.
+`smtp.strato.de`, Port 465, Postfach-Adresse und -Passwort). Fehlt etwas, wird ein von Hand gestarteter Lauf rot;
+oben in der Zusammenfassung jedes Laufs steht, ob und an wen gesendet wurde (mit Message-ID).
 In `config.yml`:
 
 ```yaml

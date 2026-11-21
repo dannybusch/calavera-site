@@ -1,0 +1,36 @@
+# Offene Punkte
+
+Stand: 21.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entscheidungen/) überführen.
+
+## Wartet auf Danny
+
+- **rausgegangen einrichten:** API-Token bei zentrale@rausgegangen.de anfragen (das Doku-„secret“ ist kein Token)
+  → Secret `RAUSGEGANGEN_API_KEY`; `python rausgegangen.py location` → `rausgegangen.location` in config.yml;
+  Vorschau-Links prüfen, dann `veroeffentlichen: true`. Erster echter Lauf: Fehlermeldungen der API ansehen
+  (PATCH-Adresse und Pfad der Location-Suche sind aus der Doku nicht eindeutig, siehe 0012).
+  Nebenbei fragen: Ist rausgegangen „Official Events“-Partner von Facebook?
+- **Pressemitteilung:** Variables `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER` + Secret `SMTP_PASSWORD` sind angelegt
+  (21.11.); erster echter Versand gegen STRATO steht noch aus – Zusammenfassung des Laufs prüfen.
+- **FAQ-Seite:** Antworten fehlen zu Mindestalter, Garderobe, Kartenzahlung, Rauchen, Barrierefreiheit, Anfahrt/ÖPNV.
+- **Facebook-Weg wählen** (siehe 0015): Browser-Mittelweg, lokales Script, `social.py` (Seite/Instagram
+  automatisch posten) oder Event-Paket zum Abtippen.
+- **Google:** Startseite und /programm/ in der Search Console neu crawlen lassen; prüfen, ob die KI-Antwort
+  nun echte Titel nennt (siehe 0014).
+
+## Ideen, nicht begonnen
+
+- Genre-/„Dark“-Landingpages (z. B. Reihe „dark“ mit eigener Seite für Wave/Gothic/Postpunk) – nur gesammelt.
+- `config.yml → site.description` nutzt „1/4 Bremen“; für Suchmaschinen wäre „Viertel“ besser (Danny entscheidet).
+- `social.py`: Wochenbild (media.py) montags und Reels automatisch auf Facebook-Seite/Instagram posten
+  (Meta-App, Seiten-Token als Secret, IG-Profikonto nötig).
+
+## Beobachten
+
+- GitHub-Runner: Deploy läuft fest auf `ubuntu-24.04`; irgendwann auf neuere Version prüfen.
+- Dauer des Deploy-Uploads mit `hochladen.py` (Prüfsummen) – erwartet: nur geänderte Seiten.
+
+## Referenzen
+
+- Design-Fläche „Calavera Relaunch – 4 Entwürfe“ (Claude-Artefakt): https://claude.ai/artifact/BJGHhQ3SBQeSJ6fDV3pUYa
+  – u. a. Startseiten-Varianten, Event-Detail, Hero-Schriften, Halloween-Effekte, Wochenbild-Entwürfe A/B/C.
+- Rausgegangen-API-Doku: https://api.zentrale.rausgegangen.de/v2/ (Zugang über das Doku-„secret“).

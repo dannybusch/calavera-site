@@ -14,7 +14,7 @@ an die Adresse(n) unter presse.an – zum Prüfen und Weiterleiten an den eigene
   --ohne-kellerfunk / --plan DATEI     wie bei media.py
   --now "JJJJ-MM-TT HH:MM"             so tun, als wäre jetzt …
 
-Mailversand (nur über Umgebungsvariablen / GitHub-Secrets, nie in Dateien):
+Mailversand (nur über Umgebungsvariablen; auf GitHub Host/Port/Benutzer als Variables, Passwort als Secret):
   SMTP_HOST, SMTP_PORT (Standard 465), SMTP_USER, SMTP_PASSWORD
   SMTP_SICHERHEIT: ssl oder starttls (Standard: ssl bei Port 465, sonst starttls)
 
@@ -52,6 +52,17 @@ MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August"
 
 def info(msg: str = "") -> None:
     print(msg, flush=True)
+
+
+def zusammenfassung(text: str, art: str = "") -> None:
+    """Auf GitHub: Zeile oben in der Lauf-Übersicht (und als Warnung/Fehler markiert) – sonst nur ausgeben"""
+    if os.environ.get("GITHUB_ACTIONS"):
+        if art in ("warning", "error"):
+            print(f"::{art}::{text}", flush=True)
+        datei = os.environ.get("GITHUB_STEP_SUMMARY")
+        if datei:
+            with open(datei, "a", encoding="utf-8") as f:
+                f.write(text + "\n\n")
 
 
 def fehler(msg: str) -> None:
@@ -281,10 +292,14 @@ def senden(cfg: dict, m: dict, text: str, html_text: str) -> None:
         fehler("in config.yml fehlt presse → an (wer die Mitteilung bekommen soll)")
     host, user, pw = (os.environ.get(k, "").strip() for k in ("SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD"))
     if not (host and user and pw):
-        if os.environ.get("GITHUB_ACTIONS"):
-            info("SMTP_HOST / SMTP_USER / SMTP_PASSWORD sind (noch) nicht als GitHub-Secrets hinterlegt – nichts gesendet.")
+        fehlt = ", ".join(k for k, v in (("SMTP_HOST", host), ("SMTP_USER", user), ("SMTP_PASSWORD", pw)) if not v)
+        meldung = (f"Pressemitteilung NICHT gesendet: es fehlt {fehlt} (GitHub → Settings → Secrets and variables → Actions: "
+                   "SMTP_HOST/SMTP_PORT/SMTP_USER unter Variables, SMTP_PASSWORD unter Secrets).")
+        if os.environ.get("GITHUB_ACTIONS") and os.environ.get("GITHUB_EVENT_NAME") == "schedule":
+            zusammenfassung(meldung, "warning")   # geplanter Lauf vor der Einrichtung: gelb statt jede Woche rot
             return
-        fehler("SMTP_HOST, SMTP_USER und SMTP_PASSWORD müssen gesetzt sein")
+        zusammenfassung(meldung, "error")
+        fehler(meldung)
     port = int(os.environ.get("SMTP_PORT") or 465)
     von = str(pcfg.get("von") or user)
     msg = EmailMessage()
@@ -299,21 +314,35 @@ def senden(cfg: dict, m: dict, text: str, html_text: str) -> None:
     msg.add_alternative(f"<!doctype html><html><body>{html_text}</body></html>", subtype="html")
     kontext = ssl.create_default_context()
     art = (os.environ.get("SMTP_SICHERHEIT") or ("ssl" if port == 465 else "starttls")).strip().lower()
+    info(f"  Mailserver {host}:{port} ({art}), Absender {von}")
     try:
         if art == "ssl":
             with smtplib.SMTP_SSL(host, port, context=kontext, timeout=30) as s:
                 s.login(user, pw)
-                s.send_message(msg)
+                abgelehnt = s.send_message(msg)
         else:
             with smtplib.SMTP(host, port, timeout=30) as s:
                 s.starttls(context=kontext)
                 s.login(user, pw)
-                s.send_message(msg)
+                abgelehnt = s.send_message(msg)
     except smtplib.SMTPAuthenticationError:
+        zusammenfassung("Pressemitteilung NICHT gesendet: Mailserver hat die Anmeldung abgelehnt (SMTP_USER / SMTP_PASSWORD).", "error")
         fehler("Mailserver: Anmeldung abgelehnt (SMTP_USER / SMTP_PASSWORD prüfen)")
+    except smtplib.SMTPSenderRefused as e:
+        zusammenfassung(f"Pressemitteilung NICHT gesendet: Absender {von} abgelehnt – muss zum Postfach {user} passen.", "error")
+        fehler(f"Mailserver lehnt den Absender {von} ab ({e.smtp_code} {e.smtp_error!r}) – presse.von muss zum Postfach passen")
     except (smtplib.SMTPException, OSError) as e:
+        zusammenfassung(f"Pressemitteilung NICHT gesendet: {e.__class__.__name__}: {e}", "error")
         fehler(f"Mailversand fehlgeschlagen ({e.__class__.__name__}: {e}) – SMTP_HOST/SMTP_PORT/SMTP_SICHERHEIT prüfen")
-    info(f"  ✉ gesendet an {', '.join(an)}")
+    angenommen = [a for a in an if a not in (abgelehnt or {})]
+    if abgelehnt:
+        zusammenfassung(f"Mailserver hat Empfänger abgelehnt: {', '.join(abgelehnt)}", "error")
+    info(f"  ✉ vom Mailserver angenommen für {', '.join(angenommen) or '–'} · Message-ID {msg['Message-ID']}")
+    zusammenfassung(f"✉ Pressemitteilung vom Mailserver angenommen – an {', '.join(angenommen)}, Absender {von}\n\n"
+                    f"Betreff: „{m['betreff']}“ · Message-ID `{msg['Message-ID']}`\n\n"
+                    "Nicht im Posteingang? Spam-Ordner prüfen und im Absender-Postfach nach Rückläufern (Mailer-Daemon) suchen.")
+    if abgelehnt:
+        sys.exit(1)
 
 
 # ---------------------------------------------------------------------------
@@ -348,6 +377,7 @@ def main() -> int:
     info(f"Pressemitteilung KW {kw[1]} ({montag:%d.%m.} – {(bis - timedelta(days=1)):%d.%m.%Y}): {len(eintraege)} Termin(e)")
     if not eintraege:
         info("  Keine Termine in dieser Woche – keine Pressemitteilung.")
+        zusammenfassung(f"Keine Termine in KW {kw[1]} – keine Pressemitteilung gesendet.", "warning")
         return 0
 
     m = mitteilung(cfg, montag, eintraege, now.date())
@@ -363,6 +393,7 @@ def main() -> int:
     if args.senden:
         senden(cfg, m, text, html_text)
     else:
+        zusammenfassung(f"Probelauf: Pressemitteilung KW {kw[1]} erzeugt, nicht gesendet (Text/HTML unter „Artifacts“).")
         info("\nBetreff: " + m["betreff"] + "\n\n" + text)
     return 0
 

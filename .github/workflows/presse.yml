@@ -5,8 +5,9 @@
 #  und startet geplante Läufe manchmal etwas später) geht die Mitteilung für die laufende
 #  Woche an die Adresse(n) unter presse.an in config.yml – zum Prüfen und Weiterleiten.
 #  Von Hand: Actions → "Pressemitteilung" → "Run workflow".
-#  Braucht die Secrets SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD (optional SMTP_SICHERHEIT).
-#  Ohne Secrets wird nichts gesendet; Text und HTML liegen dann unter "Artifacts".
+#  Braucht die Variables SMTP_HOST, SMTP_PORT, SMTP_USER (optional SMTP_SICHERHEIT) und das Secret
+#  SMTP_PASSWORD. Fehlt etwas: von Hand gestartet → rot, geplanter Lauf → gelbe Warnung; Text und HTML
+#  liegen immer unter "Artifacts". Was passiert ist, steht oben in der Zusammenfassung des Laufs.
 # ------------------------------------------------------------------
 
 name: Pressemitteilung
@@ -51,11 +52,13 @@ jobs:
 
       - name: Pressemitteilung erzeugen und senden
         env:
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
+          # Host/Port/Benutzer als Variables (wie beim Deploy), das Passwort als Secret.
+          # Zur Sicherheit wird jeweils auch die andere Stelle akzeptiert.
+          SMTP_HOST: ${{ vars.SMTP_HOST || secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || secrets.SMTP_PORT }}
+          SMTP_USER: ${{ vars.SMTP_USER || secrets.SMTP_USER }}
+          SMTP_SICHERHEIT: ${{ vars.SMTP_SICHERHEIT || secrets.SMTP_SICHERHEIT }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          SMTP_SICHERHEIT: ${{ secrets.SMTP_SICHERHEIT }}
           NAECHSTE: ${{ inputs.naechste }}
           PROBELAUF: ${{ inputs.probelauf }}
         run: |
