@@ -1,0 +1,28 @@
+# Welche Quellen der Planer abfragt – Reihenfolge = Spaltenreihenfolge in Sheet A.
+# Neue Quelle: Plugin in planer/quellen/ + Eintrag hier. `aktiv: false` schaltet eine Quelle ab.
+# Optionale Felder je Quelle: url (andere Programmseite), details (false = keine Detailseiten holen).
+
+sheet_a:
+  erste_spalte: I              # neue Quellenspalten ab hier; G und H bleiben frei für euch
+
+quellen:
+  - id: werder                 # Heim- und Auswärtsspiele über OpenLigaDB (Bundesliga + DFB-Pokal)
+    aktiv: true
+    ligen: [bl1, dfb]
+  - id: dark_kalender          # Sheet B, nur lesen
+    aktiv: true
+    blaetter: ["Kalender {jahr} Bremen"]
+  - id: modernes
+    aktiv: true
+  - id: aladin                 # Aladin + Tivoli, Raum steht in Klammern
+    aktiv: true
+  - id: eisen
+    aktiv: true
+  - id: polyester
+    aktiv: true
+  - id: shagall
+    aktiv: true
+  - id: zollkantine            # musikszene-bremen.de, Kategorie „termine“
+    aktiv: true
+  - id: zakk                   # nur die nächsten Tage (Startseite)
+    aktiv: true

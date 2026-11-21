@@ -1,0 +1,46 @@
+# Wann ist ein Termin „artverwandt“ (mögliche Kollision mit einem Calavera-Abend)?
+# Gross/klein und Umlaute egal, es zählen ganze Wörter bzw. Wortfolgen in Titel oder Kategorie.
+# Termine aus dem Dark-Kalender (Sheet B) gelten immer als artverwandt, außer ein Ausschluss trifft.
+# Diese Datei pflegt Danny.
+
+artverwandt:
+  - gothic
+  - goth
+  - dark
+  - darkwave
+  - dark wave
+  - wave
+  - new wave
+  - cold wave
+  - coldwave
+  - post punk
+  - postpunk
+  - synth
+  - synthpop
+  - synthwave
+  - ebm
+  - industrial
+  - batcave
+  - schwarz
+  - schwarze
+  - 80er
+  - 80s
+  - 80ies
+  - achtziger
+  - depeche mode
+  - the cure
+  - cure
+  - smiths
+  - sisters of mercy
+  - joy division
+  - new order
+  - siouxsie
+  - bauhaus
+  - unknown pleasures
+  - dark entries
+  - gothika
+  - wgt
+
+ausschluss:
+  - kindertheater
+  - kinderdisco

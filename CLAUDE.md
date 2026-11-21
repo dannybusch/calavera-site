@@ -46,6 +46,8 @@ python presse.py [--naechste] [--senden]                             # Wochen-Pr
 python rausgegangen.py [status|location] [--senden]                  # rausgegangen.de (Probelauf ohne --senden)
 python hochladen.py dist/ <zielordner> --probe                       # SFTP-Spiegel wie im Deploy (+ sitemap lastmod)
 python indexnow.py geaendert.txt --probe                             # geänderte Seiten an IndexNow (Bing & Co.)
+python planer.py [--bis 2027-06] [--nur modernes] [--schreiben]      # Planungskalender: Fr/Sa-Termine anderer Locations (ohne --schreiben Probelauf)
+python -m pytest tests/planer -q                                     # Tests Planungskalender (ohne Netz)
 ```
 
 Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Hochladen nur mit ausdrücklichem Schalter.
@@ -67,6 +69,7 @@ Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Ho
 | `rausgegangen.py` | Events per Rausgegangen-API v2 eintragen (Upsert über `mapping_id` `calavera-<slug>`) |
 | `hochladen.py` | SFTP-Spiegel mit Prüfsummen (`.calavera-pruefsummen.json` auf dem Server); setzt `<lastmod>` in sitemap.xml, Liste geänderter Seiten |
 | `indexnow.py` | geänderte Seiten an IndexNow melden (Bing, Yandex, Seznam …); Google liest die Sitemap |
+| `planer.py` + `planer/` | Planungskalender (0021): ein Plugin pro Quelle in `planer/quellen/`, nur Fr/Sa. **Sheet B (Dark-Kalender) nie beschreiben**, in Sheet A nur eigene Spalten + fehlende Fr/Sa-Zeilen |
 | `.github/workflows/` | `deploy` (Push + täglich), `rausgegangen` (nach Deploy), `presse` (Mo früh), `reels`, `media` (von Hand) |
 
 ## Design
@@ -118,5 +121,6 @@ Für Experimente mit Event-Dateien eine Kopie des Projekts verwenden (wegen `eve
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER` (optional `SMTP_SICHERHEIT`) | Variables | presse.py |
 | `SMTP_PASSWORD` | Secret | presse.py |
 | `INDEXNOW_KEY` | Variable | build.py (Schlüsseldatei) + indexnow.py (Meldung an Bing & Co.) |
+| `GOOGLE_SA_JSON` | Secret | planer.py `--schreiben` (Service-Account, nur Sheet A freigegeben) |
 
 Fehlt ein Zugang: geplante Läufe enden mit gelber Warnung, von Hand gestartete werden rot (nie still grün).

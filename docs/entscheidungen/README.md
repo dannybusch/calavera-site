@@ -25,3 +25,4 @@ Je Grundsatzentscheidung eine Datei: Kontext, Entscheidung, Folgen. Neue Datei m
 | [0018](0018-bild-cache.md) | Bild-Cache mit Prüfsumme in `build.py` | gilt |
 | [0019](0019-indexnow-und-lastmod.md) | IndexNow nach dem Upload, echte `lastmod` in der Sitemap | gilt (Schlüssel einrichten, siehe docs/offen.md) |
 | [0020](0020-adventskalender.md) | Adventskalender `/adventskalender/` aus `advent/*.yml`, nur geöffnete Türen im HTML | gilt |
+| [0021](0021-planungskalender.md) | Planungskalender: Fr/Sa-Termine anderer Locations in Sheet A (`planer.py`) | gilt (Etappe 1, Schreiben ab Etappe 2) |

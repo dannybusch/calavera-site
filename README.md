@@ -819,6 +819,74 @@ presse:
 Läuft automatisch montags gegen 6:17 Uhr (Sommerzeit 7:17 Uhr); von Hand unter Actions → „Pressemitteilung“,
 wahlweise für die kommende Woche oder nur als Probelauf (Text/HTML dann unter „Artifacts“).
 
+## Planungskalender (`planer.py`)
+
+Sammelt die Freitag- und Samstagtermine anderer Locations und des Dark-Kalenders, damit wir in unserem
+Google Sheet „Calavera Terminkalender“ (Sheet A) Kollisionen mit artverwandten Partys sehen.
+Ein Plugin pro Quelle in `planer/quellen/`. Mehr dazu in `docs/entscheidungen/0021-planungskalender.md`.
+
+Ohne `--schreiben` ist jeder Aufruf ein Probelauf: Der Planer holt alles, schreibt nichts und zeigt eine Tabelle.
+Mit `--schreiben` trägt er die Termine in Sheet A ein (Service-Account, siehe unten).
+
+```bash
+pip install -r requirements-planer.txt
+python planer.py                        # Probelauf: heute bis 6 Monate voraus
+python planer.py --bis 2027-06          # bis einschließlich Juni 2027
+python planer.py --nur modernes,eisen   # nur diese Quellen
+python planer.py --cache 60             # Seiten 60 min zwischenspeichern (.cache/planer/), gut beim Ausprobieren
+python planer.py --json termine.json    # zusätzlich alle Termine als JSON
+python planer.py --fuelle-bis 2027-06   # zeigen, welche Monatsblätter in Sheet A noch fehlen
+python planer.py --schreiben            # in Sheet A schreiben (Umgebungsvariable GOOGLE_SA_JSON)
+python planer.py --schreiben --fuelle-bis 2027-06   # vorher fehlende Monatsblätter bis Juni 2027 anlegen
+python -m pytest tests/planer -q        # Tests (ohne Netz, mit Fixtures)
+```
+
+| Quelle | Spalte | Wie gelesen |
+|---|---|---|
+| Werder Bremen (Bundesliga, DFB-Pokal) | Werder | OpenLigaDB-API (werderbremen.de sperrt Abrufe); „HEIM“/„auswärts“, Anstoßzeit; > 5 Wochen voraus „(Zeit vorläufig)“ |
+| Sheet B „Partyplanungen Bremen-Oldenburg“ | Dark-Kalender | CSV-Export je Jahresblatt „Kalender 2027 Bremen“, **nur lesen** |
+| modernes.de | Modernes | Programmseite, Links `/events/JJJJ-MM-TT/…`, Detailseite für Uhrzeit |
+| aladin-bremen.de | Aladin/Tivoli | Programmliste, Datum + Raum aus der Karte, Uhrzeit von der Detailseite; Raum in Klammern |
+| eisen-bremen.com | Eisen | `veranstaltungen.php`, Links `/event/…-JJJJ-MM-TT` |
+| polyester-klub.de | Polyester OL | iCal-Feed `?mec-ical-feed=1` |
+| shagall-klub.com | Shagall | `/shows` (Wix), Datum + Uhrzeit aus der Karte |
+| musikszene-bremen.de | Zollkantine | Kategorie „termine“ inkl. `/page/2/` …; auch Spannen („27.12. – 29.12.“) |
+| zakk.klubraum.org | zakk | Startseite – zeigt nur die nächsten Tage (Monatsprogramm ist InDesign-XML ohne Jahr) |
+
+Zeichen in den Zellen: **⚠** artverwandt und am selben Abend haben wir etwas in Bremen, **◐** artverwandt,
+aber in Oldenburg oder an einem Abend ohne eigenen Termin. Was „artverwandt“ ist, steht in
+`planer/stichworte.yml` (pflegt Danny). Dark-Kalender-Termine gelten immer als artverwandt.
+Steht derselbe Abend auch in einer Location-Spalte, bekommt die Dark-Kalender-Zelle „= Modernes“.
+
+**Was in Sheet A passiert** (nur mit `--schreiben`):
+
+- Jede Quelle bekommt in jedem Monatsblatt eine eigene Spalte „Modernes ⚙“ usw., frühestens ab
+  `sheet_a.erste_spalte` in `planer/quellen.yml` (Standard dort: `I`, G und H bleiben frei) und immer hinter
+  der letzten belegten Spalte. Das ⚙ heißt: wird überschrieben. Eine schon vorhandene ⚙-Spalte bleibt, wo sie
+  ist – auch wenn ihr sie von Hand verschiebt.
+- Mehrere Termine einer Location am selben Abend stehen untereinander in derselben Zelle.
+- Fehlt ein Freitag oder Samstag, wird die Zeile im Block ihrer Woche eingefügt (nur Wochentag und Datum).
+  Ganz fehlende Wochen kommen als neuer Block mit Leerzeile dazwischen. Zeilen werden nie gelöscht.
+- Vergangene Abende behalten ihren letzten Stand. Liefert eine Quelle einen Fehler, bleiben ihre Zellen unverändert.
+- `--fuelle-bis` legt fehlende Monatsblätter als Kopie des Vormonats an (Kopf und Format), mit leerem
+  Fr/Sa-Gerüst.
+- Blatt **„Crawler-Status“**: je Quelle Zustand, Anzahl, Meldungen, Zeitpunkt des letzten Laufs.
+
+**Sheet B wird nie beschrieben:** gelesen wird es über den öffentlichen CSV-Export, der Service-Account hat
+dort keine Freigabe, und `SheetsApi` weist jede andere Sheet-ID als A ab (Test vorhanden).
+
+**Einrichten (einmal):** Google Cloud Console → Projekt anlegen → „Google Sheets API“ aktivieren →
+Dienstkonto anlegen (keine Rollen) → Schlüssel „JSON“ erzeugen. Inhalt als GitHub-**Secret** `GOOGLE_SA_JSON`
+anlegen, Datei danach löschen. Sheet A mit der Adresse des Dienstkontos als **Bearbeiter** teilen, Sheet B nicht.
+Lokal: `GOOGLE_SA_JSON="$(cat schluessel.json)" python planer.py --schreiben`. Zum gefahrlosen Ausprobieren
+eine Kopie von Sheet A anlegen (Datei → Kopie erstellen), ebenfalls mit dem Dienstkonto teilen und deren ID
+(aus der Adresse, zwischen `/d/` und `/edit`) als `PLANER_SHEET_A=<id>` mitgeben – Sheet B wird auch so abgewiesen.
+Workflow: `planer-workflow.yml` nach `.github/workflows/planer.yml` kopieren. Läuft dann täglich gegen 5:23 und
+16:23 Uhr; von Hand unter Actions → „Planungskalender“ (wahlweise Probelauf oder mit `fuelle_bis`).
+
+Neue Quelle: Datei in `planer/quellen/` mit `SPALTE`, `STADT` und `hole(http, von, bis, einstellungen, warn)`,
+Eintrag in `PLUGINS` (`planer/quellen/__init__.py`) und in `planer/quellen.yml`, Fixture + Test in `tests/planer/`.
+
 ## Lizenzen
 
 Schriften Bebas Neue, Space Grotesk, IBM Plex Mono: SIL Open Font License (siehe `static/fonts/`).

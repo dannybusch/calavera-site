@@ -1,0 +1,7 @@
+# Planungskalender (planer.py) – zusätzlich zu requirements.txt
+requests>=2.31
+icalendar>=5.0
+google-auth>=2.20  # Service-Account für Sheet A (nur bei --schreiben)
+PyYAML>=6.0
+tzdata>=2024.1    # Zeitzonen-Daten (nötig unter Windows)
+pytest>=8.0       # nur für die Tests: python -m pytest tests/planer -q

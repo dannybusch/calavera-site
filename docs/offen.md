@@ -30,6 +30,11 @@ Stand: 21.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entschei
   `config.yml → navigation`; nach dem 1.12. prüfen, dass der Lauf um 00:07 Uhr kommt. Entwürfe unter
   `entwuerfe/adventskalender/` können danach weg.
 
+- **Planungskalender** (siehe 0021): Service-Account anlegen und Sheet A als Bearbeiter freigeben (Schritte in
+  der README, Abschnitt Planungskalender), Secret `GOOGLE_SA_JSON`. Dann einmal lokal oder per Actions
+  `python planer.py --schreiben` und das Ergebnis in Sheet A ansehen. Danach `planer-workflow.yml` nach
+  `.github/workflows/planer.yml` kopieren und die Vorschlagsdatei löschen.
+
 ## Ideen, nicht begonnen
 
 - `config.yml → site.description` nutzt „1/4 Bremen“; für Suchmaschinen wäre „Viertel“ besser (Danny entscheidet).

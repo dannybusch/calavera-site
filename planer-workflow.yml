@@ -1,0 +1,66 @@
+# Vorschlag für .github/workflows/planer.yml – Danny legt die Datei selbst an (Claude schreibt keine Workflows).
+# Läuft unabhängig vom Deploy. Braucht das Secret GOOGLE_SA_JSON (Inhalt des Service-Account-Schlüssels).
+name: Planungskalender
+
+on:
+  schedule:
+    - cron: "23 4 * * *"     # 05:23 Winterzeit / 06:23 Sommerzeit
+    - cron: "23 15 * * *"    # 16:23 / 17:23
+  workflow_dispatch:
+    inputs:
+      fuelle_bis:
+        description: "Fehlende Monatsblätter anlegen bis (JJJJ-MM), leer = keine"
+        required: false
+        default: ""
+      probelauf:
+        description: "Nur Probelauf (nichts schreiben)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: planer
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  planer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-planer.txt
+
+      - name: Abhängigkeiten
+        run: pip install -r requirements-planer.txt
+
+      - name: Tests
+        run: python -m pytest tests/planer -q
+
+      - name: Planer
+        env:
+          GOOGLE_SA_JSON: ${{ secrets.GOOGLE_SA_JSON }}
+          FUELLE_BIS: ${{ inputs.fuelle_bis }}
+          PROBELAUF: ${{ inputs.probelauf }}
+        run: |
+          ARGS=()
+          if [ "$PROBELAUF" != "true" ]; then
+            if [ -z "$GOOGLE_SA_JSON" ]; then
+              echo "::warning::Secret GOOGLE_SA_JSON fehlt – nur Probelauf"
+            else
+              ARGS+=(--schreiben)
+            fi
+          fi
+          if [ -n "$FUELLE_BIS" ]; then
+            if [[ ! "$FUELLE_BIS" =~ ^[0-9]{4}-[0-9]{2}$ ]]; then
+              echo "::error::fuelle_bis muss JJJJ-MM sein"; exit 1
+            fi
+            ARGS+=(--fuelle-bis "$FUELLE_BIS")
+          fi
+          python planer.py "${ARGS[@]}"
