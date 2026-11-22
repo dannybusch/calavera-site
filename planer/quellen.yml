@@ -26,3 +26,5 @@ quellen:
     aktiv: true
   - id: zakk                   # nur die nächsten Tage (Startseite)
     aktiv: true
+  - id: lila_eule              # lilaeule.com „Shows | Tickets“ (Jimdo, reiner Text)
+    aktiv: true

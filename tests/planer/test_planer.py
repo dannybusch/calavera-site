@@ -254,6 +254,7 @@ def test_gesamtlauf_ohne_netz():
         "category/termine": fix("zollkantine_termine.html"),
         "zakk.klubraum.org": fix("zakk_start.html"),
         "/bl1/": fix("openligadb_bl1.json"),
+        "shows-tickets": fix("lila_eule.html"),
         "/dfb/": "[]",
         "Kalender%202026%20Bremen": dark_csv(2027, {}, ohne_kopf=True),
         "Kalender%202027%20Bremen": dark_csv(2027, {(1, 15): "Spätschicht"}, ohne_kopf=True),
@@ -270,7 +271,7 @@ def test_gesamtlauf_ohne_netz():
     assert "◐" in zellen[fr]["polyester"]                                # Gothic in Oldenburg
     assert zellen[date(2026, 12, 11)]["eisen"].endswith("Dark Dezember")   # aus dem Slug
     assert [s for _, s in spalten] == ["Werder", "Dark-Kalender", "Modernes", "Aladin/Tivoli", "Eisen", "Polyester OL",
-                                       "Shagall", "Zollkantine", "zakk"]
+                                       "Shagall", "Zollkantine", "zakk", "Lila Eule"]
     assert zellen[date(2026, 12, 4)]["shagall"] == "22:00 XMAS CLUBBING"
     assert zellen[date(2026, 12, 4)]["zollkantine"] == "20:00 Hond // Farson // Buried"
     assert zellen[date(2026, 11, 27)]["werder"] == "20:30 HEIM Werder – Dortmund"
@@ -543,3 +544,27 @@ def test_erste_spalte_konfigurierbar():
     blatt = [["", "", "Titel", "Theke", "Tür", "DJ", "Modernes ⚙"], [], ["Fr", "04.12.", "X"]]
     plan = schreiben.plane_monat(blatt, 2026, 12, date(2026, 12, 1), date(2026, 12, 5), SPALTEN, {}, erste_spalte="I")
     assert plan.kopf == {8: "Dark-Kalender ⚙"}
+
+
+# --- Lila Eule -----------------------------------------------------------------------------------
+
+from planer.quellen import lila_eule  # noqa: E402
+
+
+def test_lila_eule_datum_vor_und_nach_titel():
+    http = FakeHttp({"shows-tickets": fix("lila_eule.html")})
+    termine = {(t.tag, t.uhrzeit, t.titel) for t in lila_eule.hole(http, date(2026, 11, 1), date(2027, 3, 31), {})}
+    assert (date(2026, 11, 28), "19:30", "IGINIO (RELEASE SHOW), special guests Spirited Away & She Danced Slowly") in termine
+    assert (date(2026, 12, 21), "20:30", "BITUME + special guest") in termine            # „neuer Termin:“ davor
+    assert (date(2026, 12, 4), "20:00", "SOFTCULT, special guest RAPID STRIDES") in termine
+    assert (date(2026, 12, 31), "23:30", "SILVESTER PARTY – 80's til 2020s sure shots, mit DJ FIRST CLAAS") in termine
+    assert (date(2027, 1, 30), "20:15", "JOCHEN PRANG (Stand Up Comedy)") in termine     # Titel vor dem Datum
+    assert (date(2027, 2, 12), "20:00", "SANDRA SCHMIDT (Stand Up Comedy)") in termine
+    assert (date(2027, 2, 27), "19:30", "DARKWAYS, special guest CULT NOIR") in termine
+    assert len(termine) == 8
+
+
+def test_lila_eule_warnt_bei_falschem_wochentag():
+    warnungen = []
+    lila_eule.termine_aus_text("Fr. 21.12.2026\num 20 h\nBITUME", warnungen.append)
+    assert "Mo" in warnungen[0]

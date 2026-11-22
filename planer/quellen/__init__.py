@@ -21,6 +21,7 @@ PLUGINS = {
     "zollkantine": "zollkantine",
     "zakk": "zakk",
     "werder": "werder",
+    "lila_eule": "lila_eule",
 }
 
 

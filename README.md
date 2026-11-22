@@ -851,6 +851,7 @@ python -m pytest tests/planer -q        # Tests (ohne Netz, mit Fixtures)
 | polyester-klub.de | Polyester OL | iCal-Feed `?mec-ical-feed=1` |
 | shagall-klub.com | Shagall | `/shows` (Wix), Datum + Uhrzeit aus der Karte |
 | musikszene-bremen.de | Zollkantine | Kategorie „termine“ inkl. `/page/2/` …; auch Spannen („27.12. – 29.12.“) |
+| lilaeule.com | Lila Eule | „Shows \| Tickets“ (Jimdo, reiner Text ohne Links); Zeile → nächstgelegenes Datum, Beginn aus „19 h / 19.30 h“ |
 | zakk.klubraum.org | zakk | Startseite – zeigt nur die nächsten Tage (Monatsprogramm ist InDesign-XML ohne Jahr) |
 
 Zeichen in den Zellen: **⚠** artverwandt und am selben Abend haben wir etwas in Bremen, **◐** artverwandt,
@@ -881,7 +882,7 @@ anlegen, Datei danach löschen. Sheet A mit der Adresse des Dienstkontos als **B
 Lokal: `GOOGLE_SA_JSON="$(cat schluessel.json)" python planer.py --schreiben`. Zum gefahrlosen Ausprobieren
 eine Kopie von Sheet A anlegen (Datei → Kopie erstellen), ebenfalls mit dem Dienstkonto teilen und deren ID
 (aus der Adresse, zwischen `/d/` und `/edit`) als `PLANER_SHEET_A=<id>` mitgeben – Sheet B wird auch so abgewiesen.
-Workflow: `.github/workflows/planer.yml`. Läuft täglich gegen 5:23 und
+Workflow: `.github/workflows/planer.yml` (Vorlage `planer-workflow.yml`, von Hand dorthin kopieren). Läuft täglich gegen 5:23 und
 16:23 Uhr; von Hand unter Actions → „Planungskalender“ (wahlweise Probelauf oder mit `fuelle_bis`).
 
 Neue Quelle: Datei in `planer/quellen/` mit `SPALTE`, `STADT` und `hole(http, von, bis, einstellungen, warn)`,
