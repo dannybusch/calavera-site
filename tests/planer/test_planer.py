@@ -588,3 +588,31 @@ def test_sonntag_ohne_titel_zaehlt_als_tag_aber_nicht_als_eigener_abend():
     assert abende == {date(2026, 12, 13): "", date(2026, 12, 12): "Party"}
     t = Termin(quelle="m", titel="Dark", tag=date(2026, 12, 13), artverwandt=True, stadt="Bremen")
     assert auswertung.kollision(t, abende) == auswertung.MITTEL     # kein eigener Abend → nur ◐
+
+
+def test_format_der_quellspalten():
+    s = FakeSitzung()
+    api = schreiben.SheetsApi(s)
+    plan = schreiben.plane_monat(DEZ, 2026, 12, date(2026, 12, 1), date(2026, 12, 5), SPALTEN, {}, erste_spalte="I")
+    schreiben.wende_monat_an(api, "Dezember 2026", 42, plan, schriftgroesse=7, spaltenbreite=80, umbruch=True)
+    fmt = s.posts[-1][1]["requests"]
+    assert {"repeatCell": {"range": {"sheetId": 42, "startColumnIndex": 8, "endColumnIndex": 9},
+                           "cell": {"userEnteredFormat": {"textFormat": {"fontSize": 7}, "wrapStrategy": "WRAP"}},
+                           "fields": "userEnteredFormat.textFormat.fontSize,userEnteredFormat.wrapStrategy"}} in fmt
+    assert {"updateDimensionProperties": {"range": {"sheetId": 42, "dimension": "COLUMNS", "startIndex": 9,
+                                                    "endIndex": 10},
+                                          "properties": {"pixelSize": 80}, "fields": "pixelSize"}} in fmt
+    assert len(fmt) == 4                                        # nur die zwei ⚙-Spalten, nicht A–H
+
+
+def test_format_auch_ohne_aenderung_und_abschaltbar():
+    blatt = [["", "", "Titel", "Theke", "Tür", "DJ", "", "", "Dark-Kalender ⚙", "Modernes ⚙"], [],
+             ["Fr", "04.12.", "X", "", "", "", "", "", "", ""], ["Sa", "05.12.", "Y"]]
+    plan = schreiben.plane_monat(blatt, 2026, 12, date(2026, 12, 1), date(2026, 12, 5), SPALTEN, {}, erste_spalte="I")
+    assert plan.leer
+    s = FakeSitzung()
+    schreiben.wende_monat_an(schreiben.SheetsApi(s), "Dezember 2026", 1, plan, schriftgroesse=7, formatieren=True)
+    assert len(s.posts) == 1 and len(s.posts[0][1]["requests"]) == 2
+    s2 = FakeSitzung()
+    schreiben.wende_monat_an(schreiben.SheetsApi(s2), "Dezember 2026", 1, plan, formatieren=True)
+    assert s2.posts == []                                       # ohne Einstellung wird nichts formatiert

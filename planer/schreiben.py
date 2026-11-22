@@ -69,6 +69,7 @@ class MonatsPlan:
     kopf: dict[int, str] = field(default_factory=dict)                  # neue Spaltenköpfe
     spalten: dict[int, list[str]] = field(default_factory=dict)         # Spalte → Werte ab Zeile 2
     zeilen_nachher: int = 0
+    quellspalten: list[int] = field(default_factory=list)              # alle ⚙-Spalten (für das Format)
 
     @property
     def leer(self) -> bool:
@@ -153,6 +154,7 @@ def plane_monat(zeilen: list[list[str]], jahr: int, monat: int, von: date, bis: 
         if [z[j] if j < len(z) else "" for z in modell[1:]] != werte or plan.einfuegen or j in plan.kopf:
             plan.spalten[j] = werte
     plan.zeilen_nachher = len(modell)
+    plan.quellspalten = sorted(index.values())
     return plan
 
 
@@ -245,8 +247,39 @@ class SheetsApi:
             self._post("/values:batchClear", {"ranges": bereiche})
 
 
-def wende_monat_an(api: SheetsApi, blatt: str, blatt_id: int, plan: MonatsPlan) -> None:
+def format_anfragen(blatt_id: int, spalten: list[int], schriftgroesse: int | None,
+                    spaltenbreite: int | None, umbruch: bool = False) -> list[dict]:
+    """Schriftgröße, Textumbruch (ganze Spalte inkl. Kopf) und Breite in Pixeln für die ⚙-Spalten.
+    Ändert nur genau diese Eigenschaften, sonstige Formatierung bleibt."""
+    anfragen: list[dict] = []
+    for j in spalten:
+        fmt, felder = {}, []
+        if schriftgroesse:
+            fmt["textFormat"] = {"fontSize": int(schriftgroesse)}
+            felder.append("userEnteredFormat.textFormat.fontSize")
+        if umbruch:
+            fmt["wrapStrategy"] = "WRAP"
+            felder.append("userEnteredFormat.wrapStrategy")
+        if fmt:
+            anfragen.append({"repeatCell": {
+                "range": {"sheetId": blatt_id, "startColumnIndex": j, "endColumnIndex": j + 1},
+                "cell": {"userEnteredFormat": fmt}, "fields": ",".join(felder)}})
+        if spaltenbreite:
+            anfragen.append({"updateDimensionProperties": {
+                "range": {"sheetId": blatt_id, "dimension": "COLUMNS", "startIndex": j, "endIndex": j + 1},
+                "properties": {"pixelSize": int(spaltenbreite)}, "fields": "pixelSize"}})
+    return anfragen
+
+
+def wende_monat_an(api: SheetsApi, blatt: str, blatt_id: int, plan: MonatsPlan,
+                   schriftgroesse: int | None = None, spaltenbreite: int | None = None,
+                   umbruch: bool = False, formatieren: bool = False) -> None:
+    """`formatieren`: Format auch setzen, wenn sich sonst nichts ändert (einmal je Lauf und Blatt)."""
+    format_jetzt = (formatieren or plan.kopf) and (schriftgroesse or spaltenbreite or umbruch)
+    if plan.leer and not format_jetzt:
+        return
     if plan.leer:
+        api.batch(format_anfragen(blatt_id, plan.quellspalten, schriftgroesse, spaltenbreite, umbruch))
         return
     api.batch([{"insertDimension": {"range": {"sheetId": blatt_id, "dimension": "ROWS",
                                               "startIndex": i, "endIndex": i + 1},
@@ -260,6 +293,8 @@ def wende_monat_an(api: SheetsApi, blatt: str, blatt_id: int, plan: MonatsPlan) 
         b = spaltenbuchstabe(j)
         daten.append((a1(blatt, f"{b}2:{b}{len(werte) + 1}"), [[w] for w in werte]))
     api.schreibe(daten)
+    if format_jetzt:
+        api.batch(format_anfragen(blatt_id, plan.quellspalten, schriftgroesse, spaltenbreite, umbruch))
 
 
 def lege_monat_an(api: SheetsApi, vorlage: str, vorlage_id: int, name: str, inhalt: list[list[str]],

@@ -864,9 +864,15 @@ Steht derselbe Abend auch in einer Location-Spalte, bekommt die Dark-Kalender-Ze
 - Jede Quelle bekommt in jedem Monatsblatt eine eigene Spalte „Modernes ⚙“ usw., frühestens ab
   `sheet_a.erste_spalte` in `planer/quellen.yml` (Standard dort: `I`, G und H bleiben frei) und immer hinter
   der letzten belegten Spalte. Das ⚙ heißt: wird überschrieben. Eine schon vorhandene ⚙-Spalte bleibt, wo sie
-  ist – auch wenn ihr sie von Hand verschiebt.
+  ist – auch wenn ihr sie von Hand verschiebt. Schriftgröße, Breite und Umbruch der ⚙-Spalten kommen aus
+  `sheet_a.schriftgroesse` (7), `sheet_a.spaltenbreite` (80 px) und `sheet_a.umbruch` (ja) und werden bei
+  jedem Lauf gesetzt.
 - Mehrere Termine einer Location am selben Abend stehen untereinander in derselben Zelle.
+- Relevant sind Freitag und Samstag – und jeder andere Tag, für den es im Monatsblatt schon eine Zeile gibt
+  (z. B. Honey Café am Sonntag, Silvester). Solche Zeilen legt ihr selbst an, der Planer füllt dann auch dort
+  seine Spalten.
 - Fehlt ein Freitag oder Samstag, wird die Zeile im Block ihrer Woche eingefügt (nur Wochentag und Datum).
+  Sonntage oder andere Tage fügt der Planer nie selbst ein.
   Ganz fehlende Wochen kommen als neuer Block mit Leerzeile dazwischen. Zeilen werden nie gelöscht.
 - Vergangene Abende behalten ihren letzten Stand. Liefert eine Quelle einen Fehler, bleiben ihre Zellen unverändert.
 - `--fuelle-bis` legt fehlende Monatsblätter als Kopie des Vormonats an (Kopf und Format), mit leerem

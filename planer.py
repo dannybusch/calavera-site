@@ -203,7 +203,11 @@ def schreib_lauf(args, http, jetzt: datetime) -> int:
     stichworte = yaml.safe_load(STICHWORTE.read_text(encoding="utf-8")) or {}
     nur = {x.strip() for x in args.nur.split(",")} if args.nur else None
 
-    erste_spalte = str((konfig.get("sheet_a") or {}).get("erste_spalte", "G"))
+    sheet_a = konfig.get("sheet_a") or {}
+    erste_spalte = str(sheet_a.get("erste_spalte", "G"))
+    schriftgroesse = sheet_a.get("schriftgroesse")      # z. B. 7
+    spaltenbreite = sheet_a.get("spaltenbreite")        # Pixel, z. B. 80
+    umbruch = bool(sheet_a.get("umbruch", False))
     schreiben.spaltenindex(erste_spalte)  # Tippfehler in quellen.yml früh melden
     cache: dict[str, list[list[str]]] = {}
 
@@ -226,7 +230,8 @@ def schreib_lauf(args, http, jetzt: datetime) -> int:
             continue
         plan = schreiben.plane_monat(leser(name), jahr, monat, von, bis, schreib_spalten, zellen,
                                      erste_spalte=erste_spalte)
-        schreiben.wende_monat_an(api, name, vorhandene[name]["id"], plan)
+        schreiben.wende_monat_an(api, name, vorhandene[name]["id"], plan, schriftgroesse=schriftgroesse,
+                                 spaltenbreite=spaltenbreite, umbruch=umbruch, formatieren=True)
         neu = len(plan.neue_zeilen)
         info(f"  {name}: {len(plan.spalten)} Spalten geschrieben" + (f", {neu} Fr/Sa-Zeilen ergänzt" if neu else ""))
 

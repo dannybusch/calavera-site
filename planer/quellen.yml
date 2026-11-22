@@ -4,6 +4,9 @@
 
 sheet_a:
   erste_spalte: I              # neue Quellenspalten ab hier; G und H bleiben frei für euch
+  schriftgroesse: 7            # Schrift der ⚙-Spalten (weglassen = nicht anfassen)
+  spaltenbreite: 80            # Breite der ⚙-Spalten in Pixeln (weglassen = nicht anfassen)
+  umbruch: true                # Text in den ⚙-Spalten umbrechen
 
 quellen:
   - id: werder                 # Heim- und Auswärtsspiele über OpenLigaDB (Bundesliga + DFB-Pokal)
