@@ -71,10 +71,10 @@ def plus_monate(d: date, n: int) -> date:
     return monatsende(f"{d.year + m // 12}-{m % 12 + 1:02d}")
 
 
-def fr_sa_abende(von: date, bis: date) -> list[date]:
+def fr_sa_abende(von: date, bis: date, extra=()) -> list[date]:
     d, aus = von, []
     while d <= bis:
-        if ist_fr_sa(d):
+        if ist_fr_sa(d) or d in extra:
             aus.append(d)
         d += timedelta(days=1)
     return aus
@@ -82,10 +82,23 @@ def fr_sa_abende(von: date, bis: date) -> list[date]:
 
 def lauf(http, von: date, bis: date, konfig: dict, stichworte: dict, nur: set[str] | None,
          mit_calavera: bool = True, blatt_leser=None):
-    """Alle Quellen holen und auswerten. → (zellen, termine, status, calavera_abende, spalten)"""
+    """Alle Quellen holen und auswerten. → (zellen, termine, status, calavera_abende, spalten)
+
+    Relevant sind Fr und Sa – und jeder andere Tag, für den es in Sheet A schon eine Zeile gibt
+    (z. B. Honey Café am Sonntag, Silvester am Donnerstag). Solche Zeilen legt der Planer nie selbst an."""
     status: list[dict] = []
     alle = []
     spalten: list[tuple[str, str]] = []
+
+    eigene: dict[date, str] = {}
+    sheet_a_status = None
+    if mit_calavera:
+        warn_a: list[str] = []
+        eigene = calavera.lese(http, von, bis, warn=warn_a.append, leser=blatt_leser)
+        sheet_a_status = {"quelle": "sheet_a", "spalte": "Calavera (Sheet A, nur gelesen)", "roh": len(eigene),
+                          "fr_sa": sum(1 for t in eigene.values() if t), "fehler": "", "warnungen": warn_a, "sekunden": 0}
+    extra = {d for d in eigene if not ist_fr_sa(d)}
+
     for eintrag in konfig.get("quellen", []):
         qid = eintrag["id"]
         if not eintrag.get("aktiv", True) or (nur and qid not in nur):
@@ -95,12 +108,12 @@ def lauf(http, von: date, bis: date, konfig: dict, stichworte: dict, nur: set[st
         warnungen: list[str] = []
         t0 = time.time()
         try:
-            gefunden = modul.hole(http, von, bis, eintrag, warn=warnungen.append)
+            gefunden = modul.hole(http, von, bis, {**eintrag, "extra_tage": extra}, warn=warnungen.append)
             fehler = ""
         except Exception as e:  # eine kaputte Quelle hält die anderen nicht auf
             gefunden, fehler = [], f"{type(e).__name__}: {e}"
         roh = len(gefunden)
-        gefunden = auswertung.nur_fr_sa(gefunden, von, bis)
+        gefunden = auswertung.nur_fr_sa(gefunden, von, bis, extra)
         alle += gefunden
         status.append({"quelle": qid, "spalte": modul.SPALTE, "roh": roh, "fr_sa": len(gefunden),
                        "fehler": fehler, "warnungen": warnungen, "sekunden": round(time.time() - t0, 1)})
@@ -108,23 +121,17 @@ def lauf(http, von: date, bis: date, konfig: dict, stichworte: dict, nur: set[st
     alle = auswertung.zusammenfuehren(alle)
     auswertung.markiere_artverwandt(alle, stichworte)
     auswertung.dark_hinweise(alle)
-
-    eigene: dict[date, str] = {}
-    if mit_calavera:
-        warn_a: list[str] = []
-        eigene = calavera.lese(http, von, bis, warn=warn_a.append, leser=blatt_leser)
-        status.append({"quelle": "sheet_a", "spalte": "Calavera (Sheet A, nur gelesen)", "roh": len(eigene),
-                       "fr_sa": sum(ist_fr_sa(d) for d in eigene), "fehler": "", "warnungen": warn_a,
-                       "sekunden": 0})
+    if sheet_a_status:
+        status.append(sheet_a_status)
     return auswertung.zellen(alle, eigene), alle, status, eigene, spalten
 
 
 def tabelle(zellen, eigene, spalten, von, bis) -> str:
     breite = max([len(s) for _, s in spalten] + [8])
     zeilen = []
-    for abend in fr_sa_abende(von, bis):
+    for abend in fr_sa_abende(von, bis, eigene):
         kopf = f"{WOCHENTAG_KURZ[abend.weekday()]} {abend:%d.%m.%Y}"
-        if abend in eigene:
+        if eigene.get(abend):
             kopf += f"   Calavera: {eigene[abend]}"
         zeilen.append(kopf)
         tag = zellen.get(abend, {})
@@ -133,7 +140,7 @@ def tabelle(zellen, eigene, spalten, von, bis) -> str:
                 text = tag[qid].split("\n")
                 zeilen.append(f"    {spalte:<{breite}}  {text[0]}")
                 zeilen += [f"    {'':<{breite}}  {t}" for t in text[1:]]
-        if abend.weekday() == 5:
+        if abend.weekday() >= 5:
             zeilen.append("")
     return "\n".join(zeilen)
 
@@ -151,7 +158,7 @@ def statusbericht(status) -> tuple[str, bool]:
             zeile = f"? {s['spalte']}: keine kommenden Termine gefunden – Seite umgebaut oder Programm leer?"
             problem = True
         else:
-            zeile = f"✓ {s['spalte']}: {s['fr_sa']} an Fr/Sa ({s['roh']} insgesamt, {s['sekunden']} s)"
+            zeile = f"✓ {s['spalte']}: {s['fr_sa']} an relevanten Tagen ({s['roh']} insgesamt, {s['sekunden']} s)"
         zeilen.append(zeile)
         zeilen += [f"    ! {w}" for w in s["warnungen"]]
     return "\n".join(zeilen), problem

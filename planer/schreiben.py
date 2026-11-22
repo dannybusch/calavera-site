@@ -139,13 +139,14 @@ def plane_monat(zeilen: list[list[str]], jahr: int, monat: int, von: date, bis: 
             plan.kopf[belegt] = titel
             belegt += 1
 
-    # 3. Werte je Spalte (vergangene Abende und Nicht-Fr/Sa behalten ihren Stand)
+    # 3. Werte je Spalte für jede Zeile mit Datum; Vergangenes behält seinen Stand
     for qid, j in index.items():
         werte = []
         for z in modell[1:]:
             alt = z[j] if j < len(z) else ""
             d = zeilen_datum(z, jahr, monat)
-            if d and von <= d <= bis and ist_fr_sa(d):
+            # jede Zeile mit Datum zählt – Fr/Sa legt der Planer an, andere Tage (So, Silvester) nur ihr
+            if d and von <= d <= bis:
                 werte.append(zellen.get(d, {}).get(qid, ""))
             else:
                 werte.append(alt)

@@ -23,7 +23,8 @@ def monate(von: date, bis: date) -> list[tuple[int, int]]:
 
 
 def lese_monat(zeilen: list[list[str]], jahr: int, monat: int) -> dict[date, str] | None:
-    """→ {Datum: Titel} oder None, wenn das Blatt nicht zu diesem Monat passt."""
+    """→ {Datum: Titel} für jede Zeile mit Datum (Titel ggf. leer) oder None, wenn das Blatt nicht zu
+    diesem Monat passt."""
     abende: dict[date, str] = {}
     fremd = 0
     for z in zeilen[1:]:
@@ -42,9 +43,8 @@ def lese_monat(zeilen: list[list[str]], jahr: int, monat: int) -> dict[date, str
         if z[0].strip() and z[0].strip()[:2] != WOCHENTAG_KURZ[d.weekday()]:
             fremd += 1
             continue
-        if z[2].strip():
-            abende[d] = z[2].strip()
-    if fremd and fremd >= len(abende):
+        abende[d] = z[2].strip()   # auch ohne Titel: die Zeile gibt es, der Tag ist relevant
+    if fremd and fremd >= len(abende) and not any(abende.values()):
         return None  # Google hat ein anderes Blatt geliefert
     return abende
 

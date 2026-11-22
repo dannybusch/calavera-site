@@ -45,8 +45,9 @@ def aehnlichkeit(a: str, b: str) -> float:
 
 # --- Schritte ---------------------------------------------------------------------------------
 
-def nur_fr_sa(termine: list[Termin], von: date, bis: date) -> list[Termin]:
-    return [t for t in termine if von <= t.abend <= bis and ist_fr_sa(t.abend)]
+def nur_fr_sa(termine: list[Termin], von: date, bis: date, extra_tage=()) -> list[Termin]:
+    """Fr/Sa im Zeitraum – plus `extra_tage` (Tage mit eigenem Eintrag in Sheet A, z. B. Sonntag)."""
+    return [t for t in termine if von <= t.abend <= bis and (ist_fr_sa(t.abend) or t.abend in extra_tage)]
 
 
 def _gewicht(t: Termin) -> int:
@@ -92,7 +93,7 @@ def dark_hinweise(termine: list[Termin], schwelle: float = 0.9) -> None:
 def kollision(t: Termin, calavera: dict[date, str]) -> str:
     if not t.artverwandt:
         return ""
-    if t.stadt == "Oldenburg" or t.abend not in calavera:
+    if t.stadt == "Oldenburg" or not calavera.get(t.abend):
         return MITTEL
     return HOCH
 

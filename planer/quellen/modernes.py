@@ -19,4 +19,4 @@ def hole(http, von, bis, einstellungen, warn=lambda text: None):
     return hole_ueber_links(
         http, quelle="modernes", liste_url=einstellungen.get("url", LISTE), muster=MUSTER,
         ort="Modernes", stadt=STADT, von=von, bis=bis, seitenname=["Modernes", "Modernes Bremen"],
-        details=einstellungen.get("details", True))
+        details=einstellungen.get("details", True), extra_tage=einstellungen.get("extra_tage", ()))

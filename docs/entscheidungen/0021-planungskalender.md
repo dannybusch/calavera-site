@@ -14,7 +14,9 @@ als Spalten erscheinen. Ausführliches Konzept: Claude-Doc „Calavera Planungsk
 - `planer.py` im Site-Repo, eigenständig wie `presse.py` (hängt nicht an `build.py`), Paket `planer/`.
 - **Ein Plugin pro Quelle** in `planer/quellen/`, Spaltenname = `SPALTE` im Plugin, Reihenfolge in
   `planer/quellen.yml`. Plugins lesen möglichst Dinge, die Umbauten überleben: iCal, JSON-LD, Datum im Link.
-- **Nur Freitag und Samstag**, alles an diesen Abenden. Beginn vor 6 Uhr zählt zum Vorabend.
+- **Freitag und Samstag**, alles an diesen Abenden. Dazu jeder andere Tag, für den es in Sheet A schon eine
+  Zeile gibt (z. B. Sonntag, von Hand angelegt; Danny, 22.11.) – solche Zeilen legt der Planer nie an.
+  Beginn vor 6 Uhr zählt zum Vorabend.
 - Mehrere Termine einer Location an einem Abend stehen untereinander in derselben Zelle.
 - Vergangene Abende behalten ihren letzten Stand; eine Quelle mit Fehler lässt ihre Zellen unverändert.
 - Schreibzugriff per Service-Account (Entscheidung am 21.11. gegen Apps Script): ein Ort für alles, und das
@@ -31,6 +33,7 @@ als Spalten erscheinen. Ausführliches Konzept: Claude-Doc „Calavera Planungsk
 
 ## Folgen
 
+- Werder-Spiele kommen über OpenLigaDB (freie API); die DFL terminiert Anstoßzeiten erst wenige Wochen vorher.
 - zakk zeigt online nur die nächsten Tage; weiter voraus gibt es dort nichts Maschinenlesbares.
 - Scraper können still kaputtgehen → Statusbericht je Quelle, „0 Termine an Fr/Sa“ gilt als verdächtig.
 - Etappen: 1 Grundgerüst + Dark-Kalender, Modernes, Eisen, Polyester (Probelauf) · 2 Schreiben in Sheet A

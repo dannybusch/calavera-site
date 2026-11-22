@@ -54,7 +54,7 @@ def hole(http, von, bis, einstellungen, warn=lambda text: None):
         if not (von <= tag <= bis):
             continue
         titel, beginn, ende = k["titel"], None, None
-        if einstellungen.get("details", True) and ist_fr_sa(tag):
+        if einstellungen.get("details", True) and (ist_fr_sa(tag) or tag in einstellungen.get("extra_tage", ())):
             try:
                 detail = lese(http.text(k["url"]), k["url"])
             except Exception:

@@ -29,7 +29,8 @@ def _iso(wert) -> datetime | None:
 
 
 def hole_ueber_links(http, *, quelle: str, liste_url: str, muster: re.Pattern, ort: str, stadt: str,
-                     von: date, bis: date, seitenname: list[str], details: bool = True) -> list[Termin]:
+                     von: date, bis: date, seitenname: list[str], details: bool = True,
+                     extra_tage=()) -> list[Termin]:
     """`muster` muss die Gruppen `datum` (JJJJ-MM-TT) und `slug` haben."""
     liste = lese(http.text(liste_url), liste_url)
 
@@ -57,7 +58,7 @@ def hole_ueber_links(http, *, quelle: str, liste_url: str, muster: re.Pattern, o
         titel, beginn, ende = listentitel, None, None
 
         # Detailseiten nur für Fr/Sa holen; andere Tage zählen nur für den Statusbericht
-        if details and ist_fr_sa(tag):
+        if details and (ist_fr_sa(tag) or tag in extra_tage):
             try:
                 seite = lese(http.text(url), url)
             except Exception:  # Detailseite kaputt → mit dem weitermachen, was die Liste hergibt

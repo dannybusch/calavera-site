@@ -275,6 +275,8 @@ def test_gesamtlauf_ohne_netz():
     assert zellen[date(2026, 12, 4)]["shagall"] == "22:00 XMAS CLUBBING"
     assert zellen[date(2026, 12, 4)]["zollkantine"] == "20:00 Hond // Farson // Buried"
     assert zellen[date(2026, 11, 27)]["werder"] == "20:30 HEIM Werder – Dortmund"
+    assert zellen[date(2026, 12, 6)]["modernes"] == "Sonntagskonzert"   # So 06.12. steht in Sheet A → relevant
+    assert date(2026, 12, 13) not in zellen                             # So 13.12. hat keine Zeile → nicht
     assert zellen[date(2026, 11, 21)]["aladin"].startswith("◐ 22:00 Depeche Mode")  # kein eigener Abend im Fixture
     assert not any(s["fehler"] for s in status)
     text = planer_cli.tabelle(zellen, eigene, spalten, VON, BIS)
@@ -313,7 +315,7 @@ def test_kein_code_schreibt_in_sheet_b():
 def test_status_nur_verdaechtig_wenn_gar_nichts_kommt():
     ok = [{"quelle": "eisen", "spalte": "Eisen", "roh": 2, "fr_sa": 0, "fehler": "", "warnungen": [], "sekunden": 1}]
     leer = [{"quelle": "eisen", "spalte": "Eisen", "roh": 0, "fr_sa": 0, "fehler": "", "warnungen": [], "sekunden": 1}]
-    assert planer_cli.statusbericht(ok) == ("✓ Eisen: 0 an Fr/Sa (2 insgesamt, 1 s)", False)
+    assert planer_cli.statusbericht(ok) == ("✓ Eisen: 0 an relevanten Tagen (2 insgesamt, 1 s)", False)
     assert planer_cli.statusbericht(leer)[1] is True
 
 
@@ -568,3 +570,21 @@ def test_lila_eule_warnt_bei_falschem_wochentag():
     warnungen = []
     lila_eule.termine_aus_text("Fr. 21.12.2026\num 20 h\nBITUME", warnungen.append)
     assert "Mo" in warnungen[0]
+
+
+def test_sonntag_nur_wenn_zeile_im_sheet():
+    zellen = {date(2026, 12, 6): {"modernes": "Sonntagskonzert"}, date(2026, 12, 20): {"modernes": "Weg damit"}}
+    plan = schreiben.plane_monat(DEZ, 2026, 12, date(2026, 12, 1), date(2026, 12, 31), SPALTEN, zellen)
+    m = anwenden(DEZ, plan)
+    nach_datum = {z[1]: z for z in m[1:] if len(z) > 1 and z[1]}
+    assert nach_datum["06.12."][7] == "Sonntagskonzert"              # So-Zeile gibt es → wird gefüllt
+    assert "20.12." not in nach_datum                               # So-Zeilen legt der Planer nie an
+    assert all(z[0] in ("Fr", "Sa") for _, z in plan.neue_zeilen)
+
+
+def test_sonntag_ohne_titel_zaehlt_als_tag_aber_nicht_als_eigener_abend():
+    zeilen = [["", "", "Titel"], ["So", "13.12.", ""], ["Sa", "12.12.", "Party"]]
+    abende = calavera.lese_monat(zeilen, 2026, 12)
+    assert abende == {date(2026, 12, 13): "", date(2026, 12, 12): "Party"}
+    t = Termin(quelle="m", titel="Dark", tag=date(2026, 12, 13), artverwandt=True, stadt="Bremen")
+    assert auswertung.kollision(t, abende) == auswertung.MITTEL     # kein eigener Abend → nur ◐
