@@ -9,7 +9,7 @@ fans_of: ["The Killers", "Taylor Swift", "Bloc Party", "Daft Punk", "Arctic Monk
 effekte: [holo]
 ---
 
-Weihnachten - ist ja schön und nett. Rechtzeitig wieder mit dem Feiern anzufangen ist doch noch netter! Mit »Fick Dich Ins Knie, Melancholie« wird **DJ Alexis On Fire** erst gar keine schlechte Laune aufkommen lassen. Mit ordentlich körpereigener Wärme schütteln wir den Winterblues einfach ab.
+Weihnachten - ist ja schön und nett. Rechtzeitig wieder mit dem Feiern anzufangen ist besser! Mit »Fick Dich Ins Knie, Melancholie« wird **DJ Alexis On Fire** erst gar keine schlechte Laune aufkommen lassen. Mit ordentlich körpereigener Wärme schütteln wir den Winterblues einfach ab.
 
 Eine ganze Nacht voll guter Vibes, freundlichen Wesen und **schönen Momenten** mit alten und neuen Freund:innen – und ganz viel Einhörnern, bunten Capybaras und Glitzer, und so!
 
