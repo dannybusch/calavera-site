@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "partials/tile.html" import tile, program_grid %}
+{% from "partials/kalender_abo.html" import abo_kasten %}
 {% set title = "Programm" %}
 {% set description = "Alle kommenden Partys und Konzerte im Calavera, Körnerwall 1, Bremen." %}
 {% block head %}
@@ -19,9 +20,9 @@
   {% endif %}
   <p class="program-empty"{% if events %} hidden{% endif %}>Gerade steht nichts im Programm – schaut bald wieder rein.</p>
   <div class="section-foot">
-    <a class="btn btn-ghost" href="{{ kalender_url }}">Programm in den Kalender</a>
     {% if has_archive %}<a class="btn btn-ghost" href="/programm/archiv/">Vergangene Veranstaltungen</a>{% endif %}
     {% for l in landings if l.rueckverlink %}<a class="btn btn-ghost" href="{{ l.url }}">{{ l.link_text }}</a>{% endfor %}
   </div>
+  {% if abo %}{{ abo_kasten(abo, "Programm im Handykalender", "Einmal abonnieren, dann stehen alle Termine in eurem Kalender – neue und geänderte kommen von selbst dazu.") }}{% endif %}
 </section>
 {% endblock %}

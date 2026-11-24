@@ -270,7 +270,18 @@
     document.addEventListener("visibilitychange", function () { fxOwners.forEach(fxUpdate); });
   }
 
-  /* ---------- Interne Seiten: Kopieren-Knöpfe + Zeichenzähler ---------- */
+  /* ---------- Kalender-Abo: auf Android zuerst „Google Kalender“ (webcal:// kennt Android nicht) ---------- */
+  if (/Android/i.test(navigator.userAgent)) {
+    document.querySelectorAll("[data-abo]").forEach(function (box) {
+      var g = box.querySelector("[data-abo-google]"), w = box.querySelector("[data-abo-webcal]");
+      if (!g || !w) return;
+      g.classList.replace("btn-dark", "btn-light");
+      w.classList.replace("btn-light", "btn-dark");
+      w.parentNode.insertBefore(g, w);
+    });
+  }
+
+  /* ---------- Kopieren-Knöpfe (interne Seiten, Kalender-Abo) + Zeichenzähler ---------- */
   var copyText = function (el) {
     if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(el.value);
     el.focus(); el.select();                         // Rückfall für http:// (lokal)

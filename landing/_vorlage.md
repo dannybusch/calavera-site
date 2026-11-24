@@ -30,6 +30,7 @@ zeigt:
 # leer: "Gerade steht nichts an – schaut bald wieder rein."   # Text, wenn nichts Passendes im Programm ist
 # bild: "dark.jpg"              # Vorschaubild beim Teilen (liegt neben dieser .md); sonst Flyer des nächsten Termins
 # noindex: true                 # nicht in Suchmaschinen/Sitemap
+# kalender_name: "Calavera Dark"   # Name des eigenen Kalender-Abos (/<slug>/calavera-<slug>.ics); sonst "Calavera " + title
 # draft: true                   # Entwurf: wird nicht veröffentlicht
 
 # Häufige Fragen: erscheinen auf der Seite und als FAQ für Google/KI-Antworten. Nur echte Antworten!

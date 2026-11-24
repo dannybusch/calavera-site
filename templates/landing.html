@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "partials/tile.html" import tile, program_grid %}
+{% from "partials/kalender_abo.html" import abo_kasten %}
 {# Landingpage aus landing/<slug>.md: eigener Text (über und unter den Kacheln), SEO-Angaben aus dem Kopf,
    dazu automatisch die passenden Veranstaltungen (kommende als Kacheln, vergangene als Liste). #}
 {% set title = l.seo_title %}
@@ -34,6 +35,7 @@
     <a class="btn btn-ghost" href="/programm/">Ganzes Programm</a>
     {% for o in landings if o.slug != l.slug and o.rueckverlink %}<a class="btn btn-ghost" href="{{ o.url }}">{{ o.link_text }}</a>{% endfor %}
   </div>
+  {% if l_abo %}{{ abo_kasten(l_abo, l_abo.name ~ " im Kalender", "Nur diese Termine abonnieren – neue und geänderte kommen von selbst dazu.", 'Alle Termine gibt es im <a href="/programm/#kalender-abo">Abo fürs ganze Programm</a>.') }}{% endif %}
 </section>
 
 {% if l.outro_html %}

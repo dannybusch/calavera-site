@@ -84,7 +84,8 @@ letzten Build vorbei ist, und hebt den nächsten Termin hervor („Heute“, „
 - `/programm/` mit allen kommenden, `/programm/archiv/` mit vergangenen Terminen
 - eine Seite pro Veranstaltung mit Flyer, Fakten, Text, Kalender-Datei, Teilen, Anfahrt, „Danach“ am selben Abend
 - Visuals verkleinert (`640.webp` für Kacheln, `1200.jpg` für Detailseite und Vorschau beim Teilen)
-- `kalender.ics` (das ganze Programm zum Abonnieren), `sitemap.xml`, `robots.txt`, `404.html`
+- Kalender-Abos: `calavera.ics` (ganzes Programm) und je Landingpage `/<slug>/calavera-<slug>.ics` – siehe „Kalender-Abo“
+- `sitemap.xml`, `robots.txt`, `404.html`
 - Vorschaubilder für WhatsApp/Instagram/Signal (Open Graph) und Event-Daten für Google (schema.org)
 - Weiterleitungen von alten Adressen (`/privatveranstaltungen/` → `/calavera-mieten/`)
 
@@ -216,6 +217,7 @@ Calavera“ (damit die Seite auch in Programmpausen etwas zeigt). Alle Möglichk
 | `zeigt:` | welche Termine: `reihen: [dark]`, `genres: [...]`, `ohne_reihen: [dark]`, `nur_partys: true` (ohne alles mit `art:`) |
 | `faq:` | Häufige Fragen (`frage:`/`antwort:`) – sichtbar auf der Seite und als FAQ für Google/KI |
 | `archiv`, `leer`, `bild`, `noindex`, `draft` | Anzahl vergangener Termine, Text bei leerem Programm, Vorschaubild, Suchmaschinen aus, Entwurf |
+| `kalender_name` | Name des eigenen Kalender-Abos im Handy (sonst „Calavera “ + `title`, z. B. „Calavera Partys“) |
 
 **Einzelne Veranstaltung zusätzlich auf einer Landingpage**, ohne sie zur Reihe zu machen (z. B. die
 Depeche-Mode-Party auf `/dark/`, ohne dass sie als „Weitere Dunkelveranstaltung“ auftaucht): in der Event-Datei
@@ -238,6 +240,52 @@ Terminen, Brotkrumen und ggf. `FAQPage`; sie steht in `sitemap.xml` und `llms.tx
 Programm (Knöpfe unten) und von jeder passenden Veranstaltungsseite („Alle Dark-Partys →“) – außer bei
 `rueckverlink: false` (so bei `/party/`: keine sichtbaren Links, nur Sitemap und `llms.txt`). Ins Hauptmenü
 kommt sie nur über `config.yml → navigation`.
+
+## Kalender-Abo (`/calavera.ics`, `/dark/calavera-dark.ics`, …)
+
+Gäste können das Programm **abonnieren**: Dann stehen alle Termine im Handy-Kalender, und neue oder
+geänderte kommen von selbst dazu. Der Build schreibt dafür
+
+- `calavera.ics` – das ganze Programm, im Handy als Kalender „Calavera Bremen“,
+- `/<landingpage>/calavera-<landingpage>.ics` – nur die Termine dieser Landingpage (derzeit
+  `/dark/calavera-dark.ics` „Calavera Dark“ und `/party/calavera-party.ics` „Calavera Partys“;
+  dieselbe Auswahl wie die Kacheln, inklusive `auch_auf:`).
+
+Neben allen kommenden Terminen stehen darin auch die der **letzten 30 Tage**, damit ein Abend nicht am
+Morgen danach aus dem abonnierten Kalender verschwindet. Die Dateien sagen den Kalender-Apps, dass sie
+alle 6 Stunden neu laden sollen (`REFRESH-INTERVAL`/`X-PUBLISHED-TTL`). Wie oft sie es wirklich tun,
+entscheidet die App: Apple und Outlook halten sich meist daran, **Google lädt nur etwa alle 12–24 Stunden**.
+
+Sichtbar ist das Abo als Kasten „Kalender-Abo“ unter dem Programm (Startseite, `/programm/`) und auf jeder
+Landingpage (dort mit deren eigenem Abo). Veranstaltungsseiten verlinken darauf („Kalender-Abo: Alle Termine
+· Nur Calavera Dark“), der Fuß jeder Seite ebenso. Im Kasten:
+
+| Knopf | Was passiert |
+|---|---|
+| **Abonnieren** | `webcal://www.calavera.club/calavera.ics` – iPhone, Mac und Outlook fragen direkt „Abonnieren?“ |
+| **Google Kalender** | öffnet Google Kalender mit „Kalender hinzufügen“ – der Weg für Android (kennt `webcal://` nicht). Auf Android-Handys stellt `site.js` diesen Knopf nach vorn. |
+| **Datei laden** | die `.ics` einmalig importieren – **ohne** spätere Änderungen |
+| Adresse + **Kopieren** | für alle anderen Apps („Kalender per URL hinzufügen“) |
+
+Abo-Adressen haben **keinen** Fingerabdruck (`?v=…`), damit sie für immer gleich bleiben; nur „Datei laden“
+hat einen. Die Dateien heißen `calavera…` statt `kalender…`, weil manche Apps den Dateinamen als Kalendernamen
+zeigen. Die alte Adresse `kalender.ics` schreibt der Build als gleiche Kopie weiter (nicht mehr verlinkt):
+Wer sie schon abonniert hat – auch als `…/kalender.ics?v=…` –, bekommt weiter alles (der Server
+ignoriert `?v=`). Die Datei je Veranstaltung (`termin.ics`, Knopf „In den Kalender“) ist davon unabhängig.
+
+Einstellungen (alle optional, in `config.yml`):
+
+```yaml
+kalender:
+  abo: false                   # Kalender-Abo ganz abschalten: keine calavera.ics/kalender.ics (auch nicht je Landingpage),
+                               # kein Kasten, keine Links (Fuß, Veranstaltungsseiten, <head>, llms.txt).
+                               # termin.ics je Veranstaltung bleibt. Standard: an
+  abo_vergangene_tage: 30      # so viele Tage bleiben vergangene Termine im Abo (0 = nur kommende)
+  abo_name: "Calavera Bremen"  # Name des Kalenders im Handy (Standard: site.name)
+```
+
+Beim Abschalten: Wer schon abonniert hat, behält die bisher geladenen Termine, bekommt aber keine neuen mehr;
+manche Apps melden beim Aktualisieren einen Fehler, bis das Abo gelöscht wird.
 
 ## Adventskalender (`/adventskalender/`)
 
@@ -473,8 +521,9 @@ ErrorDocument 404 /404.html
 nachfragen, ob sie noch aktuell ist. Bilder, Schriften, CSS und JS bekommen ohnehin einen
 Fingerabdruck (`?v=…`) in der Adresse und dürfen lange zwischengespeichert werden.
 
-Zusätzlich bekommen alle Links auf `kalender.ics` und `termin.ics` einen Fingerabdruck des Inhalts
-(`/kalender.ics?v=…`). Er ändert sich nur, wenn sich ein Termin ändert – nicht bei jedem Build.
+Zusätzlich bekommen Download-Links auf `calavera.ics` („Datei laden“) und `termin.ics` einen Fingerabdruck
+des Inhalts (`/calavera.ics?v=…`). Er ändert sich nur, wenn sich ein Termin ändert – nicht bei jedem Build.
+Abo-Links (`webcal://`, Google) haben bewusst keinen, damit die Abo-Adresse gleich bleibt.
 
 ## Automatisch veröffentlichen (GitHub Actions → STRATO per SFTP)
 

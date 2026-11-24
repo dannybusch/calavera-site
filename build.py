@@ -35,6 +35,7 @@ import re
 import shutil
 import socketserver
 import sys
+import urllib.parse
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -599,8 +600,11 @@ def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str, landings
               f"- Geöffnet: {club.get('hours', '')}" + (f" – {club['hours_note']}" if club.get("hours_note") else ""),
               f"- Eintritt (wenn nicht anders angegeben): {eintritt}" + (f", {club['box_office']}" if club.get("box_office") else ""),
               f"- Kontakt: {club.get('email', '')}",
-              f"- Programm: {base}/programm/",
-              f"- Programm als Kalender (ICS): {base}{kalender_url.split('?')[0]}"]
+              f"- Programm: {base}/programm/"]
+    if kalender_url:
+        zeilen.append(f"- Programm als Kalender-Abo (ICS): {base}{kalender_url.split('?')[0]}")
+        for l in [l for l in landings or [] if l.in_sitemap]:
+            zeilen.append(f"- Nur {l.title} als Kalender-Abo (ICS): {base}{l.url}calavera-{l.slug}.ics")
     kf = cfg.get("kellerfunk") or {}
     if kf.get("url"):
         zeilen.append(f"- Kellerfunk (Live-Streams aus dem Club): {kf['url']}")
@@ -1311,6 +1315,7 @@ class Landing:
     bild: Path | None = None       # og:image (Vorschaubild beim Teilen)
     bild_url: str = ""
     in_sitemap: bool = True
+    kalender_name: str = ""        # Name des Abo-Kalenders im Handy (sonst „Calavera <title>“)
     source: Path | None = None
 
     @property
@@ -1390,6 +1395,7 @@ def load_landings(reihen: dict[str, dict], seiten_slugs: set[str]) -> list[Landi
                 rueckverlink=meta.get("rueckverlink", True) is not False,
                 faq=faq, bild=bild,
                 in_sitemap=not meta.get("noindex", False),
+                kalender_name=str(meta.get("kalender_name") or "").strip(),
                 source=path,
             ))
         except Exception as exc:  # noqa: BLE001
@@ -1629,11 +1635,19 @@ def ics_version(ics_text: str) -> str:
     return hashlib.sha1(relevant.encode("utf-8")).hexdigest()[:8]
 
 
-def ics_for(events: list[Event], cfg: dict, stamp: datetime, calname: str) -> str:
+def ics_for(events: list[Event], cfg: dict, stamp: datetime, calname: str,
+            abo: bool = False, beschreibung: str = "") -> str:
+    """Kalenderdatei. abo=True: Kopfzeilen für abonnierte Kalender (Name, Beschreibung, Zeitzone und wie oft
+    Kalender-Apps neu laden sollen – Apple, Google und Outlook lesen je eine andere der beiden Angaben)."""
     site, club = cfg["site"], cfg["club"]
     fmt = lambda dt: dt.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")  # noqa: E731
     lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Calavera Bremen//Website//DE",
              "CALSCALE:GREGORIAN", "METHOD:PUBLISH", f"X-WR-CALNAME:{ics_escape(calname)}"]
+    if abo:
+        lines += [f"X-WR-TIMEZONE:{site.get('timezone', 'Europe/Berlin')}",
+                  "REFRESH-INTERVAL;VALUE=DURATION:PT6H", "X-PUBLISHED-TTL:PT6H"]
+        if beschreibung:
+            lines.append(f"X-WR-CALDESC:{ics_escape(beschreibung)}")
     for ev in events:
         desc = " · ".join(x for x in [ev.byline, " · ".join(ev.genres), ev.entry] if x)
         if ev.teaser:
@@ -1662,6 +1676,25 @@ def ics_for(events: list[Event], cfg: dict, stamp: datetime, calname: str) -> st
         lines.append("END:VEVENT")
     lines.append("END:VCALENDAR")
     return "\r\n".join(ics_fold(l) for l in lines) + "\r\n"
+
+
+def kalender_abo(pfad: str, ics_text: str, cfg: dict, dateiname: str = "calavera") -> dict:
+    """Links für ein Kalender-Abo unter `pfad` (z. B. "/calavera.ics"):
+    webcal:// öffnet auf iPhone, Mac und in Outlook direkt „Abonnieren“; Android hat dafür nichts Eigenes,
+    dort führt der Google-Kalender-Link zum Abo. Beide ohne ?v=…, damit die Abo-Adresse für immer gleich bleibt.
+    Nur „Datei laden“ (einmalig importieren) bekommt den Fingerabdruck gegen alte Kopien im Zwischenspeicher."""
+    https = cfg["site"]["url"].rstrip("/") + pfad
+    webcal = "webcal://" + re.sub(r"^https?://", "", https)
+    return {"https": https, "webcal": webcal,
+            "google": "https://calendar.google.com/calendar/r?cid=" + urllib.parse.quote(webcal, safe=""),
+            "datei": f"{pfad}?v={ics_version(ics_text)}", "dateiname": f"{dateiname}.ics"}
+
+
+def abo_termine(events: list[Event], now: datetime, tage: int) -> list[Event]:
+    """Termine fürs Abo: alle kommenden und die der letzten `tage` Tage. So verschwindet ein Abend nicht am
+    Morgen danach aus dem Handy-Kalender (wer nachschauen will, wann er im Calavera war, findet ihn noch)."""
+    grenze = now - timedelta(days=max(0, tage))
+    return [e for e in events if e.end > grenze]
 
 
 # ------------------------------------------------------------------ Bauen
@@ -1757,7 +1790,19 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
 
     # Programm-Kalender vorab erzeugen: Links darauf bekommen ?v=…, damit Handys nach einer
     # Änderung nicht die zwischengespeicherte alte Datei öffnen.
-    programm_ics = ics_for(upcoming, cfg, now, "Calavera Bremen – Programm")
+    # Dieselbe Datei dient als Abo (webcal://) und zum einmaligen Laden; sie enthält auch die Termine der
+    # letzten Tage (kalender.abo_vergangene_tage, Standard 30), damit sie im abonnierten Kalender stehen bleiben.
+    # Datei heißt calavera.ics (manche Kalender-Apps zeigen den Dateinamen als Kalendernamen). kalender.ics wird
+    # als gleiche Kopie weiter geschrieben, aber nicht mehr verlinkt – für alle, die die alte Adresse abonniert haben.
+    # kalender.abo: false schaltet das Abo ganz ab: keine .ics-Abo-Dateien (auch nicht je Landingpage), kein Kasten,
+    # kein Link im Fuß, im <head> und in llms.txt. Die Datei je Veranstaltung (termin.ics) bleibt.
+    kal_cfg = cfg.get("kalender") or {}
+    abo_an = kal_cfg.get("abo", True) is not False
+    abo_tage = int(kal_cfg.get("abo_vergangene_tage", 30) or 0)
+    abo_name = str(kal_cfg.get("abo_name") or cfg["site"]["name"])     # „Calavera Bremen“
+    programm_ics = ics_for(abo_termine(events, now, abo_tage), cfg, now, abo_name, abo=True,
+                           beschreibung=f"Partys und Konzerte im {cfg['site']['name']}, {cfg['club']['address']}. "
+                                        f"Programm: {cfg['site']['url']}/programm/")
     env.globals["fx_particles"] = fx_particles
     # Effekte nur auf den vordersten Kacheln im Programm (Startseite und /programm/); Veranstaltungsseiten immer
     env.globals["fx_kacheln"] = int(cfg.get("programm", {}).get("effekte_kacheln", 2))
@@ -1765,7 +1810,8 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     leiste_bis = int(cfg.get("programm", {}).get("leiste_bis", 4))
     env.globals["leiste_bis"] = leiste_bis
     env.globals["wenig_modus"] = lambda n: "a" if n == 2 else ("b" if 3 <= n <= leiste_bis else "")
-    env.globals["kalender_url"] = f"/kalender.ics?v={ics_version(programm_ics)}"
+    env.globals["kalender_url"] = f"/calavera.ics?v={ics_version(programm_ics)}" if abo_an else ""
+    env.globals["abo"] = kalender_abo("/calavera.ics", programm_ics, cfg) if abo_an else None
 
     def render(template: str, dest: str, **ctx) -> None:
         path = out / dest.lstrip("/")
@@ -1818,8 +1864,17 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         process_landing_image(l, out)
         l_kommend = [e for e in upcoming if l.passt(e)]
         l_vorbei = [e for e in past if l.passt(e)][:max(0, l.archiv)]
+        # Eigenes Abo je Landingpage (/dark/calavera-dark.ics …): nur die Termine, die auch auf der Seite stehen
+        kurz = cfg["site"]["name"].split()[0]            # „Calavera“
+        l_name = l.kalender_name or (l.title if kurz.lower() in l.title.lower() else f"{kurz} {l.title}")
+        l_ics = ics_for(abo_termine([e for e in events if l.passt(e)], now, abo_tage), cfg, now, l_name, abo=True,
+                        beschreibung=f"{l.description} {cfg['site']['url']}{l.url}".strip())
         render("landing.html", l.url, page_path=l.url, l=l, events=l_kommend, past_events=l_vorbei, cols=cols,
-               fx_css=fx_list(l_kommend), landing_ld=landing_json_ld(l, cfg, l_kommend))
+               fx_css=fx_list(l_kommend), landing_ld=landing_json_ld(l, cfg, l_kommend),
+               l_abo=dict(kalender_abo(f"{l.url}calavera-{l.slug}.ics", l_ics, cfg, f"calavera-{l.slug}"), name=l_name)
+               if abo_an else None)
+        if abo_an:
+            (out / l.slug / f"calavera-{l.slug}.ics").write_text(l_ics, encoding="utf-8", newline="")
 
     # Adventskalender: Stand zum Build-Zeitpunkt (der Deploy läuft im Dezember kurz nach Mitternacht)
     advent_offen: list = []
@@ -1833,7 +1888,9 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
         render("redirect.html", f"/{str(old).strip('/')}/", target=new)
 
     render("404.html", "/404.html", page_path="/404.html")
-    (out / "kalender.ics").write_text(programm_ics, encoding="utf-8", newline="")
+    if abo_an:
+        (out / "calavera.ics").write_text(programm_ics, encoding="utf-8", newline="")
+        (out / "kalender.ics").write_text(programm_ics, encoding="utf-8", newline="")   # alte Adresse, nicht verlinkt
 
     # Interne Seiten: fertige Texte und Bilder für Facebook, Instagram und Veranstaltungskalender.
     # Nicht verlinkt, nicht in der Sitemap, für Suchmaschinen gesperrt (robots.txt + noindex).

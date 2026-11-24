@@ -31,8 +31,8 @@
 {% for f in fx_css|default([]) %}<link rel="stylesheet" href="{{ asset('css/fx/' ~ f ~ '.css') }}">
 {% endfor %}{% for f in seiteneffekte|map(attribute="name")|unique %}<link rel="stylesheet" href="{{ asset('css/seiteneffekte/' ~ f ~ '.css') }}">
 {% endfor %}<style>:root{--accent:{{ palette.accent }};--accent-rgb:{{ palette.accent_rgb }};--accent-display:{{ palette.accent_display }};--accent-text:{{ palette.accent_text }};--text:{{ textpal.text }};--text-2:{{ textpal.text_2 }};--text-3:{{ textpal.text_3 }};--muted:{{ textpal.muted }}}</style>
-<link rel="alternate" type="text/calendar" title="Calavera Programm" href="{{ kalender_url }}">
-<script>document.documentElement.classList.add('js')</script>
+{% if kalender_url %}<link rel="alternate" type="text/calendar" title="Calavera Programm" href="{{ kalender_url }}">
+{% endif %}<script>document.documentElement.classList.add('js')</script>
 {% block head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -85,7 +85,7 @@
     <p><a href="mailto:{{ club.email }}">{{ club.email }}</a><br>
       {% for s in social %}<a href="{{ s.url }}" rel="noopener">{{ s.label }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
     <p><a href="/kontakt/">Kontakt &amp; Impressum</a> · <a href="/datenschutz/">Datenschutz</a><br>
-      <a href="{{ kalender_url }}">Programm als Kalender</a><br>© {{ year }} {{ site.name }}</p>
+      {% if abo %}<a href="/programm/#kalender-abo">Kalender-Abo</a><br>{% endif %}© {{ year }} {{ site.name }}</p>
   </div>
 </footer>
 

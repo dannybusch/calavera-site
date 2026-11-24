@@ -1,6 +1,6 @@
 # Offene Punkte
 
-Stand: 21.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entscheidungen/) überführen.
+Stand: 23.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entscheidungen/) überführen.
 
 ## Wartet auf Danny
 
@@ -34,6 +34,10 @@ Stand: 21.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entschei
   der README, Abschnitt Planungskalender), Secret `GOOGLE_SA_JSON`. Dann einmal lokal oder per Actions
   `python planer.py --schreiben` und das Ergebnis in Sheet A ansehen. Workflow `.github/workflows/planer.yml`
   ist angelegt (Ausnahme von der Workflow-Regel, von Danny bestätigt am 21.11.); `planer-workflow.yml` löschen.
+
+- **Kalender-Abo** (siehe 0022): ist ohne Einstellung **an**. Zum Abschalten in `config.yml` ergänzen:
+  `kalender:` / `  abo: false`. Nach dem Deploy auf einem iPhone (Knopf „Abonnieren“) und einem Android-Handy
+  (Knopf „Google Kalender“) einmal abonnieren und prüfen, dass Termine mit Flyer-Link ankommen.
 
 ## Ideen, nicht begonnen
 
