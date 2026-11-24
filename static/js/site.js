@@ -270,22 +270,6 @@
     document.addEventListener("visibilitychange", function () { fxOwners.forEach(fxUpdate); });
   }
 
-  /* ---------- Kalender-Abo auf Android: nur „Google Kalender“ + Anleitung ----------
-     Android kann von sich aus kein webcal://-Abo (es öffnet irgendeine App). Google fügt den Kalender hinzu,
-     synchronisiert ihn aufs Handy aber oft erst, wenn man das in der App einschaltet – daher die Anleitung. */
-  if (/Android/i.test(navigator.userAgent)) {
-    document.querySelectorAll("[data-abo]").forEach(function (box) {
-      var w = box.querySelector("[data-abo-webcal]"), g = box.querySelector("[data-abo-google]"),
-          h = box.querySelector("[data-abo-hinweis]"), a = box.querySelector("[data-abo-android]");
-      if (!w || !g || !a) return;
-      w.hidden = true;
-      g.classList.replace("btn-dark", "btn-light");
-      if (h) h.hidden = true;
-      a.hidden = false;
-      box.classList.add("abo--android");
-    });
-  }
-
   /* ---------- Interne Seiten: Kopieren-Knöpfe + Zeichenzähler ---------- */
   var copyText = function (el) {
     if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(el.value);

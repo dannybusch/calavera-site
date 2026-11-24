@@ -16,8 +16,8 @@ sofort heraus. Nachtrag Danny: Das Abo muss sich über `config.yml` ganz abschal
 - **Android (24.11.):** Auf Dannys Samsung S24 öffnete „Abonnieren“ (webcal://) eine fremde App – Android hat
   kein eingebautes Kalender-Abo. „Google Kalender“ meldete „Kalender hinzugefügt“, zeigte aber keine Termine:
   Google synchronisiert per Adresse abonnierte Kalender nicht von selbst aufs Handy, und der erste Abruf dauert.
-  Darum auf Android: nur „Google Kalender“ plus 3-Schritte-Anleitung (Hinzufügen → in der App „Synchronisieren“
-  einschalten → Geduld beim ersten Abruf). (Zwischenstand „nur am Computer“ war falsch und ist zurückgenommen.)
+  Der Hinweis im Kasten erklärt das („Synchronisieren“ einschalten, erster Abruf dauert). Beide Knöpfe auf allen
+  Geräten, keine Weiche nach Gerät (Danny: manche haben auf Android eine Abo-App). (Zwischenstand „nur am Computer“ war falsch und ist zurückgenommen.)
   Verworfen: Zusatz-Apps wie ICSx⁵ empfehlen (fremde App, für Gäste zu umständlich). Abo-Adressen **ohne** `?v=`, damit sie dauerhaft gleich bleiben.
 - Kein eigener Dienst, keine Konten, nichts im Browser gespeichert (0002): nur statische Dateien und Links.
   Der Google-Link ist ein normaler Link, keine eingebundene Ressource.
@@ -27,7 +27,7 @@ sofort heraus. Nachtrag Danny: Das Abo muss sich über `config.yml` ganz abschal
 - Abo-Dateien enthalten auch die Termine der letzten 30 Tage (`kalender.abo_vergangene_tage`), damit Abende
   nicht am Morgen danach aus dem Kalender verschwinden. Kopfzeilen `REFRESH-INTERVAL`/`X-PUBLISHED-TTL` = 6 h.
 - Sichtbar als Kasten „Kalender-Abo“ unter dem Programm (Startseite, `/programm/`, Landingpages), kleine
-  Zeile auf Veranstaltungsseiten, Link im Fuß. Auf Android stellt `site.js` den Google-Knopf nach vorn.
+  Zeile auf Veranstaltungsseiten, Link im Fuß.
 - **Name (24.11., Danny):** Kalender heißt im Handy „Calavera Bremen“ (`site.name`), die Datei `calavera.ics`
   statt `kalender.ics` – manche Apps zeigen den Dateinamen als Namen. `kalender.ics` bleibt als unverlinkte
   Kopie, damit bestehende Abos der alten Adresse weiterlaufen.

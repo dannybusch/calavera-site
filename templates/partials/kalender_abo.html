@@ -1,35 +1,24 @@
-{# Kalender-Abo: ein Kasten mit webcal://-Abo (iPhone, Mac, Outlook) und Google Kalender (Android, Computer).
+{# Kalender-Abo: ein Kasten mit webcal://-Abo (iPhone, Mac, Outlook, Android mit ICS-App) und Google Kalender.
    a = kalender_abo(...) aus build.py. Kein Download-Knopf, keine Adresse zum Kopieren (Danny, 24.11.).
-   Android kann kein webcal:// (öffnet irgendeine App): site.js blendet dort „Abonnieren“ aus und zeigt
-   [data-abo-android] – Google fügt den Kalender hinzu, synchronisiert ihn aufs Handy aber oft erst, wenn man
-   das in der Google-Kalender-App einschaltet (Dannys S24, 24.11.). #}
+   Auf allen Geräten dieselben Knöpfe – keine Weiche nach Gerät (Danny, 24.11.). #}
 {% macro abo_kasten(a, titel, text, extra="") %}
-<div class="abo" id="kalender-abo" data-abo>
+<div class="abo" id="kalender-abo">
   <div class="abo-text">
     <span class="label">Kalender-Abo</span>
     <h2 class="abo-title">{{ titel }}</h2>
     <p class="abo-lead">{{ text }}{% if extra %} {{ extra|safe }}{% endif %}</p>
   </div>
   <div class="abo-actions">
-    <a class="btn btn-light" href="{{ a.webcal }}" data-abo-webcal>
+    <a class="btn btn-light" href="{{ a.webcal }}">
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>
       Abonnieren</a>
-    <a class="btn btn-dark" href="{{ a.google }}" rel="noopener" data-abo-google>Google Kalender</a>
+    <a class="btn btn-dark" href="{{ a.google }}" rel="noopener">Google Kalender</a>
   </div>
   <div class="abo-more">
-    <p class="abo-hint" data-abo-hinweis>iPhone, Mac und Outlook: <strong>Abonnieren</strong>.
-      Android: <strong>Google Kalender</strong>, danach in der Google-Kalender-App unter Einstellungen
-      „{{ a.name }}“ antippen und <strong>Synchronisieren</strong> einschalten.</p>
-    <div class="abo-android" data-abo-android hidden>
-      <p class="abo-hint"><strong>So klappt es auf Android:</strong></p>
-      <ol class="abo-schritte">
-        <li><strong>Google Kalender</strong> antippen und „Hinzufügen“ bestätigen.</li>
-        <li>In der Google-Kalender-App: Menü ☰ → Einstellungen → „{{ a.name }}“ antippen →
-          <strong>Synchronisieren</strong> einschalten. Ohne das bleibt der Kalender auf dem Handy leer.</li>
-        <li>Den ersten Abruf macht Google selbst – das kann ein paar Minuten bis einige Stunden dauern.
-          Danach stehen die Termine auch im Samsung Kalender (wenn dort das Google-Konto eingebunden ist).</li>
-      </ol>
-    </div>
+    <p class="abo-hint"><strong>Abonnieren</strong>: iPhone, Mac, Outlook und Android mit Kalender-Abo-App.
+      <strong>Google Kalender</strong>: für alle mit Google-Konto, auch Android – danach in der Google-Kalender-App
+      unter Einstellungen „{{ a.name }}“ antippen und <strong>Synchronisieren</strong> einschalten, sonst bleibt
+      der Kalender auf dem Handy leer. Der erste Abruf durch Google kann etwas dauern.</p>
   </div>
 </div>
 {% endmacro %}

@@ -1683,7 +1683,7 @@ def kalender_abo(pfad: str, ics_text: str, cfg: dict, name: str, seite: str = "/
     webcal:// öffnet auf iPhone, Mac und in Outlook direkt „Abonnieren“; Android hat dafür nichts Eigenes,
     dort führt der Google-Kalender-Link zum Abo. Google bekommt die https://-Adresse: aus webcal:// macht Google
     sonst http://, und der Abruf scheitert oder hängt an einer Weiterleitung. Beide ohne ?v=…, damit die Abo-Adresse für immer gleich bleibt.
-    name = Name des Kalenders im Handy, seite = Seite mit dem Kasten (beides für den Android-Hinweis)."""
+    name = Name des Kalenders im Handy (für den Hinweis im Kasten), seite = Seite mit dem Kasten."""
     https = cfg["site"]["url"].rstrip("/") + pfad
     webcal = "webcal://" + re.sub(r"^https?://", "", https)
     return {"https": https, "webcal": webcal,
