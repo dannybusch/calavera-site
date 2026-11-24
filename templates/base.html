@@ -85,7 +85,7 @@
     <p><a href="mailto:{{ club.email }}">{{ club.email }}</a><br>
       {% for s in social %}<a href="{{ s.url }}" rel="noopener">{{ s.label }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
     <p><a href="/kontakt/">Kontakt &amp; Impressum</a> · <a href="/datenschutz/">Datenschutz</a><br>
-      {% if abo %}<a href="/programm/#kalender-abo">Kalender-Abo</a><br>{% endif %}© {{ year }} {{ site.name }}</p>
+      {% if abo %}<a href="/programm/#kalender-abo">Kalender-Abo</a>{% else %}<a href="{{ kalender_url }}">Programm als Kalender</a>{% endif %}<br>© {{ year }} {{ site.name }}</p>
   </div>
 </footer>
 

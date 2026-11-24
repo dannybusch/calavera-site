@@ -35,12 +35,11 @@ Stand: 23.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entschei
   `python planer.py --schreiben` und das Ergebnis in Sheet A ansehen. Workflow `.github/workflows/planer.yml`
   ist angelegt (Ausnahme von der Workflow-Regel, von Danny bestätigt am 21.11.); `planer-workflow.yml` löschen.
 
-- **Kalender-Abo** (siehe 0022): ist ohne Einstellung **an**. Zum Abschalten in `config.yml` ergänzen:
-  `kalender:` / `  abo: false`. Nach dem Deploy auf einem iPhone (Knopf „Abonnieren“) und einem Android-Handy
-  (Knopf „Google Kalender“) einmal abonnieren und prüfen, dass Termine mit Flyer-Link ankommen.
-  Android (24.11.): „Kalender hinzugefügt“, aber leer → in der Google-Kalender-App ☰ → Einstellungen →
-  „Calavera Bremen“ → Synchronisieren einschalten; am Computer auf calendar.google.com prüfen, ob Google die
-  Termine schon geholt hat. Abo in der fremden App (webcal) löschen.
+- **Kalender-Abo** (siehe 0022): gebaut, aber **ausgeschaltet** (Standard). Auf dem S24 kamen weder per
+  webcal:// (ICS-App) noch per Google Kalender Termine an. Ungeklärt, bevor es wieder an geht:
+  Liefert `http://www.calavera.club/calavera.ics` die Datei bzw. leitet auf https weiter (webcal wird zu http)?
+  Zeigt calendar.google.com am Computer per „Weitere Kalender → Per URL“ mit der https-Adresse Termine?
+  Danach Test auf iPhone + Android, dann `kalender: { abo: true }` in `config.yml`.
 
 ## Ideen, nicht begonnen
 

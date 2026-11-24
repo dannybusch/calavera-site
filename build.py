@@ -601,7 +601,9 @@ def llms_txt(cfg: dict, upcoming: list, pages: list, kalender_url: str, landings
               f"- Eintritt (wenn nicht anders angegeben): {eintritt}" + (f", {club['box_office']}" if club.get("box_office") else ""),
               f"- Kontakt: {club.get('email', '')}",
               f"- Programm: {base}/programm/"]
-    if kalender_url:
+    if kalender_url.startswith("/kalender.ics"):
+        zeilen.append(f"- Programm als Kalender (ICS): {base}{kalender_url.split('?')[0]}")
+    elif kalender_url:
         zeilen.append(f"- Programm als Kalender-Abo (ICS): {base}{kalender_url.split('?')[0]}")
         for l in [l for l in landings or [] if l.in_sitemap]:
             zeilen.append(f"- Nur {l.title} als Kalender-Abo (ICS): {base}{l.url}calavera-{l.slug}.ics")
@@ -1796,15 +1798,19 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     # letzten Tage (kalender.abo_vergangene_tage, Standard 30), damit sie im abonnierten Kalender stehen bleiben.
     # Datei heißt calavera.ics (manche Kalender-Apps zeigen den Dateinamen als Kalendernamen). kalender.ics wird
     # als gleiche Kopie weiter geschrieben, aber nicht mehr verlinkt – für alle, die die alte Adresse abonniert haben.
-    # kalender.abo: false schaltet das Abo ganz ab: keine .ics-Abo-Dateien (auch nicht je Landingpage), kein Kasten,
-    # kein Link im Fuß, im <head> und in llms.txt. Die Datei je Veranstaltung (termin.ics) bleibt.
+    # Das Abo ist vorerst AUS (Danny, 24.11.: klappte auf Android nicht). Einschalten mit kalender.abo: true.
+    # Aus = Stand vor dem Abo: nur kalender.ics mit den kommenden Terminen, Knopf „Programm in den Kalender“
+    # (Startseite, /programm/), „Programm als Kalender“ im Fuß – kein Kasten, keine calavera*.ics.
     kal_cfg = cfg.get("kalender") or {}
-    abo_an = kal_cfg.get("abo", True) is not False
+    abo_an = kal_cfg.get("abo", False) is True
     abo_tage = int(kal_cfg.get("abo_vergangene_tage", 30) or 0)
     abo_name = str(kal_cfg.get("abo_name") or cfg["site"]["name"])     # „Calavera Bremen“
-    programm_ics = ics_for(abo_termine(events, now, abo_tage), cfg, now, abo_name, abo=True,
-                           beschreibung=f"Partys und Konzerte im {cfg['site']['name']}, {cfg['club']['address']}. "
-                                        f"Programm: {cfg['site']['url']}/programm/")
+    if abo_an:
+        programm_ics = ics_for(abo_termine(events, now, abo_tage), cfg, now, abo_name, abo=True,
+                               beschreibung=f"Partys und Konzerte im {cfg['site']['name']}, {cfg['club']['address']}. "
+                                            f"Programm: {cfg['site']['url']}/programm/")
+    else:
+        programm_ics = ics_for(upcoming, cfg, now, "Calavera Bremen – Programm")
     env.globals["fx_particles"] = fx_particles
     # Effekte nur auf den vordersten Kacheln im Programm (Startseite und /programm/); Veranstaltungsseiten immer
     env.globals["fx_kacheln"] = int(cfg.get("programm", {}).get("effekte_kacheln", 2))
@@ -1812,7 +1818,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     leiste_bis = int(cfg.get("programm", {}).get("leiste_bis", 4))
     env.globals["leiste_bis"] = leiste_bis
     env.globals["wenig_modus"] = lambda n: "a" if n == 2 else ("b" if 3 <= n <= leiste_bis else "")
-    env.globals["kalender_url"] = f"/calavera.ics?v={ics_version(programm_ics)}" if abo_an else ""
+    env.globals["kalender_url"] = f"/{'calavera' if abo_an else 'kalender'}.ics?v={ics_version(programm_ics)}"
     env.globals["abo"] = kalender_abo("/calavera.ics", programm_ics, cfg, abo_name) if abo_an else None
 
     def render(template: str, dest: str, **ctx) -> None:
@@ -1892,7 +1898,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     render("404.html", "/404.html", page_path="/404.html")
     if abo_an:
         (out / "calavera.ics").write_text(programm_ics, encoding="utf-8", newline="")
-        (out / "kalender.ics").write_text(programm_ics, encoding="utf-8", newline="")   # alte Adresse, nicht verlinkt
+    (out / "kalender.ics").write_text(programm_ics, encoding="utf-8", newline="")   # mit Abo: alte Adresse, nicht verlinkt
 
     # Interne Seiten: fertige Texte und Bilder für Facebook, Instagram und Veranstaltungskalender.
     # Nicht verlinkt, nicht in der Sitemap, für Suchmaschinen gesperrt (robots.txt + noindex).

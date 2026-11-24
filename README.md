@@ -84,7 +84,8 @@ letzten Build vorbei ist, und hebt den nächsten Termin hervor („Heute“, „
 - `/programm/` mit allen kommenden, `/programm/archiv/` mit vergangenen Terminen
 - eine Seite pro Veranstaltung mit Flyer, Fakten, Text, Kalender-Datei, Teilen, Anfahrt, „Danach“ am selben Abend
 - Visuals verkleinert (`640.webp` für Kacheln, `1200.jpg` für Detailseite und Vorschau beim Teilen)
-- Kalender-Abos: `calavera.ics` (ganzes Programm) und je Landingpage `/<slug>/calavera-<slug>.ics` – siehe „Kalender-Abo“
+- `kalender.ics` (das ganze Programm, Knopf „Programm in den Kalender“); mit eingeschaltetem Abo zusätzlich
+  `calavera.ics` und je Landingpage `/<slug>/calavera-<slug>.ics` – siehe „Kalender-Abo“
 - `sitemap.xml`, `robots.txt`, `404.html`
 - Vorschaubilder für WhatsApp/Instagram/Signal (Open Graph) und Event-Daten für Google (schema.org)
 - Weiterleitungen von alten Adressen (`/privatveranstaltungen/` → `/calavera-mieten/`)
@@ -243,6 +244,11 @@ kommt sie nur über `config.yml → navigation`.
 
 ## Kalender-Abo (`/calavera.ics`, `/dark/calavera-dark.ics`, …)
 
+> **Derzeit ausgeschaltet** (24.11.2026, Danny: auf Android – Samsung S24 – kamen über keinen Weg Termine an).
+> Ohne Einstellung baut die Seite wie vor dem Abo: `kalender.ics` mit den kommenden Terminen, Knopf
+> „Programm in den Kalender“ auf Startseite und `/programm/`, „Programm als Kalender“ im Fuß.
+> Einschalten mit `kalender: { abo: true }` in `config.yml`. Alles Folgende gilt für das eingeschaltete Abo.
+
 Gäste können das Programm **abonnieren**: Dann stehen alle Termine im Handy-Kalender, und neue oder
 geänderte kommen von selbst dazu. Der Build schreibt dafür
 
@@ -285,15 +291,16 @@ Einstellungen (alle optional, in `config.yml`):
 
 ```yaml
 kalender:
-  abo: false                   # Kalender-Abo ganz abschalten: keine calavera.ics/kalender.ics (auch nicht je Landingpage),
-                               # kein Kasten, keine Links (Fuß, Veranstaltungsseiten, <head>, llms.txt).
-                               # termin.ics je Veranstaltung bleibt. Standard: an
+  abo: true                    # Kalender-Abo einschalten (Standard: aus). Aus = wie vor dem Abo: nur kalender.ics
+                               # mit kommenden Terminen und der Knopf „Programm in den Kalender“; kein Kasten,
+                               # keine calavera*.ics. termin.ics je Veranstaltung gibt es immer.
   abo_vergangene_tage: 30      # so viele Tage bleiben vergangene Termine im Abo (0 = nur kommende)
   abo_name: "Calavera Bremen"  # Name des Kalenders im Handy (Standard: site.name)
 ```
 
-Beim Abschalten: Wer schon abonniert hat, behält die bisher geladenen Termine, bekommt aber keine neuen mehr;
-manche Apps melden beim Aktualisieren einen Fehler, bis das Abo gelöscht wird.
+Beim Abschalten: Wer `calavera.ics` abonniert hat, behält die bisher geladenen Termine, bekommt aber keine neuen
+mehr; manche Apps melden beim Aktualisieren einen Fehler, bis das Abo gelöscht wird. Abos auf `kalender.ics`
+laufen weiter (die Datei gibt es immer).
 
 ## Adventskalender (`/adventskalender/`)
 

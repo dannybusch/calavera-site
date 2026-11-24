@@ -26,4 +26,4 @@ Je Grundsatzentscheidung eine Datei: Kontext, Entscheidung, Folgen. Neue Datei m
 | [0019](0019-indexnow-und-lastmod.md) | IndexNow nach dem Upload, echte `lastmod` in der Sitemap | gilt (Schlüssel einrichten, siehe docs/offen.md) |
 | [0020](0020-adventskalender.md) | Adventskalender `/adventskalender/` aus `advent/*.yml`, nur geöffnete Türen im HTML | gilt |
 | [0021](0021-planungskalender.md) | Planungskalender: Fr/Sa-Termine anderer Locations in Sheet A (`planer.py`) | gilt (Etappe 1, Schreiben ab Etappe 2) |
-| [0022](0022-kalender-abo.md) | Kalender-Abo per webcal:// (`calavera.ics`, je Landingpage), abschaltbar | gilt |
+| [0022](0022-kalender-abo.md) | Kalender-Abo per webcal:// (`calavera.ics`, je Landingpage) | gebaut, ausgeschaltet (Android-Problem offen) |

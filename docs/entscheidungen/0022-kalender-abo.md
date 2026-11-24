@@ -1,6 +1,6 @@
 # 0022 – Kalender-Abo (`calavera.ics` per webcal://)
 
-Stand: 24.11.2026 · Status: gilt
+Stand: 24.11.2026 · Status: gebaut, aber ausgeschaltet (Danny, 24.11.: auf Android nicht zum Laufen gebracht)
 
 ## Kontext
 Aus einer Ideenliste hat Danny „Kalender-Abo“ gewählt: Gäste sollen die Calavera-Termine automatisch im
@@ -31,8 +31,10 @@ sofort heraus. Nachtrag Danny: Das Abo muss sich über `config.yml` ganz abschal
 - **Name (24.11., Danny):** Kalender heißt im Handy „Calavera Bremen“ (`site.name`), die Datei `calavera.ics`
   statt `kalender.ics` – manche Apps zeigen den Dateinamen als Namen. `kalender.ics` bleibt als unverlinkte
   Kopie, damit bestehende Abos der alten Adresse weiterlaufen.
-- **Schalter:** `config.yml → kalender.abo: false` = keine Abo-Dateien (auch nicht je Landingpage), kein
-  Kasten, keine Links (Fuß, Veranstaltungsseiten, `<link rel="alternate">`, `llms.txt`). Standard: an.
+- **Schalter:** `config.yml → kalender.abo: true` schaltet ein. **Standard seit 24.11.: aus** – dann baut die
+  Seite exakt wie vor dem Abo (`kalender.ics` nur mit kommenden Terminen, Knopf „Programm in den Kalender“,
+  „Programm als Kalender“ im Fuß, kein Kasten, keine `calavera*.ics`). Grund: Auf Dannys Samsung S24 kamen
+  weder über webcal:// (ICS-App, Adresse wird zu http://) noch über Google Kalender Termine an; Ursache offen.
   `termin.ics` je Veranstaltung („In den Kalender“) gehört nicht zum Abo und bleibt.
 
 ## Folgen

@@ -57,7 +57,7 @@ Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Ho
 | Pfad | Inhalt |
 |---|---|
 | `build.py` | Generator: Events laden, Bilder (inkl. 16:9 `breit.jpg`), Seiten, ICS, JSON-LD, `llms.txt` |
-| Kalender-Abo | `calavera.ics` (Name „Calavera Bremen“; `kalender.ics` = unverlinkte Kopie für Alt-Abos) + `/<landing>/calavera-<landing>.ics` (`ics_for(…, abo=True)`, `abo_termine`, `kalender_abo`), Kasten `partials/kalender_abo.html`; Schalter `config.yml → kalender.abo: false` = keine Abo-Dateien, keine Links (0022) |
+| Kalender-Abo | `calavera.ics` (Name „Calavera Bremen“; `kalender.ics` = unverlinkte Kopie für Alt-Abos) + `/<landing>/calavera-<landing>.ics` (`ics_for(…, abo=True)`, `abo_termine`, `kalender_abo`), Kasten `partials/kalender_abo.html`; **derzeit aus** (Standard); `config.yml → kalender.abo: true` schaltet ein. Aus = alter Stand: `kalender.ics` + Knopf „Programm in den Kalender“ (0022) |
 | `landing/` | Landingpages (`/dark/`, `/party/`): Text + SEO-Kopf pflegt Danny; Auswahl der Termine per `zeigt:` (siehe `_vorlage.md`) |
 | `advent/` | Adventskalender `adventskalender<jahr>.yml` → `/adventskalender/` (`load_advent`, `advent_stand`): **nur Türen bis heute ins HTML, YAML nie ausliefern**; Deploy 30.11.–23.12. zusätzlich 00:07 |
 | `templates/` | Jinja2: `base`, `index`, `programm`, `event`, `archiv`, `page`, `landing`, `intern_*`; `partials/tile.html`, `effekte.html`, `kellerfunk.html` |
