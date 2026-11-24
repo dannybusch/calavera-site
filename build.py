@@ -1678,16 +1678,18 @@ def ics_for(events: list[Event], cfg: dict, stamp: datetime, calname: str,
     return "\r\n".join(ics_fold(l) for l in lines) + "\r\n"
 
 
-def kalender_abo(pfad: str, ics_text: str, cfg: dict, name: str) -> dict:
+def kalender_abo(pfad: str, ics_text: str, cfg: dict, name: str, seite: str = "/programm/") -> dict:
     """Links für ein Kalender-Abo unter `pfad` (z. B. "/calavera.ics"):
     webcal:// öffnet auf iPhone, Mac und in Outlook direkt „Abonnieren“; Android hat dafür nichts Eigenes,
-    dort führt der Google-Kalender-Link zum Abo. Beide ohne ?v=…, damit die Abo-Adresse für immer gleich bleibt.
-    name = Name des Kalenders im Handy (für den Android-Hinweis im Kasten)."""
+    dort führt der Google-Kalender-Link zum Abo. Google bekommt die https://-Adresse: aus webcal:// macht Google
+    sonst http://, und der Abruf scheitert oder hängt an einer Weiterleitung. Beide ohne ?v=…, damit die Abo-Adresse für immer gleich bleibt.
+    name = Name des Kalenders im Handy, seite = Seite mit dem Kasten (beides für den Android-Hinweis)."""
     https = cfg["site"]["url"].rstrip("/") + pfad
     webcal = "webcal://" + re.sub(r"^https?://", "", https)
     return {"https": https, "webcal": webcal,
-            "google": "https://calendar.google.com/calendar/r?cid=" + urllib.parse.quote(webcal, safe=""),
-            "name": name}
+            # Google mit https:// statt webcal:// – aus webcal:// macht Google http:// (Danny, 24.11.)
+            "google": "https://calendar.google.com/calendar/r?cid=" + urllib.parse.quote(https, safe=""),
+            "name": name, "seite": seite}
 
 
 def abo_termine(events: list[Event], now: datetime, tage: int) -> list[Event]:
@@ -1871,7 +1873,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
                         beschreibung=f"{l.description} {cfg['site']['url']}{l.url}".strip())
         render("landing.html", l.url, page_path=l.url, l=l, events=l_kommend, past_events=l_vorbei, cols=cols,
                fx_css=fx_list(l_kommend), landing_ld=landing_json_ld(l, cfg, l_kommend),
-               l_abo=kalender_abo(f"{l.url}calavera-{l.slug}.ics", l_ics, cfg, l_name)
+               l_abo=kalender_abo(f"{l.url}calavera-{l.slug}.ics", l_ics, cfg, l_name, l.url)
                if abo_an else None)
         if abo_an:
             (out / l.slug / f"calavera-{l.slug}.ics").write_text(l_ics, encoding="utf-8", newline="")

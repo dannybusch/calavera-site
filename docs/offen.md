@@ -38,9 +38,9 @@ Stand: 23.11.2026. Erledigtes streichen oder in eine Entscheidung (docs/entschei
 - **Kalender-Abo** (siehe 0022): ist ohne Einstellung **an**. Zum Abschalten in `config.yml` ergänzen:
   `kalender:` / `  abo: false`. Nach dem Deploy auf einem iPhone (Knopf „Abonnieren“) und einem Android-Handy
   (Knopf „Google Kalender“) einmal abonnieren und prüfen, dass Termine mit Flyer-Link ankommen.
-  Android (24.11.): Das zuerst per webcal:// angelegte Abo in der fremden App wieder löschen. Dann über
-  „Google Kalender“ hinzufügen, in der Google-Kalender-App unter Einstellungen „Calavera Bremen“ →
-  Synchronisieren einschalten. Klappt das nicht, Bescheid geben (Plan B: Anleitung mit „Adresse kopieren“).
+  Android (24.11.): „Kalender hinzugefügt“, aber leer → in der Google-Kalender-App ☰ → Einstellungen →
+  „Calavera Bremen“ → Synchronisieren einschalten; am Computer auf calendar.google.com prüfen, ob Google die
+  Termine schon geholt hat. Abo in der fremden App (webcal) löschen.
 
 ## Ideen, nicht begonnen
 

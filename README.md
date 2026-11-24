@@ -263,16 +263,19 @@ Landingpage (dort mit deren eigenem Abo). Veranstaltungsseiten verlinken darauf 
 | Knopf | Was passiert |
 |---|---|
 | **Abonnieren** | `webcal://www.calavera.club/calavera.ics` – iPhone, Mac und Outlook fragen direkt „Abonnieren?“ |
-| **Google Kalender** | öffnet Google Kalender mit „Kalender hinzufügen“ – der Weg für Android. Auf Android-Handys blendet `site.js` „Abonnieren“ aus und macht diesen Knopf zum Hauptknopf. |
+| **Google Kalender** | öffnet Google Kalender mit „Kalender hinzufügen“ (`cid=https://…`) – der Weg für Android (und alle mit Google-Konto) |
 
 Einen Download-Knopf und eine Adresse zum Kopieren gibt es bewusst nicht (24.11., Danny): Einmal importierte
 Termine bekommen keine Änderungen, das Abo kann alles besser. Wer eine andere App nutzt, nimmt die Adresse
 aus dem Abonnieren-Link (`https://www.calavera.club/calavera.ics`).
 
-**Android:** `webcal://` öffnet dort irgendeine App, die sich dafür angemeldet hat (nicht unbedingt die
-Kalender-App) – daher nur der Google-Weg. Auch der hat eine Falle: Google zeigt per Adresse hinzugefügte
-Kalender in der Android-App oft erst, wenn man dort unter **Einstellungen → „Calavera Bremen“ →
-Synchronisieren** einschaltet (und den Kalender im Menü links anhakt). Das steht deshalb im Kasten.
+**Android (Dannys Samsung S24, 24.11.):** Android kann von sich aus kein Kalender-Abo; `webcal://` öffnet
+irgendeine App, die sich dafür angemeldet hat. Darum blendet `site.js` auf Android „Abonnieren“ aus. „Google
+Kalender“ klappt („Kalender hinzugefügt“), aber **Google synchronisiert per Adresse abonnierte Kalender nicht
+von selbst aufs Handy**: In der Google-Kalender-App unter ☰ → Einstellungen → „Calavera Bremen“ →
+**Synchronisieren** einschalten. Außerdem holt Google die Datei beim ersten Mal mit Verzögerung (Minuten bis
+Stunden). Beides steht auf Android als 3-Schritte-Anleitung im Kasten. Ohne JavaScript stehen Knöpfe und
+Hinweis für alle da.
 
 Abo-Adressen haben **keinen** Fingerabdruck (`?v=…`), damit sie für immer gleich bleiben. Die Dateien heißen `calavera…` statt `kalender…`, weil manche Apps den Dateinamen als Kalendernamen
 zeigen. Die alte Adresse `kalender.ics` schreibt der Build als gleiche Kopie weiter (nicht mehr verlinkt):

@@ -10,12 +10,15 @@ sofort heraus. Nachtrag Danny: Das Abo muss sich über `config.yml` ganz abschal
 
 ## Entscheidung
 - **Abo statt Import:** Hauptknopf `webcal://…/calavera.ics` (iPhone, Mac, Outlook), dazu Google Kalender
-  (`calendar.google.com/calendar/r?cid=webcal://…`) für Android.
+  (`calendar.google.com/calendar/r?cid=https://…`) für Android. Anfangs stand dort `cid=webcal://…`; Google
+  macht daraus `http://` (24.11. bei Danny gesehen) – deshalb https://.
   **Kein Download-Knopf, keine Adresse zum Kopieren** (Danny, 24.11.): nur die zwei Abo-Wege, nichts Technisches.
-- **Android (24.11.):** `webcal://` öffnete auf Dannys Handy eine fremde App, das Abo war in der Kalender-App
-  nicht zu sehen. Darum blendet `site.js` auf Android „Abonnieren“ aus, nur Google Kalender bleibt. Der Kasten
-  erklärt, dass man in der Google-Kalender-App „Synchronisieren“ für den Kalender einschalten muss – Google
-  synchronisiert per Adresse hinzugefügte Kalender auf Android sonst oft nicht. Abo-Adressen **ohne** `?v=`, damit sie dauerhaft gleich bleiben.
+- **Android (24.11.):** Auf Dannys Samsung S24 öffnete „Abonnieren“ (webcal://) eine fremde App – Android hat
+  kein eingebautes Kalender-Abo. „Google Kalender“ meldete „Kalender hinzugefügt“, zeigte aber keine Termine:
+  Google synchronisiert per Adresse abonnierte Kalender nicht von selbst aufs Handy, und der erste Abruf dauert.
+  Darum auf Android: nur „Google Kalender“ plus 3-Schritte-Anleitung (Hinzufügen → in der App „Synchronisieren“
+  einschalten → Geduld beim ersten Abruf). (Zwischenstand „nur am Computer“ war falsch und ist zurückgenommen.)
+  Verworfen: Zusatz-Apps wie ICSx⁵ empfehlen (fremde App, für Gäste zu umständlich). Abo-Adressen **ohne** `?v=`, damit sie dauerhaft gleich bleiben.
 - Kein eigener Dienst, keine Konten, nichts im Browser gespeichert (0002): nur statische Dateien und Links.
   Der Google-Link ist ein normaler Link, keine eingebundene Ressource.
 - **Je Landingpage ein eigenes Abo** (`/dark/calavera-dark.ics`, `/party/calavera-party.ics`) mit genau der Auswahl

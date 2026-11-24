@@ -830,3 +830,6 @@ a.fact:hover { background: var(--surface-2); color: var(--text); }
 @media (max-width: 520px) {
   .abo-actions .btn { flex: 1 1 100%; }
 }
+.abo-schritte { margin: 12px 0 0; padding-left: 1.3em; display: grid; gap: 8px; font-size: 15px; line-height: 1.5; color: var(--text-2); }
+.abo-schritte strong { font-weight: 500; color: var(--text); }
+.abo--android .abo-hint { font-size: 15px; color: var(--text-2); }

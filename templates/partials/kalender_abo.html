@@ -1,7 +1,8 @@
-{# Kalender-Abo: ein Kasten mit webcal://-Abo (iPhone, Mac, Outlook) und Google Kalender (Android).
+{# Kalender-Abo: ein Kasten mit webcal://-Abo (iPhone, Mac, Outlook) und Google Kalender (Android, Computer).
    a = kalender_abo(...) aus build.py. Kein Download-Knopf, keine Adresse zum Kopieren (Danny, 24.11.).
-   site.js blendet auf Android-Handys „Abonnieren“ aus (webcal:// öffnet dort irgendeine App) und zeigt den
-   Hinweis zum Synchronisieren in der Google-Kalender-App. #}
+   Android kann kein webcal:// (öffnet irgendeine App): site.js blendet dort „Abonnieren“ aus und zeigt
+   [data-abo-android] – Google fügt den Kalender hinzu, synchronisiert ihn aufs Handy aber oft erst, wenn man
+   das in der Google-Kalender-App einschaltet (Dannys S24, 24.11.). #}
 {% macro abo_kasten(a, titel, text, extra="") %}
 <div class="abo" id="kalender-abo" data-abo>
   <div class="abo-text">
@@ -16,10 +17,19 @@
     <a class="btn btn-dark" href="{{ a.google }}" rel="noopener" data-abo-google>Google Kalender</a>
   </div>
   <div class="abo-more">
-    <p class="abo-hint">iPhone, Mac und Outlook: <strong>Abonnieren</strong>. Android: <strong>Google Kalender</strong>,
-      dort „Hinzufügen“ bestätigen. <strong>Wichtig auf Android:</strong> Danach in der Google-Kalender-App
-      unter Einstellungen „{{ a.name }}“ antippen und <strong>Synchronisieren</strong> einschalten (und im Menü
-      links anhaken) – sonst zeigt das Handy die Termine nicht an.</p>
+    <p class="abo-hint" data-abo-hinweis>iPhone, Mac und Outlook: <strong>Abonnieren</strong>.
+      Android: <strong>Google Kalender</strong>, danach in der Google-Kalender-App unter Einstellungen
+      „{{ a.name }}“ antippen und <strong>Synchronisieren</strong> einschalten.</p>
+    <div class="abo-android" data-abo-android hidden>
+      <p class="abo-hint"><strong>So klappt es auf Android:</strong></p>
+      <ol class="abo-schritte">
+        <li><strong>Google Kalender</strong> antippen und „Hinzufügen“ bestätigen.</li>
+        <li>In der Google-Kalender-App: Menü ☰ → Einstellungen → „{{ a.name }}“ antippen →
+          <strong>Synchronisieren</strong> einschalten. Ohne das bleibt der Kalender auf dem Handy leer.</li>
+        <li>Den ersten Abruf macht Google selbst – das kann ein paar Minuten bis einige Stunden dauern.
+          Danach stehen die Termine auch im Samsung Kalender (wenn dort das Google-Konto eingebunden ist).</li>
+      </ol>
+    </div>
   </div>
 </div>
 {% endmacro %}

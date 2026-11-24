@@ -270,15 +270,18 @@
     document.addEventListener("visibilitychange", function () { fxOwners.forEach(fxUpdate); });
   }
 
-  /* ---------- Kalender-Abo: auf Android nur „Google Kalender“ ----------
-     webcal:// öffnet auf Android irgendeine App, die sich dafür gemeldet hat – das Abo landet dann oft
-     nicht in der Kalender-App. Also dort ausblenden und Google Kalender zum Hauptknopf machen. */
+  /* ---------- Kalender-Abo auf Android: nur „Google Kalender“ + Anleitung ----------
+     Android kann von sich aus kein webcal://-Abo (es öffnet irgendeine App). Google fügt den Kalender hinzu,
+     synchronisiert ihn aufs Handy aber oft erst, wenn man das in der App einschaltet – daher die Anleitung. */
   if (/Android/i.test(navigator.userAgent)) {
     document.querySelectorAll("[data-abo]").forEach(function (box) {
-      var g = box.querySelector("[data-abo-google]"), w = box.querySelector("[data-abo-webcal]");
-      if (!g || !w) return;
-      g.classList.replace("btn-dark", "btn-light");
+      var w = box.querySelector("[data-abo-webcal]"), g = box.querySelector("[data-abo-google]"),
+          h = box.querySelector("[data-abo-hinweis]"), a = box.querySelector("[data-abo-android]");
+      if (!w || !g || !a) return;
       w.hidden = true;
+      g.classList.replace("btn-dark", "btn-light");
+      if (h) h.hidden = true;
+      a.hidden = false;
       box.classList.add("abo--android");
     });
   }
