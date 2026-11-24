@@ -1678,16 +1678,16 @@ def ics_for(events: list[Event], cfg: dict, stamp: datetime, calname: str,
     return "\r\n".join(ics_fold(l) for l in lines) + "\r\n"
 
 
-def kalender_abo(pfad: str, ics_text: str, cfg: dict, dateiname: str = "calavera") -> dict:
+def kalender_abo(pfad: str, ics_text: str, cfg: dict, name: str) -> dict:
     """Links für ein Kalender-Abo unter `pfad` (z. B. "/calavera.ics"):
     webcal:// öffnet auf iPhone, Mac und in Outlook direkt „Abonnieren“; Android hat dafür nichts Eigenes,
     dort führt der Google-Kalender-Link zum Abo. Beide ohne ?v=…, damit die Abo-Adresse für immer gleich bleibt.
-    Nur „Datei laden“ (einmalig importieren) bekommt den Fingerabdruck gegen alte Kopien im Zwischenspeicher."""
+    name = Name des Kalenders im Handy (für den Android-Hinweis im Kasten)."""
     https = cfg["site"]["url"].rstrip("/") + pfad
     webcal = "webcal://" + re.sub(r"^https?://", "", https)
     return {"https": https, "webcal": webcal,
             "google": "https://calendar.google.com/calendar/r?cid=" + urllib.parse.quote(webcal, safe=""),
-            "datei": f"{pfad}?v={ics_version(ics_text)}", "dateiname": f"{dateiname}.ics"}
+            "name": name}
 
 
 def abo_termine(events: list[Event], now: datetime, tage: int) -> list[Event]:
@@ -1811,7 +1811,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
     env.globals["leiste_bis"] = leiste_bis
     env.globals["wenig_modus"] = lambda n: "a" if n == 2 else ("b" if 3 <= n <= leiste_bis else "")
     env.globals["kalender_url"] = f"/calavera.ics?v={ics_version(programm_ics)}" if abo_an else ""
-    env.globals["abo"] = kalender_abo("/calavera.ics", programm_ics, cfg) if abo_an else None
+    env.globals["abo"] = kalender_abo("/calavera.ics", programm_ics, cfg, abo_name) if abo_an else None
 
     def render(template: str, dest: str, **ctx) -> None:
         path = out / dest.lstrip("/")
@@ -1871,7 +1871,7 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
                         beschreibung=f"{l.description} {cfg['site']['url']}{l.url}".strip())
         render("landing.html", l.url, page_path=l.url, l=l, events=l_kommend, past_events=l_vorbei, cols=cols,
                fx_css=fx_list(l_kommend), landing_ld=landing_json_ld(l, cfg, l_kommend),
-               l_abo=dict(kalender_abo(f"{l.url}calavera-{l.slug}.ics", l_ics, cfg, f"calavera-{l.slug}"), name=l_name)
+               l_abo=kalender_abo(f"{l.url}calavera-{l.slug}.ics", l_ics, cfg, l_name)
                if abo_an else None)
         if abo_an:
             (out / l.slug / f"calavera-{l.slug}.ics").write_text(l_ics, encoding="utf-8", newline="")

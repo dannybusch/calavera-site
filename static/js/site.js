@@ -270,18 +270,20 @@
     document.addEventListener("visibilitychange", function () { fxOwners.forEach(fxUpdate); });
   }
 
-  /* ---------- Kalender-Abo: auf Android zuerst „Google Kalender“ (webcal:// kennt Android nicht) ---------- */
+  /* ---------- Kalender-Abo: auf Android nur „Google Kalender“ ----------
+     webcal:// öffnet auf Android irgendeine App, die sich dafür gemeldet hat – das Abo landet dann oft
+     nicht in der Kalender-App. Also dort ausblenden und Google Kalender zum Hauptknopf machen. */
   if (/Android/i.test(navigator.userAgent)) {
     document.querySelectorAll("[data-abo]").forEach(function (box) {
       var g = box.querySelector("[data-abo-google]"), w = box.querySelector("[data-abo-webcal]");
       if (!g || !w) return;
       g.classList.replace("btn-dark", "btn-light");
-      w.classList.replace("btn-light", "btn-dark");
-      w.parentNode.insertBefore(g, w);
+      w.hidden = true;
+      box.classList.add("abo--android");
     });
   }
 
-  /* ---------- Kopieren-Knöpfe (interne Seiten, Kalender-Abo) + Zeichenzähler ---------- */
+  /* ---------- Interne Seiten: Kopieren-Knöpfe + Zeichenzähler ---------- */
   var copyText = function (el) {
     if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(el.value);
     el.focus(); el.select();                         // Rückfall für http:// (lokal)

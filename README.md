@@ -263,12 +263,18 @@ Landingpage (dort mit deren eigenem Abo). Veranstaltungsseiten verlinken darauf 
 | Knopf | Was passiert |
 |---|---|
 | **Abonnieren** | `webcal://www.calavera.club/calavera.ics` – iPhone, Mac und Outlook fragen direkt „Abonnieren?“ |
-| **Google Kalender** | öffnet Google Kalender mit „Kalender hinzufügen“ – der Weg für Android (kennt `webcal://` nicht). Auf Android-Handys stellt `site.js` diesen Knopf nach vorn. |
-| **Datei laden** | die `.ics` einmalig importieren – **ohne** spätere Änderungen |
-| Adresse + **Kopieren** | für alle anderen Apps („Kalender per URL hinzufügen“) |
+| **Google Kalender** | öffnet Google Kalender mit „Kalender hinzufügen“ – der Weg für Android. Auf Android-Handys blendet `site.js` „Abonnieren“ aus und macht diesen Knopf zum Hauptknopf. |
 
-Abo-Adressen haben **keinen** Fingerabdruck (`?v=…`), damit sie für immer gleich bleiben; nur „Datei laden“
-hat einen. Die Dateien heißen `calavera…` statt `kalender…`, weil manche Apps den Dateinamen als Kalendernamen
+Einen Download-Knopf und eine Adresse zum Kopieren gibt es bewusst nicht (24.11., Danny): Einmal importierte
+Termine bekommen keine Änderungen, das Abo kann alles besser. Wer eine andere App nutzt, nimmt die Adresse
+aus dem Abonnieren-Link (`https://www.calavera.club/calavera.ics`).
+
+**Android:** `webcal://` öffnet dort irgendeine App, die sich dafür angemeldet hat (nicht unbedingt die
+Kalender-App) – daher nur der Google-Weg. Auch der hat eine Falle: Google zeigt per Adresse hinzugefügte
+Kalender in der Android-App oft erst, wenn man dort unter **Einstellungen → „Calavera Bremen“ →
+Synchronisieren** einschaltet (und den Kalender im Menü links anhakt). Das steht deshalb im Kasten.
+
+Abo-Adressen haben **keinen** Fingerabdruck (`?v=…`), damit sie für immer gleich bleiben. Die Dateien heißen `calavera…` statt `kalender…`, weil manche Apps den Dateinamen als Kalendernamen
 zeigen. Die alte Adresse `kalender.ics` schreibt der Build als gleiche Kopie weiter (nicht mehr verlinkt):
 Wer sie schon abonniert hat – auch als `…/kalender.ics?v=…` –, bekommt weiter alles (der Server
 ignoriert `?v=`). Die Datei je Veranstaltung (`termin.ics`, Knopf „In den Kalender“) ist davon unabhängig.
@@ -521,8 +527,8 @@ ErrorDocument 404 /404.html
 nachfragen, ob sie noch aktuell ist. Bilder, Schriften, CSS und JS bekommen ohnehin einen
 Fingerabdruck (`?v=…`) in der Adresse und dürfen lange zwischengespeichert werden.
 
-Zusätzlich bekommen Download-Links auf `calavera.ics` („Datei laden“) und `termin.ics` einen Fingerabdruck
-des Inhalts (`/calavera.ics?v=…`). Er ändert sich nur, wenn sich ein Termin ändert – nicht bei jedem Build.
+Zusätzlich bekommen Download-Links auf `termin.ics` und der `<link rel="alternate">` auf `calavera.ics` einen
+Fingerabdruck des Inhalts (`/calavera.ics?v=…`). Er ändert sich nur, wenn sich ein Termin ändert – nicht bei jedem Build.
 Abo-Links (`webcal://`, Google) haben bewusst keinen, damit die Abo-Adresse gleich bleibt.
 
 ## Automatisch veröffentlichen (GitHub Actions → STRATO per SFTP)

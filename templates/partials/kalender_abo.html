@@ -1,6 +1,7 @@
-{# Kalender-Abo: ein Kasten mit webcal://-Abo (iPhone, Mac, Outlook), Google Kalender (Android), Datei zum
-   einmaligen Laden und der Adresse zum Kopieren für alle anderen Apps. a = kalender_abo(...) aus build.py.
-   site.js macht auf Android-Handys „Google Kalender“ zum ersten Knopf (webcal:// kann Android nicht). #}
+{# Kalender-Abo: ein Kasten mit webcal://-Abo (iPhone, Mac, Outlook) und Google Kalender (Android).
+   a = kalender_abo(...) aus build.py. Kein Download-Knopf, keine Adresse zum Kopieren (Danny, 24.11.).
+   site.js blendet auf Android-Handys „Abonnieren“ aus (webcal:// öffnet dort irgendeine App) und zeigt den
+   Hinweis zum Synchronisieren in der Google-Kalender-App. #}
 {% macro abo_kasten(a, titel, text, extra="") %}
 <div class="abo" id="kalender-abo" data-abo>
   <div class="abo-text">
@@ -13,17 +14,12 @@
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>
       Abonnieren</a>
     <a class="btn btn-dark" href="{{ a.google }}" rel="noopener" data-abo-google>Google Kalender</a>
-    <a class="btn btn-ghost" href="{{ a.datei }}" download="{{ a.dateiname }}">Datei laden</a>
   </div>
   <div class="abo-more">
-    <p class="abo-hint">iPhone, Mac und Outlook: <strong>Abonnieren</strong>. Android: <strong>Google Kalender</strong>.
-      Andere Kalender-Apps: Adresse kopieren und dort als Abo („Kalender per URL“) hinzufügen.
-      <strong>Datei laden</strong> holt die Termine nur einmal, ohne spätere Änderungen.</p>
-    <div class="abo-url ifield-row">
-      <label class="visually-hidden" for="abo-adresse">Adresse des Kalender-Abos</label>
-      <input id="abo-adresse" type="text" value="{{ a.https }}" readonly>
-      <button class="btn btn-dark btn-copy" type="button" data-copy="abo-adresse">Kopieren</button>
-    </div>
+    <p class="abo-hint">iPhone, Mac und Outlook: <strong>Abonnieren</strong>. Android: <strong>Google Kalender</strong>,
+      dort „Hinzufügen“ bestätigen. <strong>Wichtig auf Android:</strong> Danach in der Google-Kalender-App
+      unter Einstellungen „{{ a.name }}“ antippen und <strong>Synchronisieren</strong> einschalten (und im Menü
+      links anhaken) – sonst zeigt das Handy die Termine nicht an.</p>
   </div>
 </div>
 {% endmacro %}
