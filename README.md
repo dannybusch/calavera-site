@@ -84,9 +84,7 @@ letzten Build vorbei ist, und hebt den nächsten Termin hervor („Heute“, „
 - `/programm/` mit allen kommenden, `/programm/archiv/` mit vergangenen Terminen
 - eine Seite pro Veranstaltung mit Flyer, Fakten, Text, Kalender-Datei, Teilen, Anfahrt, „Danach“ am selben Abend
 - Visuals verkleinert (`640.webp` für Kacheln, `1200.jpg` für Detailseite und Vorschau beim Teilen)
-- `kalender.ics` (das ganze Programm, Knopf „Programm in den Kalender“); mit eingeschaltetem Abo zusätzlich
-  `calavera.ics` und je Landingpage `/<slug>/calavera-<slug>.ics` – siehe „Kalender-Abo“
-- `sitemap.xml`, `robots.txt`, `404.html`
+- `kalender.ics` (das ganze Programm zum Abonnieren), `sitemap.xml`, `robots.txt`, `404.html`
 - Vorschaubilder für WhatsApp/Instagram/Signal (Open Graph) und Event-Daten für Google (schema.org)
 - Weiterleitungen von alten Adressen (`/privatveranstaltungen/` → `/calavera-mieten/`)
 
@@ -218,7 +216,6 @@ Calavera“ (damit die Seite auch in Programmpausen etwas zeigt). Alle Möglichk
 | `zeigt:` | welche Termine: `reihen: [dark]`, `genres: [...]`, `ohne_reihen: [dark]`, `nur_partys: true` (ohne alles mit `art:`) |
 | `faq:` | Häufige Fragen (`frage:`/`antwort:`) – sichtbar auf der Seite und als FAQ für Google/KI |
 | `archiv`, `leer`, `bild`, `noindex`, `draft` | Anzahl vergangener Termine, Text bei leerem Programm, Vorschaubild, Suchmaschinen aus, Entwurf |
-| `kalender_name` | Name des eigenen Kalender-Abos im Handy (sonst „Calavera “ + `title`, z. B. „Calavera Partys“) |
 
 **Einzelne Veranstaltung zusätzlich auf einer Landingpage**, ohne sie zur Reihe zu machen (z. B. die
 Depeche-Mode-Party auf `/dark/`, ohne dass sie als „Weitere Dunkelveranstaltung“ auftaucht): in der Event-Datei
@@ -241,66 +238,6 @@ Terminen, Brotkrumen und ggf. `FAQPage`; sie steht in `sitemap.xml` und `llms.tx
 Programm (Knöpfe unten) und von jeder passenden Veranstaltungsseite („Alle Dark-Partys →“) – außer bei
 `rueckverlink: false` (so bei `/party/`: keine sichtbaren Links, nur Sitemap und `llms.txt`). Ins Hauptmenü
 kommt sie nur über `config.yml → navigation`.
-
-## Kalender-Abo (`/calavera.ics`, `/dark/calavera-dark.ics`, …)
-
-> **Derzeit ausgeschaltet** (24.11.2026, Danny: auf Android – Samsung S24 – kamen über keinen Weg Termine an).
-> Ohne Einstellung baut die Seite wie vor dem Abo: `kalender.ics` mit den kommenden Terminen, Knopf
-> „Programm in den Kalender“ auf Startseite und `/programm/`, „Programm als Kalender“ im Fuß.
-> Einschalten mit `kalender: { abo: true }` in `config.yml`. Alles Folgende gilt für das eingeschaltete Abo.
-
-Gäste können das Programm **abonnieren**: Dann stehen alle Termine im Handy-Kalender, und neue oder
-geänderte kommen von selbst dazu. Der Build schreibt dafür
-
-- `calavera.ics` – das ganze Programm, im Handy als Kalender „Calavera Bremen“,
-- `/<landingpage>/calavera-<landingpage>.ics` – nur die Termine dieser Landingpage (derzeit
-  `/dark/calavera-dark.ics` „Calavera Dark“ und `/party/calavera-party.ics` „Calavera Partys“;
-  dieselbe Auswahl wie die Kacheln, inklusive `auch_auf:`).
-
-Neben allen kommenden Terminen stehen darin auch die der **letzten 30 Tage**, damit ein Abend nicht am
-Morgen danach aus dem abonnierten Kalender verschwindet. Die Dateien sagen den Kalender-Apps, dass sie
-alle 6 Stunden neu laden sollen (`REFRESH-INTERVAL`/`X-PUBLISHED-TTL`). Wie oft sie es wirklich tun,
-entscheidet die App: Apple und Outlook halten sich meist daran, **Google lädt nur etwa alle 12–24 Stunden**.
-
-Sichtbar ist das Abo als Kasten „Kalender-Abo“ unter dem Programm (Startseite, `/programm/`) und auf jeder
-Landingpage (dort mit deren eigenem Abo). Veranstaltungsseiten verlinken darauf („Kalender-Abo: Alle Termine
-· Nur Calavera Dark“), der Fuß jeder Seite ebenso. Im Kasten:
-
-| Knopf | Was passiert |
-|---|---|
-| **Abonnieren** | `webcal://www.calavera.club/calavera.ics` – iPhone, Mac und Outlook fragen direkt „Abonnieren?“ |
-| **Google Kalender** | öffnet Google Kalender mit „Kalender hinzufügen“ (`cid=https://…`) – der Weg für Android (und alle mit Google-Konto) |
-
-Einen Download-Knopf und eine Adresse zum Kopieren gibt es bewusst nicht (24.11., Danny): Einmal importierte
-Termine bekommen keine Änderungen, das Abo kann alles besser. Wer eine andere App nutzt, nimmt die Adresse
-aus dem Abonnieren-Link (`https://www.calavera.club/calavera.ics`).
-
-**Android (Dannys Samsung S24, 24.11.):** Android kann von sich aus kein Kalender-Abo; `webcal://` öffnet
-irgendeine App, die sich dafür angemeldet hat. Trotzdem zeigt der Kasten auf allen Geräten beide Knöpfe (Danny,
-24.11.: manche haben auf Android eine Abo-App wie ICSx⁵). „Google Kalender“ klappt („Kalender hinzugefügt“), aber **Google synchronisiert per Adresse abonnierte Kalender nicht
-von selbst aufs Handy**: In der Google-Kalender-App unter ☰ → Einstellungen → „Calavera Bremen“ →
-**Synchronisieren** einschalten. Außerdem holt Google die Datei beim ersten Mal mit Verzögerung (Minuten bis
-Stunden). Beides steht als Hinweis im Kasten.
-
-Abo-Adressen haben **keinen** Fingerabdruck (`?v=…`), damit sie für immer gleich bleiben. Die Dateien heißen `calavera…` statt `kalender…`, weil manche Apps den Dateinamen als Kalendernamen
-zeigen. Die alte Adresse `kalender.ics` schreibt der Build als gleiche Kopie weiter (nicht mehr verlinkt):
-Wer sie schon abonniert hat – auch als `…/kalender.ics?v=…` –, bekommt weiter alles (der Server
-ignoriert `?v=`). Die Datei je Veranstaltung (`termin.ics`, Knopf „In den Kalender“) ist davon unabhängig.
-
-Einstellungen (alle optional, in `config.yml`):
-
-```yaml
-kalender:
-  abo: true                    # Kalender-Abo einschalten (Standard: aus). Aus = wie vor dem Abo: nur kalender.ics
-                               # mit kommenden Terminen und der Knopf „Programm in den Kalender“; kein Kasten,
-                               # keine calavera*.ics. termin.ics je Veranstaltung gibt es immer.
-  abo_vergangene_tage: 30      # so viele Tage bleiben vergangene Termine im Abo (0 = nur kommende)
-  abo_name: "Calavera Bremen"  # Name des Kalenders im Handy (Standard: site.name)
-```
-
-Beim Abschalten: Wer `calavera.ics` abonniert hat, behält die bisher geladenen Termine, bekommt aber keine neuen
-mehr; manche Apps melden beim Aktualisieren einen Fehler, bis das Abo gelöscht wird. Abos auf `kalender.ics`
-laufen weiter (die Datei gibt es immer).
 
 ## Adventskalender (`/adventskalender/`)
 
@@ -332,26 +269,6 @@ Einzelne Tür direkt öffnen (auch zum Teilen): `/adventskalender/#tuer-7`.
 ```yaml
   - { label: "Adventskalender", href: "/adventskalender/" }
 ```
-
-**Mit dabei:** Oben auf der Seite stehen alle Personen aus der Datei, auch die hinter noch geschlossenen
-Türen – ohne Doppelte und in zufälliger Reihenfolge (beim Build gemischt und im Browser bei jedem Besuch neu),
-damit nicht abzulesen ist, welche Tür zu wem gehört.
-
-**Startseite:** Im Hero teilt sich eine Adventskalender-Karte den Platz mit dem Kellerfunk (Desktop: darüber,
-Tablet: daneben, Handy: darüber). Vor dem 1.12. zeigt sie Titel und Einleitung mit der Marke „Ab 1. Dezember“,
-vom 1. bis 24.12. eine rote Tür mit der Zahl von heute, die beim Laden nach außen aufgeht, und „Öffne das Türchen von
-[Person]“ (Song und Künstler verrät die Karte nicht; ist die Tür noch leer: „Tür N folgt in Kürze“), danach „Alle 24 Türen offen“.
-Zeitraum in der YAML (beides optional):
-
-```yaml
-startseite_ab: 2026-11-27     # Standard: 27.11.
-startseite_bis: 2027-01-06    # Standard: 6.1. des Folgejahres
-startseite: false             # Karte ganz abschalten
-```
-
-Ein Build bis zu 7 Tage vor `startseite_ab` legt die Karte schon versteckt ab, `site.js` blendet sie am
-Stichtag ein (und nach `startseite_bis` aus) – dafür braucht es keinen eigenen Deploy. Testen mit
-`?now=2026-11-28T12:00`. Dateien: `templates/partials/advent_karte.html`, `.adv-karte` in `static/css/site.css`.
 
 Für Suchmaschinen: `CollectionPage`-JSON-LD mit den geöffneten Türen als `MusicRecording`, Eintrag in
 `sitemap.xml` und `llms.txt` (nur Geöffnetes). Ohne JavaScript stehen die geöffneten Türen als Liste unter dem
@@ -556,9 +473,8 @@ ErrorDocument 404 /404.html
 nachfragen, ob sie noch aktuell ist. Bilder, Schriften, CSS und JS bekommen ohnehin einen
 Fingerabdruck (`?v=…`) in der Adresse und dürfen lange zwischengespeichert werden.
 
-Zusätzlich bekommen Download-Links auf `termin.ics` und der `<link rel="alternate">` auf `calavera.ics` einen
-Fingerabdruck des Inhalts (`/calavera.ics?v=…`). Er ändert sich nur, wenn sich ein Termin ändert – nicht bei jedem Build.
-Abo-Links (`webcal://`, Google) haben bewusst keinen, damit die Abo-Adresse gleich bleibt.
+Zusätzlich bekommen alle Links auf `kalender.ics` und `termin.ics` einen Fingerabdruck des Inhalts
+(`/kalender.ics?v=…`). Er ändert sich nur, wenn sich ein Termin ändert – nicht bei jedem Build.
 
 ## Automatisch veröffentlichen (GitHub Actions → STRATO per SFTP)
 
@@ -602,21 +518,6 @@ Ordner und Dateien stimmen. Danach von Hand ohne Häkchen starten oder einfach p
 deren Inhalt sich geändert hat: die Prüfsummen merkt es sich auf dem Server in `.calavera-pruefsummen.json`
 (nicht löschen – sonst wird beim nächsten Mal einmal alles hochgeladen). Beim Start von Hand gibt es das Häkchen
 „Alles neu hochladen“. Lokal: `SFTP_HOST=… SFTP_USER=… SFTP_PASSWORD=… python hochladen.py dist/ <ordner> --probe`.
-
-Damit nie eine Seite online ist, die auf noch Fehlendes verweist, lädt `hochladen.py` **in Stufen** hoch:
-
-1. **Bilder & Dateien** – `static/`, `media/`, die `termin.ics` der Veranstaltungen (alles außer HTML)
-2. **Veranstaltungsseiten** – `/programm/<slug>/` und `/intern/<slug>/`
-3. **Übersichtsseiten** – Landingpages, Archiv, feste Seiten …, ganz zum Schluss `/programm/` und die Startseite
-4. **Verzeichnisse** – `sitemap.xml`, `llms.txt`, `robots.txt`, `kalender.ics` und Abos, `build.json`
-
-Gelöscht wird erst danach (erst Seiten, dann ihre Bilder). Jede Datei geht zuerst unter einem Zwischennamen
-(`….calavera-neu`) hoch und ersetzt dann die alte in einem Schritt – Besucher sehen nie eine halbe Seite.
-Lässt sich eine Datei nicht hochladen, läuft ihre Stufe noch zu Ende, die späteren Stufen und das Löschen
-bleiben aber aus und der Lauf wird rot; beim nächsten Lauf geht es mit dem Fehlenden weiter. Der Stand wird
-nach jeder Stufe und spätestens jede Minute auf dem Server gesichert: Reißt die Verbindung ab, lädt der
-nächste Versuch nicht alles noch einmal hoch. Lässt sich eine alte Datei nicht löschen, gibt es nur eine
-Warnung. Tests (ohne Server): `python -m pytest tests/hochladen -q`.
 Die frühere lftp-Variante steht auskommentiert im Workflow.
 
 Hinweise: GitHub startet geplante Läufe manchmal mit Verzögerung. In **öffentlichen** Repositories
@@ -951,6 +852,8 @@ python -m pytest tests/planer -q        # Tests (ohne Netz, mit Fixtures)
 | shagall-klub.com | Shagall | `/shows` (Wix), Datum + Uhrzeit aus der Karte |
 | musikszene-bremen.de | Zollkantine | Kategorie „termine“ inkl. `/page/2/` …; auch Spannen („27.12. – 29.12.“) |
 | lilaeule.com | Lila Eule | „Shows \| Tickets“ (Jimdo, reiner Text ohne Links); Zeile → nächstgelegenes Datum, Beginn aus „19 h / 19.30 h“ |
+| pink-lemon-party.de | Pink Lemon | Startseite, Daten als Text („05. dezember 2026“), Beginn aus „von 20:00 bis 1:00 Uhr“ |
+| weserterrassen.com/events/ | Weserterrassen | **nur Reihen aus `nur:`** (Standard „Jungbrunnen“); Contao-Monatsseiten `events/?month=JJJJMM`, Datum und Uhrzeit aus dem title-Attribut der Event-Links; Notfall: JSON-LD bzw. Stichwort → nächstes Datum |
 | zakk.klubraum.org | zakk | Startseite – zeigt nur die nächsten Tage (Monatsprogramm ist InDesign-XML ohne Jahr) |
 
 Zeichen in den Zellen: **⚠** artverwandt und am selben Abend haben wir etwas in Bremen, **◐** artverwandt,

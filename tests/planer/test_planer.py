@@ -255,6 +255,10 @@ def test_gesamtlauf_ohne_netz():
         "zakk.klubraum.org": fix("zakk_start.html"),
         "/bl1/": fix("openligadb_bl1.json"),
         "shows-tickets": fix("lila_eule.html"),
+        "pink-lemon-party": fix("pink_lemon.html"),
+        "events/?month=202612": fix("weserterrassen-202612.html"),
+        "events/?month=202701": fix("weserterrassen-202701.html"),
+        "weserterrassen": fix("weserterrassen.html"),
         "/dfb/": "[]",
         "Kalender%202026%20Bremen": dark_csv(2027, {}, ohne_kopf=True),
         "Kalender%202027%20Bremen": dark_csv(2027, {(1, 15): "Spätschicht"}, ohne_kopf=True),
@@ -271,7 +275,8 @@ def test_gesamtlauf_ohne_netz():
     assert "◐" in zellen[fr]["polyester"]                                # Gothic in Oldenburg
     assert zellen[date(2026, 12, 11)]["eisen"].endswith("Dark Dezember")   # aus dem Slug
     assert [s for _, s in spalten] == ["Werder", "Dark-Kalender", "Modernes", "Aladin/Tivoli", "Eisen", "Polyester OL",
-                                       "Shagall", "Zollkantine", "zakk", "Lila Eule"]
+                                       "Shagall", "Zollkantine", "zakk", "Lila Eule", "Pink Lemon",
+                                       "Weserterrassen"]
     assert zellen[date(2026, 12, 4)]["shagall"] == "22:00 XMAS CLUBBING"
     assert zellen[date(2026, 12, 4)]["zollkantine"] == "20:00 Hond // Farson // Buried"
     assert zellen[date(2026, 11, 27)]["werder"] == "20:30 HEIM Werder – Dortmund"
@@ -616,3 +621,61 @@ def test_format_auch_ohne_aenderung_und_abschaltbar():
     s2 = FakeSitzung()
     schreiben.wende_monat_an(schreiben.SheetsApi(s2), "Dezember 2026", 1, plan, formatieren=True)
     assert s2.posts == []                                       # ohne Einstellung wird nichts formatiert
+
+
+# --- Pink Lemon, Weserterrassen ------------------------------------------------------------------
+
+from planer.quellen import pink_lemon, weserterrassen  # noqa: E402
+
+
+def test_pink_lemon():
+    termine = pink_lemon.hole(FakeHttp({"pink-lemon-party": fix("pink_lemon.html")}), VON, BIS, {})
+    # Oktober ist vorbei, Februar liegt hinter BIS
+    assert [(t.tag, t.uhrzeit, t.titel, t.ort) for t in termine] == [
+        (date(2026, 12, 5), "20:00", "Pink Lemon Party", "Up den Höfen")]
+
+
+WESER = {"events/?month=202612": fix("weserterrassen-202612.html"),
+         "events/?month=202701": fix("weserterrassen-202701.html"),
+         "events/?month=202611": fix("weserterrassen.html")}
+
+
+def test_weserterrassen_contao_nur_jungbrunnen_mit_blaettern():
+    http = FakeHttp(WESER)
+    termine = weserterrassen.hole(http, VON, BIS, {"nur": ["Jungbrunnen"]})
+    # Jazz, Kinderflohmarkt, Weihnachtskonzert usw. werden ignoriert, Titel in der Schreibweise aus quellen.yml
+    assert [(t.tag, t.uhrzeit, t.titel, t.url) for t in termine] == [
+        (date(2026, 11, 28), "20:00", "Jungbrunnen", "https://www.weserterrassen.com/events/details/jungbrunnen-60/"),
+        (date(2026, 12, 26), "20:00", "Jungbrunnen", "https://www.weserterrassen.com/events/details/jungbrunnen-61/")]
+    assert [u.rsplit("=", 1)[1] for u in http.urls] == ["202611", "202612", "202701"]
+
+
+def test_weserterrassen_contao_andere_reihe_und_fehlender_monat():
+    warnungen = []
+    nur_nov = {"events/?month=202611": fix("weserterrassen.html")}
+    termine = weserterrassen.hole(FakeHttp(nur_nov), VON, BIS, {"nur": ["jazz"]}, warn=warnungen.append)
+    assert termine == []                      # Jazz am 04.11. liegt vor VON
+    termine = weserterrassen.hole(FakeHttp(nur_nov), date(2026, 11, 1), date(2026, 12, 31),
+                                  {"nur": ["jazz", "flohmarkt"]}, warn=warnungen.append)
+    assert [(t.tag, t.uhrzeit, t.titel) for t in termine] == [
+        (date(2026, 11, 4), "20:00", "Jazz & More: JazzInvaders"), (date(2026, 11, 8), "10:00", "Kinderflohmarkt")]
+    assert any("12/2026 nicht abrufbar" in w for w in warnungen)
+
+
+def test_weserterrassen_nur_jungbrunnen_aus_text():
+    termine = weserterrassen.hole(FakeHttp({"weserterrassen": fix("weserterrassen-text.html")}), VON, BIS, {})
+    assert [(t.tag, t.uhrzeit, t.titel) for t in termine] == [
+        (date(2026, 11, 28), "20:00", "Jungbrunnen – Die Ü30-Party"),
+        (date(2026, 12, 26), "20:00", "Jungbrunnen – Die Ü30-Party")]
+
+
+def test_weserterrassen_jsonld_und_warnung():
+    html = ('<html><head><script type="application/ld+json">[{"@type":"Event","name":"Jungbrunnen",'
+            '"startDate":"2026-11-28T20:00:00+01:00","url":"https://www.weserterrassen.com/events/jb/"},'
+            '{"@type":"Event","name":"Lesung","startDate":"2026-11-27T19:00:00+01:00"}]</script></head></html>')
+    termine = weserterrassen.hole(FakeHttp({"weserterrassen": html}), VON, BIS, {})
+    assert [(t.tag, t.uhrzeit, t.titel, t.url) for t in termine] == [
+        (date(2026, 11, 28), "20:00", "Jungbrunnen", "https://www.weserterrassen.com/events/jb/")]
+    warnungen = []
+    weserterrassen.hole(FakeHttp({"weserterrassen": "<html>nix</html>"}), VON, BIS, {}, warn=warnungen.append)
+    assert "Jungbrunnen" in warnungen[0]

@@ -31,3 +31,8 @@ quellen:
     aktiv: true
   - id: lila_eule              # lilaeule.com „Shows | Tickets“ (Jimdo, reiner Text)
     aktiv: true
+  - id: pink_lemon             # pink-lemon-party.de, Up den Höfen, 1. Samstag alle zwei Monate
+    aktiv: true
+  - id: weserterrassen         # weserterrassen.com/events/ – nur diese Reihen:
+    aktiv: true
+    nur: ["Jungbrunnen"]

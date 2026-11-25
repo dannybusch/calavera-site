@@ -139,7 +139,7 @@ def jsonld_events(seite: Seite) -> list[dict]:
     return gefunden
 
 
-_ZEIT = re.compile(r"\b(?:Beginn|Start|Einlass|Doors|ab)\s*:?\s*(\d{1,2})[:.](\d{2})\s*(?:Uhr)?", re.I)
+_ZEIT = re.compile(r"\b(?:Beginn|Start|Einlass|Doors|ab|von)\s*:?\s*(\d{1,2})[:.](\d{2})\s*(?:Uhr)?", re.I)
 _ZEIT_FREI = re.compile(r"\b(\d{1,2})[:.](\d{2})\s*Uhr\b")
 
 
