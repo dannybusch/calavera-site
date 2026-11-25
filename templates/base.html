@@ -32,6 +32,7 @@
 {% endfor %}{% for f in seiteneffekte|map(attribute="name")|unique %}<link rel="stylesheet" href="{{ asset('css/seiteneffekte/' ~ f ~ '.css') }}">
 {% endfor %}<style>:root{--accent:{{ palette.accent }};--accent-rgb:{{ palette.accent_rgb }};--accent-display:{{ palette.accent_display }};--accent-text:{{ palette.accent_text }};--text:{{ textpal.text }};--text-2:{{ textpal.text_2 }};--text-3:{{ textpal.text_3 }};--muted:{{ textpal.muted }}}</style>
 {% if kalender_url %}<link rel="alternate" type="text/calendar" title="Calavera Programm" href="{{ kalender_url }}">
+{% endif %}{% if jetzt_simuliert %}<meta name="calavera-jetzt" content="{{ jetzt_simuliert }}">{# nur bei build.py --now: site.js rechnet dann mit dieser Zeit #}
 {% endif %}<script>document.documentElement.classList.add('js')</script>
 {% block head %}{% endblock %}
 </head>

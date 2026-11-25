@@ -1,20 +1,19 @@
 {# Adventskalender-Karte auf der Startseite, teilt sich den Platz mit dem Kellerfunk.
    Zeitraum: startseite_ab / startseite_bis in advent/adventskalender*.yml (site.js blendet am Stichtag ein/aus).
-   Vor dem 1.12.: Titel + Einleitung. 1.–24.12.: die Tür von heute (nur wenn sie offen ist). Danach: Titel. #}
+   Vor dem 1.12.: Titel + Einleitung. 1.–24.12.: eine sich öffnende Tür + „Öffne das Türchen von …“ (kein Song). Danach: Titel. #}
 {% set h = advent_hero %}
 <a class="adv-karte" href="{{ h.url }}{% if h.tuer %}#tuer-{{ h.tag }}{% endif %}"{% if h.versteckt %} hidden{% endif %}
    data-advent-ab="{{ h.ab }}" data-advent-bis="{{ h.bis }}">
   <span class="adv-k-top">
     <span class="label">Adventskalender</span>
-    <span class="adv-k-marke">{% if h.vor_start %}Ab 1. Dezember{% elif h.tag %}Tür {{ h.tag }}{% else %}Alle 24 Türen offen{% endif %}</span>
+    {% if not h.tag %}<span class="adv-k-marke">{% if h.vor_start %}Ab 1. Dezember{% else %}Alle 24 Türen offen{% endif %}</span>{% endif %}
   </span>
-  {% if h.tuer %}
-  <span class="adv-k-body">
-    <span class="adv-k-artist">{{ h.tuer.kuenstler }}</span>
-    <span class="adv-k-titel">{{ h.tuer.song }}</span>
-    <span class="adv-k-by">von {{ h.tuer.person }}</span>
+  {% if h.tag %}
+  {# 1.–24.12.: nichts vom Song verraten – nur eine Tür, die aufgeht, und wessen Tür es ist #}
+  <span class="adv-k-tag">
+    <span class="adv-k-tuer" aria-hidden="true"><span class="adv-k-innen"></span><span class="adv-k-front">{{ h.tag }}</span></span>
+    <span class="adv-k-satz">{% if h.tuer %}Öffne das Türchen von <strong>{{ h.tuer.person }}</strong> <span aria-hidden="true">→</span>{% else %}Tür {{ h.tag }} folgt in Kürze <span aria-hidden="true">→</span>{% endif %}</span>
   </span>
-  <span class="adv-k-cta">Tür öffnen <span aria-hidden="true">→</span></span>
   {% else %}
   <span class="adv-k-body">
     <span class="adv-k-titel">{{ h.titel_teile[0] }}{% if h.titel_teile[1] %} <span class="accent">{{ h.titel_teile[1] }}</span>{% endif %}</span>

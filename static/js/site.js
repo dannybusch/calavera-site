@@ -13,6 +13,7 @@
  *  Startseite: Adventskalender-Karte zum Stichtag ein- und ausblenden.
  *
  *  Testen:  ?now=2026-10-23T23:00  tut so, als wäre es diese Bremer Uhrzeit (die Uhr läuft von dort weiter).
+ *           Ein Build mit build.py --now macht das von selbst (meta calavera-jetzt).
  */
 (function () {
   "use strict";
@@ -57,7 +58,9 @@
   }
   function fmtTime(d) { var p = bremenParts(d); return p.hour + ":" + p.minute; }
 
-  var nowParam = new URLSearchParams(location.search).get("now");
+  /* ?now=… in der Adresse, sonst der Zeitpunkt von build.py --now (meta calavera-jetzt, gibt es nur in Testbuilds) */
+  var jetztMeta = document.querySelector('meta[name="calavera-jetzt"]');
+  var nowParam = new URLSearchParams(location.search).get("now") || (jetztMeta && jetztMeta.getAttribute("content"));
   var fixedNow = nowParam ? bremen(nowParam) : null;
   var loadedAt = Date.now();
   function now() { return fixedNow ? new Date(fixedNow.getTime() + Date.now() - loadedAt) : new Date(); }

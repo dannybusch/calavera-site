@@ -339,7 +339,8 @@ damit nicht abzulesen ist, welche Tür zu wem gehört.
 
 **Startseite:** Im Hero teilt sich eine Adventskalender-Karte den Platz mit dem Kellerfunk (Desktop: darüber,
 Tablet: daneben, Handy: darüber). Vor dem 1.12. zeigt sie Titel und Einleitung mit der Marke „Ab 1. Dezember“,
-vom 1. bis 24.12. die Tür von heute (nur wenn sie ausgefüllt ist, sonst den Titel), danach „Alle 24 Türen offen“.
+vom 1. bis 24.12. eine rote Tür mit der Zahl von heute, die beim Laden nach außen aufgeht, und „Öffne das Türchen von
+[Person]“ (Song und Künstler verrät die Karte nicht; ist die Tür noch leer: „Tür N folgt in Kürze“), danach „Alle 24 Türen offen“.
 Zeitraum in der YAML (beides optional):
 
 ```yaml

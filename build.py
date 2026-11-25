@@ -1751,6 +1751,8 @@ def abo_termine(events: list[Event], now: datetime, tage: int) -> list[Event]:
 def build(out: Path, now: datetime | None, strict: bool) -> int:
     cfg = yaml.safe_load((ROOT / "config.yml").read_text(encoding="utf-8"))
     tz = ZoneInfo(cfg["site"].get("timezone", "Europe/Berlin"))
+    # Mit --now gebaut: Zeitpunkt auch fürs Script im Browser vormerken (sonst rechnet site.js mit der echten Uhr)
+    jetzt_simuliert = now.strftime("%Y-%m-%dT%H:%M") if now else ""
     now = now or datetime.now(tz)
     print(f"Calavera · baue Website für Stand {now:%d.%m.%Y %H:%M} ({tz.key})")
 
@@ -1836,7 +1838,8 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
                        textpal=text_palette(cfg["site"].get("text", "#d1cabf")),
                        pages={p.slug: p for p in pages}, landings=landings,
                        seiteneffekte=seiteneffekte_aus(cfg, tz, now),
-                       advent_hero=advent_hinweis(advent, now) if advent else None)
+                       advent_hero=advent_hinweis(advent, now) if advent else None,
+                       jetzt_simuliert=jetzt_simuliert)
 
     # Programm-Kalender vorab erzeugen: Links darauf bekommen ?v=…, damit Handys nach einer
     # Änderung nicht die zwischengespeicherte alte Datei öffnen.
