@@ -10,6 +10,7 @@
  *     Sendungen ohne end laufen 6 Stunden). Auf jeder Seite: schmales Band oben, wenn live
  *     (oder dezent mit Countdown, wenn eine Sendung in weniger als 60 Minuten beginnt).
  *  Startseite: die Veranstaltung des Tages übernimmt ab ein paar Stunden vor Beginn den Claim.
+ *  Startseite: Adventskalender-Karte zum Stichtag ein- und ausblenden.
  *
  *  Testen:  ?now=2026-10-23T23:00  tut so, als wäre es diese Bremer Uhrzeit (die Uhr läuft von dort weiter).
  */
@@ -82,6 +83,17 @@
       if (e.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") { setMenu(false); toggle.focus(); }
     });
     nav.addEventListener("click", function (e) { if (e.target.closest("a")) setMenu(false); });
+  }
+
+  /* ---------- Adventskalender-Karte (Startseite) ---------- */
+  /* Der Build legt die Karte bis zu 7 Tage vorher versteckt ab; hier wird sie am Stichtag
+     (Bremer Datum) ein- und nach dem letzten Tag wieder ausgeblendet. */
+  var advKarten = document.querySelectorAll("[data-advent-ab]");
+  if (advKarten.length) {
+    var advHeute = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(now());
+    advKarten.forEach(function (el) {
+      el.hidden = advHeute < el.getAttribute("data-advent-ab") || advHeute > el.getAttribute("data-advent-bis");
+    });
   }
 
   /* ---------- 2. Programm ---------- */

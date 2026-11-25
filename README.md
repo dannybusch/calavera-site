@@ -333,6 +333,25 @@ Einzelne Tür direkt öffnen (auch zum Teilen): `/adventskalender/#tuer-7`.
   - { label: "Adventskalender", href: "/adventskalender/" }
 ```
 
+**Mit dabei:** Oben auf der Seite stehen alle Personen aus der Datei, auch die hinter noch geschlossenen
+Türen – ohne Doppelte und in zufälliger Reihenfolge (beim Build gemischt und im Browser bei jedem Besuch neu),
+damit nicht abzulesen ist, welche Tür zu wem gehört.
+
+**Startseite:** Im Hero teilt sich eine Adventskalender-Karte den Platz mit dem Kellerfunk (Desktop: darüber,
+Tablet: daneben, Handy: darüber). Vor dem 1.12. zeigt sie Titel und Einleitung mit der Marke „Ab 1. Dezember“,
+vom 1. bis 24.12. die Tür von heute (nur wenn sie ausgefüllt ist, sonst den Titel), danach „Alle 24 Türen offen“.
+Zeitraum in der YAML (beides optional):
+
+```yaml
+startseite_ab: 2026-11-27     # Standard: 27.11.
+startseite_bis: 2027-01-06    # Standard: 6.1. des Folgejahres
+startseite: false             # Karte ganz abschalten
+```
+
+Ein Build bis zu 7 Tage vor `startseite_ab` legt die Karte schon versteckt ab, `site.js` blendet sie am
+Stichtag ein (und nach `startseite_bis` aus) – dafür braucht es keinen eigenen Deploy. Testen mit
+`?now=2026-11-28T12:00`. Dateien: `templates/partials/advent_karte.html`, `.adv-karte` in `static/css/site.css`.
+
 Für Suchmaschinen: `CollectionPage`-JSON-LD mit den geöffneten Türen als `MusicRecording`, Eintrag in
 `sitemap.xml` und `llms.txt` (nur Geöffnetes). Ohne JavaScript stehen die geöffneten Türen als Liste unter dem
 Raster; mit JavaScript öffnen sie sich als Fenster (`static/js/adventskalender.js`, `static/css/adventskalender.css`,

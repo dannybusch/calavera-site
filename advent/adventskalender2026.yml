@@ -15,7 +15,7 @@ draft: true                                   # true = Seite wird nicht gebaut. 
 jahr: 2026
 titel: "24 Türen. 24 Lieblingssongs."         # große Überschrift (letzter Satz erscheint rot)
 kicker: "Calavera · Advent 2026"              # kleine Zeile darüber
-einleitung: ""                                # 1–3 Sätze unter der Überschrift (leer = keine)
+einleitung: "Jeden Tag ein neuer Lieblingssong von den Menschen, die für euch unvergessliche Calavera-Nächte zaubern."                                # 1–3 Sätze unter der Überschrift (leer = keine)
 seo_title: "Adventskalender 2026"             # Titel im Browser-Tab und bei Google (" · Calavera Bremen" kommt dazu)
 description: ""                               # ein Satz für Google, höchstens ca. 155 Zeichen (sonst: Einleitung)
 
@@ -39,89 +39,96 @@ description: ""                               # ein Satz für Google, höchstens
 tueren:
 
   - tag: 1                                   # Di 01.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Danger Zone"
+    kuenstler: "Kenny Loggins"
+    erschienen: "1986"
+    person: "Christine"
+    rolle: "Inhaberin"
+    text: "Die Titelmusik zu »Top Gun« - mehr 80er geht kaum"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=siwpn14IE7E"
       bandcamp: ""
+      spotify: "https://open.spotify.com/intl-de/track/7ajsDipI8WFdcTTsfGl7hm?si=f5b5fd0f828e404f"
+      tidal: "https://tidal.com/track/5119939/u"
+      apple_music: "https://music.apple.com/de/song/danger-zone/387193955"
 
   - tag: 2                                   # Mi 02.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Girls And Boys"
+    kuenstler: "Blur"
+    erschienen: 1994
+    person: "Kijote"
+    rolle: "DJ"
+    text: "Ein Song, der nahezu in jede Party passt, und mehr nach 80er als nach 90er klingt"
     links:
       youtube_music: ""
       bandcamp: ""
+      tidal: ""
+      apple_music: ""
 
   - tag: 3                                   # Do 03.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Lithium"
+    kuenstler: "Nirvana"
+    erschienen: 1991
+    person: "Pete Bo"
+    rolle: "DJ"
+    text: "Der fünfte Track des legendären »Nevermind«-Albums"
     links:
       youtube_music: ""
       bandcamp: ""
+      tidal:
+      apple_music: ""
 
   - tag: 4                                   # Fr 04.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Black"
+    kuenstler: "Pearl Jam"
+    erschienen: 1991
+    person: "Matze"
+    rolle: "DJ"
+    text: "Aus dem Debütalbum »Ten« von Pearl Jam"
     links:
       youtube_music: ""
       bandcamp: ""
 
   - tag: 5                                   # Sa 05.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Never Surrender"
+    kuenstler: "Lion"
+    erschienen: 1987
+    person: "Ärger Müller"
+    rolle: "DJ"
+    text: "Niemals aufgeben, auch nicht in schwierigen Situationen"
     links:
       youtube_music: ""
       bandcamp: ""
 
   - tag: 6                                   # So 06.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
+    song: "No More"
+    kuenstler: "Suicide Commando"
+    erschienen: 1981
+    person: "Warg"
+    rolle: "DJ"
     text: ""
     links:
       youtube_music: ""
       bandcamp: ""
 
   - tag: 7                                   # Mo 07.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Joel"
+    kuenstler: "ok.danke.tschüß"
+    erschienen: 2023
+    person: "TiM"
+    rolle: "DJ"
+    text: "Einfach ein total süßer Pop-Song - der zeigt, wie lebendig Indie-Pop aus Deutschland ist"
     links:
       youtube_music: ""
       bandcamp: ""
 
   - tag: 8                                   # Di 08.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Von Leeren Herzen"
+    kuenstler: "EA80"
+    erschienen: 1987
+    person: "Doc Grotabol"
+    rolle: "DJ"
+    text: "Der sechste Track auf dem Album »Mehr Schreie« von EA80"
     links:
       youtube_music: ""
       bandcamp: ""
@@ -138,12 +145,12 @@ tueren:
       bandcamp: ""
 
   - tag: 10                                  # Do 10.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "The grey machines"
+    kuenstler: "Chris Harms feat. VNV Nation"
+    erschienen: 2025
+    person: "TiM"
+    rolle: "DJ"
+    text: "Kann man immer wieder hören."
     links:
       youtube_music: ""
       bandcamp: ""
@@ -226,12 +233,12 @@ tueren:
       bandcamp: ""
 
   - tag: 18                                  # Fr 18.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
+    song: "I Tell My Sorrows To The Stones"
+    kuenstler: "Digital Leather"
+    erschienen: 2004
+    person: "Doc Grotabol"
     rolle: ""
-    text: ""
+    text: "Aus dem Album »Mork Teklogi« von 2004"
     links:
       youtube_music: ""
       bandcamp: ""
@@ -248,12 +255,12 @@ tueren:
       bandcamp: ""
 
   - tag: 20                                  # So 20.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "World In My Eyes"
+    kuenstler: "Depeche Mode"
+    erschienen: 1990
+    person: "Matze"
+    rolle: "DJ"
+    text: "Natürlich muss einer der »Violator«-Songs zu den Lieblingssongs von DJ Matze gehören."
     links:
       youtube_music: ""
       bandcamp: ""

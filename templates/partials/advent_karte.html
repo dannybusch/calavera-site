@@ -1,0 +1,25 @@
+{# Adventskalender-Karte auf der Startseite, teilt sich den Platz mit dem Kellerfunk.
+   Zeitraum: startseite_ab / startseite_bis in advent/adventskalender*.yml (site.js blendet am Stichtag ein/aus).
+   Vor dem 1.12.: Titel + Einleitung. 1.–24.12.: die Tür von heute (nur wenn sie offen ist). Danach: Titel. #}
+{% set h = advent_hero %}
+<a class="adv-karte" href="{{ h.url }}{% if h.tuer %}#tuer-{{ h.tag }}{% endif %}"{% if h.versteckt %} hidden{% endif %}
+   data-advent-ab="{{ h.ab }}" data-advent-bis="{{ h.bis }}">
+  <span class="adv-k-top">
+    <span class="label">Adventskalender</span>
+    <span class="adv-k-marke">{% if h.vor_start %}Ab 1. Dezember{% elif h.tag %}Tür {{ h.tag }}{% else %}Alle 24 Türen offen{% endif %}</span>
+  </span>
+  {% if h.tuer %}
+  <span class="adv-k-body">
+    <span class="adv-k-artist">{{ h.tuer.kuenstler }}</span>
+    <span class="adv-k-titel">{{ h.tuer.song }}</span>
+    <span class="adv-k-by">von {{ h.tuer.person }}</span>
+  </span>
+  <span class="adv-k-cta">Tür öffnen <span aria-hidden="true">→</span></span>
+  {% else %}
+  <span class="adv-k-body">
+    <span class="adv-k-titel">{{ h.titel_teile[0] }}{% if h.titel_teile[1] %} <span class="accent">{{ h.titel_teile[1] }}</span>{% endif %}</span>
+    {% if h.vor_start and h.einleitung %}<span class="adv-k-text">{{ h.einleitung }}</span>{% endif %}
+  </span>
+  <span class="adv-k-cta">{% if h.vor_start %}Zum Kalender{% else %}Alle Türen ansehen{% endif %} <span aria-hidden="true">→</span></span>
+  {% endif %}
+</a>

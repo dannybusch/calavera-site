@@ -4,6 +4,13 @@
    Kein Speichern im Browser; Deep-Links über #tuer-N. */
 (function () {
   "use strict";
+  // Mitwirkende bei jedem Besuch neu mischen (Reihenfolge verrät nichts über die Türen)
+  var mit = document.querySelector(".adv-mit ul");
+  if (mit) {
+    var li = Array.prototype.slice.call(mit.children);
+    for (var i = li.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = li[i]; li[i] = li[j]; li[j] = x; }
+    li.forEach(function (el) { mit.appendChild(el); });
+  }
   var grid = document.querySelector(".adv-grid"), dlg = document.querySelector(".adv-dlg");
   if (!grid || !dlg || typeof dlg.showModal !== "function") return;   // ohne <dialog>: Liste + Anker reichen
   var inhalt = dlg.querySelector(".adv-dlg-inhalt"), toast = document.querySelector(".adv-toast");
@@ -36,7 +43,6 @@
     var d = e.target.closest(".door");
     if (!d) return;
     if (d.classList.contains("is-zu")) {
-      d.classList.remove("wackeln"); void d.offsetWidth; d.classList.add("wackeln");
       toast.textContent = d.dataset.ab ? "Noch zu – diese Tür öffnet am " + d.dataset.ab : "Diese Tür folgt in Kürze";
       toast.classList.add("zeigen"); clearTimeout(tt);
       tt = setTimeout(function () { toast.classList.remove("zeigen"); }, 2600);
@@ -45,8 +51,8 @@
     e.preventDefault();
     var n = +d.dataset.tuer;
     if (d.classList.contains("is-heute") && !d.classList.contains("is-auf") && !still) {
-      d.classList.add("is-auf");                                  // erst die Tür aufklappen, dann den Inhalt zeigen
-      setTimeout(function () { zeige(n); }, 650);
+      d.classList.add("is-auf");                                  // erst schwenkt die Tür nach außen auf, dann der Inhalt
+      setTimeout(function () { zeige(n); }, 900);
       return;
     }
     zeige(n);

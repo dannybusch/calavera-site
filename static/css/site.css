@@ -164,6 +164,34 @@ a:hover { color: var(--accent-text); }
   .kf-ring { opacity: .3; transform: translate(-50%,-50%) scale(1); }
 }
 
+/* ---------- Startseite: Adventskalender teilt sich den Platz mit dem Kellerfunk ---------- */
+.hero-seite { grid-area: kf; min-width: 0; display: flex; flex-direction: column; gap: var(--gap); }
+.hero-seite .kf-card { flex: 1 1 auto; }
+.hero-seite .kf-logo img { max-height: 150px; }
+.adv-karte { flex: 0 0 auto; display: flex; flex-direction: column; gap: 18px; padding: 24px 28px 26px; border-radius: var(--radius);
+             background: var(--surface-2); box-shadow: inset 0 2px 0 var(--accent); color: var(--text); transition: background .15s ease; }
+.adv-karte[hidden] { display: none; }
+.adv-karte:hover { background: var(--surface-3); color: var(--text); }
+.adv-k-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.adv-k-marke { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--text);
+               background: var(--accent); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.adv-k-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.adv-k-artist { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+.adv-k-titel { font-family: var(--display); font-size: 40px; line-height: .95; text-transform: uppercase;
+               display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+.adv-k-titel .accent { color: var(--accent-display); }
+.adv-k-by { font-size: 15px; color: var(--text-2); }
+.adv-k-text { font-size: 15px; line-height: 1.5; color: var(--text-3); margin-top: 6px; }
+.adv-k-cta { font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-text); }
+@media (max-width: 1103px) and (min-width: 641px) {
+  .hero-seite { flex-direction: row; }
+  .hero-seite > * { flex: 1 1 0; }
+}
+@media (max-width: 640px) {
+  .adv-karte { padding: 18px; gap: 14px; }
+  .adv-k-titel { font-size: 32px; }
+}
+
 /* ---------- Infokacheln ---------- */
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--gap); }
 .fact { background: var(--surface-1); border-radius: var(--radius); padding: 22px 24px; display: flex; flex-direction: column; gap: 6px; }

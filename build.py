@@ -31,6 +31,7 @@ import http.server
 import inspect
 import json
 import os
+import random
 import re
 import shutil
 import socketserver
@@ -1484,6 +1485,9 @@ class Advent:
     tueren: dict[int, AdventTuer]
     source: Path
     in_sitemap: bool = True
+    startseite_ab: date | None = None   # Karte auf der Startseite (neben dem Kellerfunk) ab diesem Tag (Standard: 27.11.)
+    startseite_bis: date | None = None  # … bis einschließlich diesem Tag (Standard: 6.1. des Folgejahres)
+    startseite: bool = True             # false = gar keine Karte auf der Startseite
 
     @property
     def url(self) -> str:
@@ -1514,6 +1518,38 @@ def _advent_links(roh, wo: str) -> list[dict]:
                 continue
             links.append({"dienst": name, "url": url})
     return links
+
+
+def _advent_datum(roh, standard: date, wo: str) -> date:
+    if not roh:
+        return standard
+    if isinstance(roh, datetime):
+        return roh.date()
+    if isinstance(roh, date):
+        return roh
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y"):
+        try:
+            return datetime.strptime(str(roh).strip(), fmt).date()
+        except ValueError:
+            pass
+    warn(f"{wo}: \"{roh}\" ist kein Datum (2026-11-27 oder 27.11.2026) – nehme {standard:%d.%m.%Y}")
+    return standard
+
+
+def advent_hinweis(a: Advent, now: datetime) -> dict | None:
+    """Karte auf der Startseite, die sich den Platz mit dem Kellerfunk teilt. None = außerhalb des Zeitraums.
+    Liegt der Build bis zu 7 Tage vor startseite_ab, steht die Karte schon versteckt im HTML und
+    site.js blendet sie am Stichtag ein (und nach startseite_bis wieder aus) – ohne eigenen Deploy.
+    Gezeigt wird nur, was ohnehin offen ist: vor dem 1.12. Titel + Einleitung, danach die Tür von heute."""
+    heute = now.date()
+    if not a.startseite or heute > a.startseite_bis or (a.startseite_ab - heute).days > 7:
+        return None
+    start, ende = date(a.jahr, 12, 1), date(a.jahr, 12, 24)
+    tag = (heute - start).days + 1 if start <= heute <= ende else 0
+    t = a.tueren.get(tag) if tag else None
+    return {"url": a.url, "ab": a.startseite_ab.isoformat(), "bis": a.startseite_bis.isoformat(),
+            "versteckt": heute < a.startseite_ab, "vor_start": heute < start, "tag": tag,
+            "tuer": t if t and t.fertig else None, "titel_teile": a.titel_teile, "einleitung": a.einleitung}
 
 
 def load_advent(belegt: set[str]) -> Advent | None:
@@ -1558,7 +1594,10 @@ def load_advent(belegt: set[str]) -> Advent | None:
                 einleitung=einleitung, seo_title=str(d.get("seo_title") or f"Adventskalender {jahr}").strip(),
                 description=str(d.get("description") or "").strip() or shorten(einleitung, 160)
                             or f"Der Calavera-Adventskalender {jahr}: jeden Tag ein Lieblingssong aus dem Team und von den DJs.",
-                tueren=tueren, source=path, in_sitemap=not d.get("noindex", False))
+                tueren=tueren, source=path, in_sitemap=not d.get("noindex", False),
+                startseite_ab=_advent_datum(d.get("startseite_ab"), date(jahr, 11, 27), f"advent/{path.name}: startseite_ab"),
+                startseite_bis=_advent_datum(d.get("startseite_bis"), date(jahr + 1, 1, 6), f"advent/{path.name}: startseite_bis"),
+                startseite=d.get("startseite", True) is not False)
         except Exception as exc:  # noqa: BLE001
             warn(f"advent/{path.name}: {exc} – Seite wird übersprungen")
     return None
@@ -1583,7 +1622,13 @@ def advent_stand(a: Advent, now: datetime) -> dict:
                      "auf der Seite steht „folgt in Kürze“")
         kacheln[tag] = k
     vor_start = heute < date(a.jahr, 12, 1)
+    # Mitwirkende: alle Personen aus der Datei (auch hinter noch geschlossenen Türen), ohne Doppelte und
+    # in zufälliger Reihenfolge – so ist nicht abzulesen, welche Tür zu wem gehört.
+    # (adventskalender.js mischt bei jedem Besuch noch einmal neu.)
+    mitwirkende = sorted({t.person.strip() for t in a.tueren.values() if t.person.strip()})
+    random.SystemRandom().shuffle(mitwirkende)
     return {"kacheln": [kacheln[t] for t in ADVENT_MISCHUNG], "offen": offen, "vor_start": vor_start,
+            "mitwirkende": mitwirkende,
             "alle_offen": heute >= date(a.jahr, 12, 24)}
 
 
@@ -1790,7 +1835,8 @@ def build(out: Path, now: datetime | None, strict: bool) -> int:
                        palette=accent_palette(cfg["site"].get("accent", "#b3122e")),
                        textpal=text_palette(cfg["site"].get("text", "#d1cabf")),
                        pages={p.slug: p for p in pages}, landings=landings,
-                       seiteneffekte=seiteneffekte_aus(cfg, tz, now))
+                       seiteneffekte=seiteneffekte_aus(cfg, tz, now),
+                       advent_hero=advent_hinweis(advent, now) if advent else None)
 
     # Programm-Kalender vorab erzeugen: Links darauf bekommen ?v=…, damit Handys nach einer
     # Änderung nicht die zwischengespeicherte alte Datei öffnen.

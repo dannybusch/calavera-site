@@ -31,23 +31,28 @@
     <span class="chip">Neue Tür jeden Tag kurz nach Mitternacht</span>
     {% endif %}
   </div>
+  {% if mitwirkende %}
+  <div class="adv-mit">
+    <p class="label">Mit dabei</p>
+    <ul>{% for n in mitwirkende %}<li>{{ n }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
 </section>
 
 <section class="wrap" aria-label="Türchen">
   <div class="adv-grid">
     {% for k in kacheln %}
-    {% set nr = "%02d"|format(k.tag) %}
     {% if k.tuer %}
     {% set t = k.tuer %}
     <a class="door is-{{ k.zustand }}{% if k.zustand == 'offen' %} is-auf{% endif %} {{ k.gross }}" href="#tuer-{{ k.tag }}" data-tuer="{{ k.tag }}"
        aria-label="Tür {{ k.tag }}{% if k.zustand == 'heute' %}, heute{% endif %}: {{ t.song }} – {{ t.kuenstler }}">
-      <span class="door-in" aria-hidden="true"><span class="di-num">{{ nr }}</span><span class="di-song">{{ t.song }}</span><span class="di-by">von {{ t.person }}</span><span class="di-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg> Anhören</span></span>
-      <span class="door-front" aria-hidden="true"><span class="df-num">{{ k.tag }}</span><span class="df-lab">{% if k.zustand == 'heute' %}Heute · Öffnen{% endif %}</span></span>
+      <span class="door-in" aria-hidden="true"><span class="di-num">{{ "%02d"|format(k.tag) }}</span><span class="di-artist">{{ t.kuenstler }}</span><span class="di-song">{{ t.song }}</span><span class="di-by">von {{ t.person }}</span></span>
+      <span class="door-front" aria-hidden="true"><span class="df-num">{{ k.tag }}</span><span class="df-lab">Heute</span></span>
     </a>
     {% else %}
-    <button class="door is-zu {{ k.gross }}" type="button" data-ab="{% if k.zustand == 'folgt' %}{% else %}{{ k.wt }} {{ k.datum }}{% endif %}"
+    <button class="door is-zu {{ k.gross }}" type="button" data-ab="{% if k.zustand != 'folgt' %}{{ k.wt }} {{ k.datum }}{% endif %}"
        aria-label="Tür {{ k.tag }}, {% if k.zustand == 'folgt' %}folgt in Kürze{% else %}öffnet am {{ k.datum }}{% endif %}">
-      <span class="door-front" aria-hidden="true"><span class="df-num">{{ k.tag }}</span><span class="df-lab"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>{% if k.zustand == 'folgt' %}Folgt<span class="wt"> in Kürze</span>{% else %}<span class="wt">ab {{ k.wt }} </span>{{ k.datum }}{% endif %}</span></span>
+      <span class="door-front" aria-hidden="true"><span class="df-num">{{ k.tag }}</span><span class="df-lab">{% if k.zustand == 'folgt' %}Folgt{% else %}{{ k.datum }}{% endif %}</span></span>
     </button>
     {% endif %}
     {% endfor %}
@@ -59,31 +64,18 @@
   <h2 class="h-section h-section--sm" id="adv-liste-titel">Bisher geöffnet</h2>
   {% for t in offen|reverse %}
   <article class="adv-tuer" id="tuer-{{ t.tag }}" data-tuer="{{ t.tag }}" aria-labelledby="tuer-{{ t.tag }}-song">
-    <div class="adv-side" aria-hidden="true">
-      <img src="{{ asset('img/calavera_logo.svg') }}" alt="" width="1024" height="789" loading="lazy">
-      <span class="as-lab">Türchen · {{ t.datum|wd }} {{ "%02d.12."|format(t.tag) }}</span>
-      <span class="as-num">{{ "%02d"|format(t.tag) }}</span>
+    <p class="ab-kopf"><span class="ab-nr">Tür {{ "%02d"|format(t.tag) }}</span> · {{ t.datum|wd }} {{ "%02d.12."|format(t.tag) }}</p>
+    <h3 class="ab-song" id="tuer-{{ t.tag }}-song">{{ t.song }}</h3>
+    <p class="ab-artist">{{ t.kuenstler }}{% if t.erschienen %} · {{ t.erschienen }}{% endif %}</p>
+    <p class="ab-wer"><span class="label">Ausgewählt von</span> <strong>{{ t.person }}</strong>{% if t.rolle %} <span class="muted">· {{ t.rolle }}</span>{% endif %}</p>
+    {% if t.text_html %}<div class="ab-text">{{ t.text_html|safe }}</div>{% endif %}
+    {% if t.links %}
+    <div class="ab-links" aria-label="Anhören bei">
+      {% for l in t.links %}
+      <a class="btn {{ 'btn-red' if loop.first else 'btn-ghost' }}" href="{{ l.url }}" target="_blank" rel="noopener">{{ l.dienst }} <span aria-hidden="true">↗</span></a>
+      {% endfor %}
     </div>
-    <div class="adv-body">
-      <h3 class="ab-song" id="tuer-{{ t.tag }}-song">{{ t.song }}</h3>
-      <p class="ab-artist">{{ t.kuenstler }}{% if t.erschienen %} · {{ t.erschienen }}{% endif %}</p>
-      <div class="ab-who">
-        <span class="ab-ava" aria-hidden="true">{{ t.person[:1]|upper }}</span>
-        <p><span class="label">Ausgewählt von</span><strong>{{ t.person }}</strong>{% if t.rolle %} <span class="muted">· {{ t.rolle }}</span>{% endif %}</p>
-      </div>
-      {% if t.text_html %}<div class="ab-text">{{ t.text_html|safe }}</div>{% endif %}
-      {% if t.links %}
-      <div class="ab-hoeren">
-        <p class="label">Anhören bei</p>
-        <div class="ab-links">
-          {% for l in t.links %}
-          <a class="btn {{ 'btn-red' if loop.first else 'btn-ghost' }}" href="{{ l.url }}" target="_blank" rel="noopener">
-            {% if loop.first %}<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>{% else %}<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>{% endif %}{{ l.dienst }}</a>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-    </div>
+    {% endif %}
   </article>
   {% endfor %}
 </section>

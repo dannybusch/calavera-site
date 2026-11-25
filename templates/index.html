@@ -29,7 +29,14 @@
     </a>
   </div>
 
+  {% if advent_hero %}
+  <div class="hero-seite">
+    {% include "partials/advent_karte.html" %}
+    {% include "partials/kellerfunk.html" %}
+  </div>
+  {% else %}
   {% include "partials/kellerfunk.html" %}
+  {% endif %}
   {# Startseiten-Übernahme: je eine Fassung der nächsten Veranstaltungen; site.js nimmt die, die in
      weniger als {{ uebernahme_h }} Stunden beginnt (oder gerade läuft), und setzt sie an die Stelle des Claims #}
   {% for ev in uebernahme %}<template class="takeover-vorlage" data-start="{{ ev.start|iso }}" data-end="{{ ev.end|iso }}" data-stunden="{{ uebernahme_h }}">{{ tile(ev, false, true, true) }}</template>
