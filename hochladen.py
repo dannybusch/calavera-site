@@ -4,7 +4,13 @@ Calavera Bremen – dist/ per SFTP auf den Server spiegeln (ersetzt lftp, brauch
 
   - lädt nur hoch, was neu ist oder dessen Inhalt sich geändert hat: Prüfsummen der hochgeladenen Dateien
     liegen auf dem Server in .calavera-pruefsummen.json (fehlt die Datei, wird einmal alles hochgeladen),
-  - löscht auf dem Server, was es in dist/ nicht mehr gibt,
+  - lädt in Stufen hoch, damit nie eine Seite online ist, die auf noch Fehlendes verweist:
+    1. Bilder & Dateien, 2. Veranstaltungsseiten, 3. Übersichtsseiten (zuletzt /programm/ und Startseite),
+    4. sitemap.xml, llms.txt, Kalender & Co. – klappt in einer Stufe etwas nicht, bleiben die späteren aus,
+  - ersetzt jede Datei in einem Schritt (Zwischenname + Umbenennen): nie eine halb hochgeladene Seite online,
+  - sichert den Stand zwischendurch (nach jeder Stufe, sonst jede Minute): nach einem Verbindungsabbruch
+    macht der nächste Versuch dort weiter, statt alles noch einmal hochzuladen,
+  - löscht auf dem Server, was es in dist/ nicht mehr gibt – erst nach dem Hochladen, Seiten vor ihren Bildern,
   - lässt .htaccess (überall), .well-known/ und _behalten/ auf dem Server unangetastet,
   - prüft den Server-Schlüssel gegen ~/.ssh/known_hosts (wie lftp mit StrictHostKeyChecking=yes),
   - setzt in sitemap.xml <lastmod> je Seite auf den Zeitpunkt, an dem sich ihr Inhalt zuletzt geändert hat
@@ -176,6 +182,50 @@ def sitemap_aktualisieren(quelle: Path, alt: dict, jetzt: str) -> tuple[dict, li
     return neu, geaendert + entfernt
 
 
+# ------------------------------------------------------------------ Reihenfolge
+# Hochgeladen wird in Stufen, damit online nie eine Seite steht, die auf etwas noch Fehlendes verweist:
+#   1. Bilder & Dateien      – static/, media/, termin.ics der Veranstaltungen … (alles außer HTML)
+#   2. Veranstaltungsseiten  – /programm/<slug>/ und /intern/<slug>/
+#   3. Übersichtsseiten      – Landingpages, Archiv, feste Seiten …, zum Schluss /programm/ und die Startseite
+#   4. Verzeichnisse         – sitemap.xml, llms.txt, robots.txt, kalender.ics & Abos, build.json
+# Gelöscht wird erst danach und in umgekehrter Folge (erst Seiten, dann ihre Bilder).
+STUFEN = ("Bilder & Dateien", "Veranstaltungsseiten", "Übersichtsseiten", "Verzeichnisse")
+EVENT_ORDNER = ("programm", "intern")             # /<ordner>/<slug>/index.html = eine Veranstaltung
+KEINE_VERANSTALTUNG = ("archiv",)                 # /programm/archiv/ ist eine Übersicht
+GANZ_ZULETZT = ("programm/index.html", "index.html")   # innerhalb der Übersichtsseiten zuletzt, in dieser Folge
+NEU_ENDUNG = ".calavera-neu"                      # Zwischenname beim Hochladen (danach umbenannt)
+ZWISCHENSTAND_SEK = 60                            # spätestens so oft die Prüfsummen auf dem Server sichern
+
+
+def stufe(rel: str) -> int:
+    teile = rel.split("/")
+    ist_html = rel.endswith(".html")
+    veranstaltung = len(teile) >= 3 and teile[0] in EVENT_ORDNER and teile[1] not in KEINE_VERANSTALTUNG
+    if len(teile) == 1 and not ist_html:
+        return 3                                  # sitemap.xml, llms.txt, robots.txt, kalender.ics, build.json …
+    if not ist_html:
+        # Abo-Kalender der Landingpages (/dark/calavera-dark.ics) verweisen auf Veranstaltungsseiten → zuletzt;
+        # termin.ics einer Veranstaltung wird von ihrer Seite verlinkt → vorher
+        return 3 if rel.endswith(".ics") and not veranstaltung else 0
+    return 1 if veranstaltung else 2
+
+
+def reihenfolge(rel: str) -> tuple:
+    zuletzt = GANZ_ZULETZT.index(rel) + 1 if rel in GANZ_ZULETZT else 0
+    return stufe(rel), zuletzt, rel
+
+
+class StufenFehler(Exception):
+    """Einzelne Dateien ließen sich nicht hochladen – spätere Stufen wurden bewusst ausgelassen."""
+
+
+def verbindung_steht(sftp) -> bool:
+    try:
+        return bool(sftp.get_channel().get_transport().is_active())
+    except AttributeError:   # (Test-Ersatz ohne Kanal)
+        return True
+
+
 def spiegeln(quelle: Path, ziel: str, probe: bool, alles: bool = False, liste: Path | None = None) -> dict:
     client, sftp = verbinden()
     try:
@@ -197,7 +247,24 @@ def spiegeln(quelle: Path, ziel: str, probe: bool, alles: bool = False, liste: P
             liste.write_text("".join(u + "\n" for u in geaendert), encoding="utf-8")
         if not summen and not alles and ent_dateien:
             print(f"  (noch keine {PRUEFSUMMEN} auf dem Server – dieses Mal wird alles hochgeladen)")
-        zahl = {"hoch": 0, "gleich": 0, "geloescht": 0, "ordner": 0}
+        zahl = {"hoch": 0, "gleich": 0, "geloescht": 0, "ordner": 0, "warnungen": 0}
+
+        # Was auf dem Server steht und wie es zuletzt hochgeladen wurde. Wird beim Hochladen fortgeschrieben und
+        # zwischendurch gesichert: Reißt die Verbindung ab, macht der nächste Versuch dort weiter.
+        stand = {rel: s for rel, s in summen.items() if rel in ent_dateien}
+        zu_tun = []
+        for rel, (groesse, summe) in lok_dateien.items():
+            alt = ent_dateien.get(rel)
+            # gleich = auf dem Server vorhanden, gleiche Größe, und zuletzt mit genau diesem Inhalt hochgeladen
+            if alt and alt[0] == groesse and summen.get(rel) == summe:
+                zahl["gleich"] += 1
+            else:
+                zu_tun.append(rel)
+        zu_tun.sort(key=reihenfolge)
+        weg = sorted(set(ent_dateien) - set(lok_dateien), key=lambda r: (-stufe(r), r))
+
+        if not zu_tun and not weg:
+            print("  Alles aktuell – nichts hochzuladen.")
 
         for rel in sorted(lok_ordner - ent_ordner, key=lambda r: r.count("/")):
             print(f"  Ordner anlegen: {rel}")
@@ -205,25 +272,86 @@ def spiegeln(quelle: Path, ziel: str, probe: bool, alles: bool = False, liste: P
             if not probe:
                 sftp.mkdir(posixpath.join(ziel, rel))
 
-        neue_summen = {}
-        for rel, (groesse, summe) in lok_dateien.items():
-            alt = ent_dateien.get(rel)
-            # gleich = auf dem Server vorhanden, gleiche Größe, und zuletzt mit genau diesem Inhalt hochgeladen
-            if alt and alt[0] == groesse and summen.get(rel) == summe:
-                zahl["gleich"] += 1
-                neue_summen[rel] = summe
-                continue
-            print(f"  {'Neu' if not alt else 'Aktualisieren'}: {rel}")
-            zahl["hoch"] += 1
-            if not probe:
-                sftp.put(str(quelle / rel), posixpath.join(ziel, rel), confirm=True)
-                neue_summen[rel] = summe
+        gesichert = [time.monotonic(), dict(stand)]
 
-        for rel in sorted(set(ent_dateien) - set(lok_dateien)):
+        def sichern(immer: bool = False) -> None:
+            if probe or stand == gesichert[1]:
+                return
+            if immer or time.monotonic() - gesichert[0] >= ZWISCHENSTAND_SEK:
+                pruefsummen_schreiben(sftp, ziel, stand, seiten_alt)   # Seiten-Stand erst, wenn alles oben ist
+                gesichert[:] = [time.monotonic(), dict(stand)]
+
+        atomar = [True]   # Server kann posix-rename (OpenSSH) – sonst direkt überschreiben
+
+        def hochladen(rel: str) -> None:
+            lokal, entfernt = str(quelle / rel), posixpath.join(ziel, rel)
+            stand.pop(rel, None)   # ab jetzt ist offen, was auf dem Server steht
+            if atomar[0]:
+                # erst unter Zwischennamen, dann in einem Schritt ersetzen: nie eine halbe Seite online
+                tmp = entfernt + NEU_ENDUNG
+                sftp.put(lokal, tmp, confirm=True)
+                try:
+                    sftp.posix_rename(tmp, entfernt)
+                    return
+                except OSError:
+                    if not verbindung_steht(sftp):
+                        raise
+                    atomar[0] = False
+                    print("    (Server kann nicht in einem Schritt ersetzen – lade ab jetzt direkt hoch)")
+                    try:
+                        sftp.remove(tmp)
+                    except OSError:
+                        pass
+            sftp.put(lokal, entfernt, confirm=True)
+
+        for nr, name in enumerate(STUFEN):
+            dateien = [r for r in zu_tun if stufe(r) == nr]
+            if not dateien:
+                continue
+            print(f"  ── {nr + 1}/{len(STUFEN)} {name}: {len(dateien)} Datei(en)")
+            fehler = []
+            for rel in dateien:
+                print(f"  {'Aktualisieren' if rel in ent_dateien else 'Neu'}: {rel}")
+                zahl["hoch"] += 1
+                if probe:
+                    continue
+                try:
+                    hochladen(rel)
+                except OSError as e:
+                    if not verbindung_steht(sftp):
+                        raise   # Verbindung weg → neuer Versuch ab dem letzten Zwischenstand
+                    print(f"    FEHLER beim Hochladen: {e.__class__.__name__}: {e}")
+                    fehler.append(rel)
+                    zahl["hoch"] -= 1
+                    continue
+                stand[rel] = lok_dateien[rel][1]
+                sichern()
+            if fehler:
+                sichern(immer=True)
+                rest = len([r for r in zu_tun if stufe(r) > nr])
+                raise StufenFehler(
+                    f"{len(fehler)} Datei(en) in Stufe „{name}“ nicht hochgeladen ({', '.join(fehler[:5])}"
+                    f"{' …' if len(fehler) > 5 else ''}). Abgebrochen, damit nichts auf Fehlendes verweist: "
+                    f"{rest} Datei(en) späterer Stufen und alle Löschungen ausgelassen. Erledigtes ist gemerkt.")
+            sichern(immer=True)   # nach jeder Stufe: Grundlage für die nächste steht sicher auf dem Server
+
+        for rel in weg:
             print(f"  Löschen: {rel}")
             zahl["geloescht"] += 1
-            if not probe:
+            if probe:
+                continue
+            try:
                 sftp.remove(posixpath.join(ziel, rel))
+            except FileNotFoundError:
+                pass
+            except OSError as e:
+                if not verbindung_steht(sftp):
+                    raise
+                print(f"    WARNUNG: nicht gelöscht ({e.__class__.__name__}: {e})")
+                zahl["geloescht"] -= 1
+                zahl["warnungen"] += 1
+                continue
+            stand.pop(rel, None)
         for rel in sorted(ent_ordner - lok_ordner, key=lambda r: -r.count("/")):
             print(f"  Ordner löschen: {rel}")
             if not probe:
@@ -232,8 +360,8 @@ def spiegeln(quelle: Path, ziel: str, probe: bool, alles: bool = False, liste: P
                 except OSError:
                     print("    (nicht leer – enthält ausgenommene Dateien, bleibt stehen)")
         zahl["seiten"] = len(geaendert)
-        if not probe and (zahl["hoch"] or zahl["geloescht"] or neue_summen != summen or seiten != seiten_alt):
-            pruefsummen_schreiben(sftp, ziel, neue_summen, seiten)
+        if not probe and (stand != summen or seiten != seiten_alt):
+            pruefsummen_schreiben(sftp, ziel, stand, seiten)
         return zahl
     finally:
         sftp.close()
@@ -256,14 +384,20 @@ def main() -> int:
     if ziel in ("~", "~/") or ziel.startswith("~/"):   # wie bei lftp: "~" = Startordner des Zugangs
         ziel = ziel[2:] or "."
     ziel = ziel.rstrip("/") or "/"
-    for versuch in range(1, 4):   # Spiegeln ist wiederholbar – nach Verbindungsabbruch einfach von vorn
-        try:
-            zahl = spiegeln(quelle, ziel, args.probe, args.alles,
+    alles = args.alles
+    for versuch in range(1, 4):   # Spiegeln ist wiederholbar – nach Verbindungsabbruch macht es dort weiter,
+        try:                      # wo der letzte gesicherte Zwischenstand war
+            zahl = spiegeln(quelle, ziel, args.probe, alles,
                             Path(args.geaendert_liste) if args.geaendert_liste else None)
             print(("Probelauf: " if args.probe else "Fertig: ")
                   + f"{zahl['hoch']} hochgeladen, {zahl['geloescht']} gelöscht, {zahl['ordner']} Ordner neu, {zahl['gleich']} unverändert"
                   + f", {zahl['seiten']} Seite(n) mit neuem Inhalt")
+            if zahl["warnungen"]:
+                hinweis = f"{zahl['warnungen']} Datei(en) auf dem Server ließen sich nicht löschen (siehe oben)"
+                print(f"::warning::{hinweis}" if os.environ.get("GITHUB_ACTIONS") else f"WARNUNG: {hinweis}")
             return 0
+        except StufenFehler as e:
+            sys.exit(f"FEHLER: {e}")
         except Exception as e:   # noqa: BLE001
             import paramiko
             if isinstance(e, paramiko.AuthenticationException):
@@ -272,7 +406,9 @@ def main() -> int:
                 sys.exit(f"FEHLER: Server-Schlüssel stimmt nicht mit known_hosts überein – Abbruch ({e})")
             if not isinstance(e, (OSError, EOFError, paramiko.SSHException)) or versuch == 3:
                 raise
-            print(f"Verbindung unterbrochen ({e.__class__.__name__}: {e}) – neuer Versuch {versuch + 1}/3 …")
+            print(f"Verbindung unterbrochen ({e.__class__.__name__}: {e}) – neuer Versuch {versuch + 1}/3, "
+                  "macht beim letzten Zwischenstand weiter …")
+            alles = False   # bei --alles: schon Hochgeladenes steht im Zwischenstand, nicht noch einmal
             time.sleep(5 * versuch)
     return 1
 

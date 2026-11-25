@@ -602,6 +602,21 @@ Ordner und Dateien stimmen. Danach von Hand ohne Häkchen starten oder einfach p
 deren Inhalt sich geändert hat: die Prüfsummen merkt es sich auf dem Server in `.calavera-pruefsummen.json`
 (nicht löschen – sonst wird beim nächsten Mal einmal alles hochgeladen). Beim Start von Hand gibt es das Häkchen
 „Alles neu hochladen“. Lokal: `SFTP_HOST=… SFTP_USER=… SFTP_PASSWORD=… python hochladen.py dist/ <ordner> --probe`.
+
+Damit nie eine Seite online ist, die auf noch Fehlendes verweist, lädt `hochladen.py` **in Stufen** hoch:
+
+1. **Bilder & Dateien** – `static/`, `media/`, die `termin.ics` der Veranstaltungen (alles außer HTML)
+2. **Veranstaltungsseiten** – `/programm/<slug>/` und `/intern/<slug>/`
+3. **Übersichtsseiten** – Landingpages, Archiv, feste Seiten …, ganz zum Schluss `/programm/` und die Startseite
+4. **Verzeichnisse** – `sitemap.xml`, `llms.txt`, `robots.txt`, `kalender.ics` und Abos, `build.json`
+
+Gelöscht wird erst danach (erst Seiten, dann ihre Bilder). Jede Datei geht zuerst unter einem Zwischennamen
+(`….calavera-neu`) hoch und ersetzt dann die alte in einem Schritt – Besucher sehen nie eine halbe Seite.
+Lässt sich eine Datei nicht hochladen, läuft ihre Stufe noch zu Ende, die späteren Stufen und das Löschen
+bleiben aber aus und der Lauf wird rot; beim nächsten Lauf geht es mit dem Fehlenden weiter. Der Stand wird
+nach jeder Stufe und spätestens jede Minute auf dem Server gesichert: Reißt die Verbindung ab, lädt der
+nächste Versuch nicht alles noch einmal hoch. Lässt sich eine alte Datei nicht löschen, gibt es nur eine
+Warnung. Tests (ohne Server): `python -m pytest tests/hochladen -q`.
 Die frühere lftp-Variante steht auskommentiert im Workflow.
 
 Hinweise: GitHub startet geplante Läufe manchmal mit Verzögerung. In **öffentlichen** Repositories

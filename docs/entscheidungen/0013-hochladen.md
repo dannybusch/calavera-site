@@ -14,5 +14,16 @@ lftp-Installation hing minutenlang. Danny: „ätzend, wenn das so ewig dauert�
   Workflow-Häkchen „Alles neu hochladen“.
 - lftp-Variante bleibt auskommentiert im Workflow.
 
+## Nachtrag 25.11.2026 – Reihenfolge und Fehler
+Danny: erst die Bilder, dann die Einzelseiten der Events, dann die Programmseiten.
+- Hochgeladen wird in Stufen: 1. Bilder & Dateien (alles außer HTML), 2. Veranstaltungsseiten
+  (`/programm/<slug>/`, `/intern/<slug>/`), 3. Übersichtsseiten (zuletzt `/programm/` und Startseite),
+  4. `sitemap.xml`, `llms.txt`, `robots.txt`, Kalender-Dateien, `build.json`. Gelöscht wird danach, Seiten vor Bildern.
+- Jede Datei geht unter Zwischennamen (`….calavera-neu`) hoch und wird dann per posix-rename ersetzt – nie eine
+  halbe Seite online. Kann der Server das nicht, direkt überschreiben (wie vorher).
+- Schlägt eine Datei fehl, läuft die Stufe zu Ende, spätere Stufen und Löschungen bleiben aus (Lauf wird rot).
+- Zwischenstand der Prüfsummen nach jeder Stufe und spätestens jede Minute: nach Verbindungsabbruch macht der
+  nächste Versuch dort weiter. Nicht löschbare Dateien: Warnung (gelb), kein Abbruch.
+
 ## Folgen
 Optional per `.htaccess` sperrbar: `<Files ".calavera-pruefsummen.json">Require all denied</Files>`.

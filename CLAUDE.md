@@ -48,6 +48,7 @@ python hochladen.py dist/ <zielordner> --probe                       # SFTP-Spie
 python indexnow.py geaendert.txt --probe                             # geänderte Seiten an IndexNow (Bing & Co.)
 python planer.py [--bis 2027-06] [--nur modernes] [--schreiben]      # Planungskalender: Fr/Sa-Termine anderer Locations (ohne --schreiben Probelauf)
 python -m pytest tests/planer -q                                     # Tests Planungskalender (ohne Netz)
+python -m pytest tests/hochladen -q                                  # Tests hochladen.py (Reihenfolge, Fehler; ohne Server)
 ```
 
 Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Hochladen nur mit ausdrücklichem Schalter.
@@ -68,7 +69,7 @@ Alle Scripts: `--help`, und `--now "JJJJ-MM-TT HH:MM"` zum Simulieren. Senden/Ho
 | `media.py` + `media/vorlagen/` | Wochenbild in 3 Vorlagen: `programmzettel`, `plakatwand`, `wochenstreifen` |
 | `presse.py` | Wochen-Pressemitteilung als Mail (SMTP) an Danny zum Weiterleiten |
 | `rausgegangen.py` | Events per Rausgegangen-API v2 eintragen (Upsert über `mapping_id` `calavera-<slug>`) |
-| `hochladen.py` | SFTP-Spiegel mit Prüfsummen (`.calavera-pruefsummen.json` auf dem Server); setzt `<lastmod>` in sitemap.xml, Liste geänderter Seiten |
+| `hochladen.py` | SFTP-Spiegel mit Prüfsummen (`.calavera-pruefsummen.json` auf dem Server); setzt `<lastmod>` in sitemap.xml, Liste geänderter Seiten. Reihenfolge in Stufen (`stufe()`): Bilder/Dateien → Veranstaltungsseiten → Übersicht (zuletzt `/programm/`, `/`) → sitemap/llms/ics; Fehler stoppt vor der nächsten Stufe; Zwischenname `.calavera-neu` + posix-rename (0013) |
 | `indexnow.py` | geänderte Seiten an IndexNow melden (Bing, Yandex, Seznam …); Google liest die Sitemap |
 | `planer.py` + `planer/` | Planungskalender (0021): ein Plugin pro Quelle in `planer/quellen/`, nur Fr/Sa. **Sheet B (Dark-Kalender) nie beschreiben**, in Sheet A nur eigene Spalten + fehlende Fr/Sa-Zeilen |
 | `.github/workflows/` | `deploy` (Push + täglich), `rausgegangen` (nach Deploy), `presse` (Mo früh), `reels`, `media` (von Hand) |
