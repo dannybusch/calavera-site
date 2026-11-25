@@ -4,7 +4,7 @@ start: "2026-11-27 22:00"
 djs: ["DJ TiM"]
 genres: ["Indie", "Pop", "Punk", "Hip Hop", "Electro", "2010s", "2020s"]
 #tags: ["Rauchfrei"]
-teaser: "Viel neue Musik seit 2010 - Musik, die einfach Spaß macht und sich gut feiern lässt."
+teaser: "Viel neue Musik seit 2010 - Musik der neuen Generation, die einfach Spaß macht und sich gut feiern lässt - und manchmal auch ein wenig frech ist"
 fans_of: ["Soffie", "DEVO", "K.I.Z.", "Avicii", "Neonschwarz", "Boyz Noize", "Sookee", "Kaffkiez", "SALO", "blond", "Tiga", "Peter Fox", "Jennifer Rostock", "Schnipo Schranke", "Großstadtgeflüster", "Egotronic", "Das Lumpenpack", "Alenna Rose", "Ikkimel", "The Dare", "Team Scheiße", "Mia", "AnnenMayKantereit", "Paula Carolina", "ok.danke.tschüß", "Anamanaguchi", "Charli XCX", "Nina Chuba", "Deichkind", "SXTN", "The Black Eyed Peas", "u.v.a.m."]
 effekte: [heartbubble]
 ---
