@@ -18,7 +18,7 @@ kicker: "Calavera · Advent 2026"              # kleine Zeile darüber
 einleitung: "Jeden Tag ein neuer Lieblingssong von den Menschen, die für euch unvergessliche Calavera-Nächte zaubern."                                # 1–3 Sätze unter der Überschrift (leer = keine)
 seo_title: "Musik Adventskalender 2026 aus dem Calavera Bremen"             # Titel im Browser-Tab und bei Google (" · Calavera Bremen" kommt dazu)
 description: ""                               # ein Satz für Google, höchstens ca. 155 Zeichen (sonst: Einleitung)
-startseite_ab: 2026-11-27
+startseite_ab: 2026-11-26
 startseite_bis: 2026-12-30
 
 # So sieht eine ausgefüllte Tür aus (Werte hier nur Beispiele für das Format):
