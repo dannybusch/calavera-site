@@ -112,15 +112,15 @@ tueren:
       apple_music: "https://music.apple.com/de/album/never-surrender/1481509407?i=1481509467"
 
   - tag: 6                                   # So 06.12.
-    song: "No More"
-    kuenstler: "Suicide Commando"
+    song: "Suicide Commando"
+    kuenstler: "No More"
     erschienen: 1981
     person: "Warg"
     rolle: "DJ"
-    text: ""
+    text: "Nach dem Titel dieses Liedes hat sich eine andere Band später benannt"
     links:
       youtube_music: ""
-      bandcamp: ""
+      bandcamp: "https://nomore.bandcamp.com/track/suicide-commando"
 
   - tag: 7                                   # Mo 07.12.
     song: "Joel"
