@@ -10,7 +10,7 @@
 #  Texte in "Anführungszeichen" setzen (wegen : und # im Text).
 # ------------------------------------------------------------------
 
-draft: true                                   # true = Seite wird nicht gebaut. Zum Start auf false setzen
+draft: false                                   # true = Seite wird nicht gebaut. Zum Start auf false setzen
                                               #   (und Menüpunkt in config.yml → navigation ergänzen)
 jahr: 2026
 titel: "24 Türen. 24 Lieblingssongs."         # große Überschrift (letzter Satz erscheint rot)
@@ -53,6 +53,7 @@ tueren:
       spotify: "https://open.spotify.com/intl-de/track/7ajsDipI8WFdcTTsfGl7hm?si=f5b5fd0f828e404f"
       tidal: "https://tidal.com/track/5119939/u"
       apple_music: "https://music.apple.com/de/song/danger-zone/387193955"
+      deezer: "https://www.deezer.com/track/7675051"
 
   - tag: 2                                   # Mi 02.12.
     song: "Girls And Boys"
@@ -62,10 +63,12 @@ tueren:
     rolle: "DJ"
     text: "Ein Song, der nahezu in jede Party passt, und mehr nach 80er als nach 90er klingt"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=LCp77Yf54_k"
       bandcamp: ""
-      tidal: ""
-      apple_music: ""
+      tidal: "https://tidal.com/track/433967205"
+      apple_music: "https://music.apple.com/de/album/girls-and-boys/699665183?i=699665410"
+      spotify: "https://open.spotify.com/track/2qrL1YF9aA865b6SKhLZ78"
+      deezer: "https://www.deezer.com/track/3102138"
 
   - tag: 3                                   # Do 03.12.
     song: "Lithium"
@@ -75,10 +78,11 @@ tueren:
     rolle: "DJ"
     text: "Der fünfte Track des legendären »Nevermind«-Albums"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=553VogDv5DI"
       bandcamp: ""
       tidal:
-      apple_music: ""
+      apple_music: "https://music.apple.com/de/album/lithium/1440783617?i=1440783764"
+      spotify: "https://open.spotify.com/track/5vHLwhxxlGzmClMcxRRFPr"
 
   - tag: 4                                   # Fr 04.12.
     song: "Black"
@@ -88,8 +92,12 @@ tueren:
     rolle: "DJ"
     text: "Aus dem Debütalbum »Ten« von Pearl Jam"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=IpwHB2U3J1s"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/5Xak5fmy089t0FYmh3VJiY"
+      apple_music: "https://music.apple.com/de/album/black/425465247?i=425465351"
+      tidal: "https://tidal.com/track/78163940"
+      deezer: "https://www.deezer.com/track/7675132"
 
   - tag: 5                                   # Sa 05.12.
     song: "Never Surrender"
@@ -99,8 +107,10 @@ tueren:
     rolle: "DJ"
     text: "Niemals aufgeben, auch nicht in schwierigen Situationen"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=UMw_aHocMmc"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/2dm3UxRHnKk2aN0oZSwULc"
+      apple_music: "https://music.apple.com/de/album/never-surrender/1481509407?i=1481509467"
 
   - tag: 6                                   # So 06.12.
     song: "No More"
@@ -121,8 +131,10 @@ tueren:
     rolle: "DJ"
     text: "Einfach ein total süßer Pop-Song - der zeigt, wie lebendig Indie-Pop aus Deutschland ist"
     links:
-      youtube_music: ""
-      bandcamp: ""
+      youtube_music: "https://music.youtube.com/watch?v=RLbm_3NnvJU"
+      bandcamp: "https://okdanketschuess.bandcamp.com/track/joel"
+      spotify: "https://open.spotify.com/track/7A2MVRdwPy1PKiF5euhNK6"
+      apple_music: "https://music.apple.com/de/album/joel/1713020454?i=1713020455"
 
   - tag: 8                                   # Di 08.12.
     song: "Von Leeren Herzen"
@@ -136,15 +148,17 @@ tueren:
       bandcamp: ""
 
   - tag: 9                                   # Mi 09.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Nano Creator"
+    kuenstler: "Blac Kolor"
+    erschienen: 2018
+    person: "Frank S aus HB"
+    rolle: "DJ"
+    text: "Ein echter Geheimtipp"
     links:
-      youtube_music: ""
-      bandcamp: ""
+      youtube_music: "https://music.youtube.com/watch?v=JNBLvNw4XSg"
+      bandcamp: "https://handsofficial.bandcamp.com/track/nano-creator"
+      spotify: "https://open.spotify.com/track/0iuesrDhQVznheLZvsxU0Y"
+      apple_music: "https://music.apple.com/de/album/nano-creator/1368088242?i=1368088926"
 
   - tag: 10                                  # Do 10.12.
     song: "The grey machines"
@@ -154,107 +168,133 @@ tueren:
     rolle: "DJ"
     text: "Kann man immer wieder hören."
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=Qb2BrajfKLU"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/6bAZCEy84pz3LxJrsYxQjC"
+      apple_music: "https://music.apple.com/de/album/the-grey-machines-feat-vnv-nation/1781078927?i=1781079913"
 
   - tag: 11                                  # Fr 11.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Living On Video"
+    kuenstler: "Trans-X"
+    erschienen: 1982
+    person: "Warg"
+    rolle: "DJ"
+    text: "Von der kanadischen Band Trans-X gibt es neben der allseits bekannten englischen Fassung auch eine Aufnahme mit französischen Texten - dann heißt es »Vivre sur Video«"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=xJiax7gMEVc"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/4T4GFHCelpWURCVrF2xetE"
+      apple_music: "https://music.apple.com/de/album/living-on-video/286855836?i=286855840"
+      tidal: "https://tidal.com/track/21314704"
+      deezer: "https://www.deezer.com/track/68606985"
 
   - tag: 12                                  # Sa 12.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Wir"
+    kuenstler: "Pogendroblem"
+    erschienen: 2024
+    person: "Pete Bo"
+    rolle: "DJ"
+    text: "Bei zu viel »Ich« hilft die Frage nach dem »Wir« - kollektives Erleben ist doch auch viel schöner"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=M2IjXaKsBZo"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/72TCby5CZaniH30TnfGEpm"
+      apple_music: "https://music.apple.com/de/album/wir/1622670966?i=1622670977"
 
   - tag: 13                                  # So 13.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Love Missile F1-11"
+    kuenstler: "Sigue Sigue Sputnik"
+    erschienen: 1986
+    person: "TiM"
+    rolle: "DJ"
+    text: "Direkt im Debütalbum ein großer Hit von Sigue Sigue Sputnik - gegründet von dem Bassisten der Band »Generation X«. James von »Sigue Sigue Sputnik« ist 1989 zu »The Sisters of Mercy« gewechselt."
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=yvQ_W2Af1FY"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/2nnK8on14B6tYkiPEBL84w"
+      apple_music: "https://music.apple.com/de/album/love-missile-f1-11/1437332311?i=1437332313"
+      tidal: "https://tidal.com/track/6755189"
+      deezer: "https://www.deezer.com/track/3786405842"
 
   - tag: 14                                  # Mo 14.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Ice Age"
+    kuenstler: "Joy Division"
+    erschienen: 1981
+    person: "Spinne"
+    rolle: "DJ"
+    text: "Die Band aus Manchester verkörpert wie kaum eine zweite Band den Sound des Post-Punk"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=cDrBTr5HOrI"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/6lpDnTPc3xIGIqtJhbWyvm"
+      apple_music: "https://music.apple.com/de/album/ice-age/275968300?i=275968327"
 
   - tag: 15                                  # Di 15.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Ballroom Blitz"
+    kuenstler: "Sweet"
+    erschienen: 1973
+    person: "Kijote"
+    rolle: "DJ"
+    text: "Ein Song, der heute noch Jubel bei Jung & Alt auf der Tanzfläche auslöst - das schaffen nicht viele Titel aus den wilden 70ern."
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=mPQPdYttl7U"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/1PcERoNH2UMQ19lnD2BWfn"
+      apple_music: "https://music.apple.com/de/album/the-ballroom-blitz/1110348361?i=1110348474"
+      tidal: "https://tidal.com/track/7848727"
+      deezer: "https://www.deezer.com/track/2565717"
 
   - tag: 16                                  # Mi 16.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Good Time"
+    kuenstler: "The Dare"
+    erschienen: 2023
+    person: "TiM"
+    rolle: "DJ"
+    text: "Kann man »Electroclash« noch mal in das aktuelle Jahrzehnt heben? »The Dare«: »Ja!«"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=7CdQ-5MAqO0"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/4yX77sedjv7v6MfRZnuKyy"
+      apple_music: "https://music.apple.com/de/album/good-time/1763155718?i=1763155723"
 
   - tag: 17                                  # Do 17.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
+    song: "Possédée"
+    kuenstler: "Potochkine"
+    erschienen: 2021
+    person: "Frank S aus HB"
+    rolle: "DJ"
     text: ""
     links:
-      youtube_music: ""
-      bandcamp: ""
+      youtube_music: "https://music.youtube.com/watch?v=YXzueaBM8PE"
+      bandcamp: "https://potochkine.bandcamp.com/track/poss-d-e"
+      spotify: "https://open.spotify.com/track/4s4Un8Agl5RvI1PMJ8j917"
+      apple_music: "https://music.apple.com/de/album/poss%C3%A9d%C3%A9e/1555495512?i=1555495515"
 
   - tag: 18                                  # Fr 18.12.
     song: "I Tell My Sorrows To The Stones"
     kuenstler: "Digital Leather"
     erschienen: 2004
     person: "Doc Grotabol"
-    rolle: ""
+    rolle: "DJ"
     text: "Aus dem Album »Mork Teklogi« von 2004"
     links:
       youtube_music: ""
       bandcamp: ""
 
   - tag: 19                                  # Sa 19.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Pictures Of You"
+    kuenstler: "The Cure"
+    erschienen: 1989
+    person: "MZ"
+    text: "Aus dem Album »Desintegration« - ein Song, der inspiriert wurde von einem Feuer, das Robert Smiths' Zuhause zerstört hat"
+    rolle: "DJ"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=D88J_57QgxY"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/2o49Twc3qrNMOt8gq9W06L"
+      apple_music: "https://music.apple.com/de/album/pictures-of-you/1440785740?i=1440786023"
+      tidal: "https://tidal.com/track/5162513"
+      deezer: "https://www.deezer.com/track/6215171"
 
   - tag: 20                                  # So 20.12.
     song: "World In My Eyes"
@@ -262,51 +302,65 @@ tueren:
     erschienen: 1990
     person: "Matze"
     rolle: "DJ"
-    text: "Natürlich muss einer der »Violator«-Songs zu den Lieblingssongs von DJ Matze gehören."
+    text: "Natürlich gehört einer der »Violator«-Songs zu den Lieblingssongs von DJ Matze."
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=NF9Pc2FvgQU"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/0TBn49AjkNufCRJ2O5VJ6s"
+      apple_music: "https://music.apple.com/de/album/world-in-my-eyes/1174246686?i=1174246800"
+      tidal: "https://tidal.com/track/20907588"
+      deezer: "https://www.deezer.com/track/136331372"
 
   - tag: 21                                  # Mo 21.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Legartija Nick"
+    kuenstler: "Bauhaus"
+    erschienen: 1983
+    person: "Spinne"
+    rolle: "DJ"
+    text: "Aus der Zeit, als »Goth Rock« oder »Wave Punk« noch gängige Begriffe waren."
     links:
       youtube_music: ""
       bandcamp: ""
 
   - tag: 22                                  # Di 22.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Love Street"
+    kuenstler: "The Doors"
+    erschienen: 1968
+    person: "Warg"
+    rolle: "DJ"
+    text: "Die einzigartigen »The Doors« mit ihrem Album »Waiting for the Sun«"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=vf7m-ogAW5A"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/5Q2Im8o4RthlAMkvUMYwGj"
+      apple_music: "https://music.apple.com/de/album/love-street/1622361522?i=1622361524"
+      tidal: "https://tidal.com/track/193304510"
+      deezer: "https://www.deezer.com/track/4085212"
 
   - tag: 23                                  # Mi 23.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "I Tried To Die Young"
+    kuenstler: "The Manges"
+    erschienen: 2024
+    person: "Pete Bo"
+    rolle: "DJ"
+    text: "Das Cover eines Liedes der Folk-Sängerin Melanie Safka, die schon bei Woodstock aufgetreten ist - und eine Brücke in die heutige Zeit schlägt"
     links:
-      youtube_music: ""
-      bandcamp: ""
+      youtube_music: "https://music.youtube.com/watch?v=2aiwqRcELzw"
+      bandcamp: "https://themanges.bandcamp.com/track/i-tried-to-die-young-2"
+      spotify: "https://open.spotify.com/track/5UaZcIXFXcWPrUcy3ivXz0"
+      apple_music: "https://music.apple.com/de/album/i-tried-to-die-young/1752803587?i=1752803589"
 
   - tag: 24                                  # Do 24.12.
-    song: ""
-    kuenstler: ""
-    erschienen:
-    person: ""
-    rolle: ""
-    text: ""
+    song: "Like A Prayer"
+    kuenstler: "Madonna"
+    erschienen: 1989
+    person: "Christine"
+    rolle: "Inhaberin"
+    text: "Na klar - Madonna! Kaum eine Künstlerin zeigt sich so wandlungsfähig und trotzdem zeitlos aktuell."
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=ilottRbDnGY"
       bandcamp: ""
+      spotify: "https://open.spotify.com/track/2v7ywbUzCgcVohHaKUcacV"
+      apple_music: "https://music.apple.com/de/album/like-a-prayer/1874757108?i=1874757282"
+      tidal: "https://tidal.com/track/534548661"
+      deezer: "https://www.deezer.com/track/664507"

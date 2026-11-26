@@ -261,14 +261,43 @@ Winterzeit). GitHub startet geplante Läufe manchmal verspätet; spätestens der
 holt es nach. Seiten werden mit `Cache-Control: no-cache` ausgeliefert (`.htaccess`), Browser holen also
 immer den neuen Stand.
 
+**Ratespiel „Wann ist der Song erschienen?“:** In jeder geöffneten Tür mit `erschienen:` (vierstellig) stehen drei
+Jahre zur Auswahl, eines ist richtig. Das Jahr selbst steht erst nach dem Tipp da – im HTML steckt nur ein
+Prüfwert, nicht die Zahl. Die falschen Jahre würfelt der Build (±2 bis 5 Jahre, nicht in der Zukunft, fest pro Tür,
+Reihenfolge gemischt). Selbst festlegen oder abschalten pro Tür:
+
+```yaml
+    erschienen: 1994
+    jahr_raten: [1991, 1997]    # die zwei falschen Vorschläge (eins geht auch, das zweite wird gewürfelt)
+    # jahr_raten: false         # kein Ratespiel, Jahr steht direkt da
+```
+
+Tipps merkt sich die Seite nur, solange sie offen ist (kein Speichern im Browser). Ohne JavaScript kein Ratespiel.
+
+**Streaming-Links ergänzen:** `python adventskalender-anreichern.py --tag 2` sucht den Song und fragt die
+Dienste direkt. Es zeigt nur an; mit `--schreiben` trägt es ein. Gefüllt werden nur leere Links, fehlende Dienste
+werden angehängt (`--nur-vorhandene`: nur die, die schon leer dastehen). Bandcamp bleibt unberührt.
+
+| Dienst | Einrichtung |
+|---|---|
+| Apple Music, Deezer | keine |
+| Spotify | `SPOTIFY_CLIENT_ID` + `SPOTIFY_CLIENT_SECRET` (kostenlose App auf developer.spotify.com) |
+| Tidal | `TIDAL_CLIENT_ID` + `TIDAL_CLIENT_SECRET` (kostenlose App auf developer.tidal.com), Suche über die ISRC |
+| YouTube Music | `pip install ytmusicapi` (ohne Konto, aber inoffiziell) |
+
+Schlüssel nur als Umgebungsvariable, nie in eine Datei. SoundCloud gibt es nicht automatisch. Ohne `--tag` laufen
+alle Türen mit Song und Künstler:in (3 Sekunden Pause pro Tür wegen der iTunes-Suche). Fehler nennen Dienst,
+Adresse und die Antwort des Dienstes. Treffer bitte einmal anklicken – bei Neuaufnahmen kann die Suche die
+falsche Fassung erwischen.
+
 **Testen:** `python build.py --now "2026-12-07 12:00" --serve` → `http://localhost:8000/adventskalender/`.
 Einzelne Tür direkt öffnen (auch zum Teilen): `/adventskalender/#tuer-7`.
 
-**Menü:** in `config.yml → navigation` (pflegt Danny):
-
-```yaml
-  - { label: "Adventskalender", href: "/adventskalender/" }
-```
+**Menü:** Der Punkt „Adventskalender“ kommt automatisch, kein Eintrag in `config.yml` nötig (steht dort trotzdem
+einer, wird er in der Zeit ausgeblendet). Er ist heller als die anderen und trägt eine rote Marke: „bald“ vor dem
+1.12., dann die Tür von heute; ein feiner Lichtstreif läuft alle paar Sekunden darüber. Auf dem Handy zeigt ein
+roter Punkt am Menü-Knopf, dass es etwas gibt. Sichtbar im selben Zeitraum wie die Startseiten-Karte
+(`startseite_ab` bis `startseite_bis`); `startseite: false` schaltet nur die Karte ab, nicht den Menüpunkt.
 
 Für Suchmaschinen: `CollectionPage`-JSON-LD mit den geöffneten Türen als `MusicRecording`, Eintrag in
 `sitemap.xml` und `llms.txt` (nur Geöffnetes). Ohne JavaScript stehen die geöffneten Türen als Liste unter dem

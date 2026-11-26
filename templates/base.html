@@ -61,15 +61,21 @@
     </a>
     <nav class="nav" id="hauptmenue" aria-label="Hauptmenü">
       <ul>
-        {% for item in nav %}
+        {% for item in nav if not (advent_hero and item.href == advent_hero.url) %}
         <li><a href="{{ item.href }}"{% if page_path.startswith(item.href) %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
         {% endfor %}
+        {# Adventskalender: hervorgehoben, nur im Zeitraum startseite_ab–startseite_bis (advent/*.yml; site.js blendet
+           am Stichtag ein). Marke: „bald“ vor dem 1.12., dann die Tür von heute, danach keine. #}
+        {% if advent_hero %}
+        {% set am = advent_hero %}
+        <li class="nav-adv"{% if am.versteckt %} hidden{% endif %} data-advent-ab="{{ am.ab }}" data-advent-bis="{{ am.bis }}"><a href="{{ am.url }}"{% if page_path.startswith(am.url) %} aria-current="page"{% endif %}>Adventskalender{% if am.vor_start %}<span class="nav-adv-marke">bald</span>{% elif am.tag %}<span class="nav-adv-marke"><span class="nav-adv-sr">Tür </span>{{ am.tag }}</span>{% endif %}</a></li>
+        {% endif %}
         <li class="nav-kf"><a href="{{ kellerfunk.url }}">Kellerfunk <span aria-hidden="true">↗</span></a></li>
       </ul>
       <p class="nav-meta">{{ club.address }} · {{ club.hours }}</p>
     </nav>
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="hauptmenue">
-      <span class="menu-label">Menü</span>
+      <span class="menu-label">Menü</span>{% if advent_hero %}<span class="menu-adv" aria-hidden="true"{% if advent_hero.versteckt %} hidden{% endif %} data-advent-ab="{{ advent_hero.ab }}" data-advent-bis="{{ advent_hero.bis }}"></span>{% endif %}
       <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path class="i-open" d="M4 7h16M4 12h16M4 17h16"/><path class="i-close" d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>

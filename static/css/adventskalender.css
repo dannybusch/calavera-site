@@ -80,6 +80,31 @@
 .ab-artist { margin: -4px 0 0; font-size: 20px; color: var(--text-2); }
 .ab-wer { margin: 0; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .ab-wer .label { margin-right: 6px; }
+/* Ratespiel: Erscheinungsjahr */
+.ab-raten { display: grid; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.ab-raten .label { margin: 0; color: var(--accent-text); }
+/* Beim Öffnen der Tür blinken die Jahre kurz nacheinander rot auf, damit man das Spiel bemerkt */
+.adv-dlg .ab-raten:not(.is-geraten) .ab-j { animation: abJBlitz 1.1s ease-in-out .5s 2 both; }
+.adv-dlg .ab-raten:not(.is-geraten) .ab-j:nth-child(2) { animation-delay: .65s; }
+.adv-dlg .ab-raten:not(.is-geraten) .ab-j:nth-child(3) { animation-delay: .8s; }
+@keyframes abJBlitz {
+  0%, 100% { background: var(--surface-3); box-shadow: inset 0 0 0 1px #34302c; color: var(--text); }
+  35%      { background: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); color: #f1ebe2; }
+}
+@media (prefers-reduced-motion: reduce) { .adv-dlg .ab-raten .ab-j { animation: none !important; } }
+.ab-raten-wahl { display: flex; flex-wrap: wrap; gap: 8px; }
+.ab-j { min-width: 92px; min-height: 48px; padding: 0 18px; border: 0; border-radius: 999px; cursor: pointer;
+        background: var(--surface-3); color: var(--text); font-family: var(--display); font-size: 26px; letter-spacing: .03em;
+        box-shadow: inset 0 0 0 1px #4a4440; transition: background .15s ease, color .15s ease, opacity .2s ease; }
+.ab-j:hover:not(:disabled) { background: #2a2626; box-shadow: inset 0 0 0 1px var(--accent); }
+.ab-j:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.ab-j:disabled { cursor: default; }
+.is-geraten .ab-j { opacity: .4; }
+.is-geraten .ab-j.is-richtig { opacity: 1; background: var(--accent); color: #f1ebe2; box-shadow: none; }
+.is-geraten .ab-j.is-gewaehlt:not(.is-richtig) { opacity: .75; text-decoration: line-through; text-decoration-thickness: 2px; }
+.ab-raten-aufl { margin: 0; min-height: 1.4em; font-size: 16px; color: var(--text-2); }
+.ab-raten-aufl:empty { display: none; }
+html:not(.js) .ab-raten { display: none; }   /* ohne JavaScript lässt sich nicht auflösen */
 .ab-text { font-size: 17px; line-height: 1.65; color: var(--text-2); }
 .ab-text > :first-child { margin-top: 0; } .ab-text > :last-child { margin-bottom: 0; }
 .ab-text a { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent-display); text-underline-offset: 3px; }

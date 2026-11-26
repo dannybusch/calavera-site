@@ -11,6 +11,70 @@
     for (var i = li.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = li[i]; li[i] = li[j]; li[j] = x; }
     li.forEach(function (el) { mit.appendChild(el); });
   }
+  // Ratespiel „Wann ist der Song erschienen?“ – im HTML steht nur ein Prüfwert (FNV-1a von Salz + Jahr), nicht das Jahr.
+  // Tipps merkt sich die Seite nur, solange sie offen ist (kein Speichern im Browser).
+  function fnv(t) {
+    var h = 0x811c9dc5, b = new TextEncoder().encode(t);
+    for (var i = 0; i < b.length; i++) { h ^= b[i]; h = Math.imul(h, 0x01000193) >>> 0; }
+    return ("0000000" + h.toString(16)).slice(-8);
+  }
+  var tipps = {};
+  function aufloesen(box, gewaehlt) {
+    var richtig = null, salz = box.dataset.salz, h = box.dataset.h;
+    box.querySelectorAll(".ab-j").forEach(function (b) {
+      b.disabled = true;
+      if (fnv(salz + b.dataset.j) === h) { richtig = b.dataset.j; b.classList.add("is-richtig"); }
+      if (b.dataset.j === gewaehlt) b.classList.add("is-gewaehlt");
+    });
+    box.classList.add("is-geraten");
+    box.querySelector(".ab-raten-aufl").textContent = gewaehlt === richtig
+      ? "Richtig – " + richtig + "."
+      : "Leider nein – erschienen " + richtig + ".";
+    var art = box.closest(".adv-tuer"), j = art && art.querySelector(".ab-jahr");
+    if (j) j.textContent = " · " + richtig;
+  }
+  function ratenWiederherstellen(root) {
+    (root || document).querySelectorAll(".adv-tuer").forEach(function (a) {
+      var t = a.dataset.tuer, box = a.querySelector(".ab-raten");
+      if (box && tipps[t] && !box.classList.contains("is-geraten")) aufloesen(box, tipps[t]);
+    });
+  }
+  // Konfetti bei richtigem Tipp: ein paar Schnipsel in Rot, Gold und Creme, ohne Bibliothek (Web Animations).
+  // Hängt im Fenster (<dialog> liegt ganz oben – außerhalb wäre es verdeckt). Bei reduzierter Bewegung: keins.
+  function konfetti(von) {
+    if (!von.animate || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+    var buehne = von.closest("dialog") || document.body, r = von.getBoundingClientRect();
+    var farben = ["#b3122e", "#cb5e71", "#d4a64a", "#e8c872", "#d1cabf"];
+    for (var i = 0; i < 46; i++) {
+      var k = document.createElement("span"), w = 5 + Math.random() * 5, winkel = Math.random() * Math.PI * 2;
+      var weit = 60 + Math.random() * 140, dx = Math.cos(winkel) * weit, dy = Math.sin(winkel) * weit * .7 - 60;
+      k.setAttribute("aria-hidden", "true");
+      k.style.cssText = "position:fixed;z-index:10;pointer-events:none;left:" + (r.left + r.width / 2) + "px;top:" +
+        (r.top + r.height / 2) + "px;width:" + w + "px;height:" + (w * (Math.random() < .5 ? .45 : 1)) + "px;background:" +
+        farben[i % farben.length] + ";border-radius:" + (Math.random() < .3 ? "50%" : "1px");
+      buehne.appendChild(k);
+      var dreh = (Math.random() * 720 - 360) + "deg";
+      k.animate([
+        { transform: "translate(-50%,-50%) rotate(0)", opacity: 1 },
+        { transform: "translate(calc(-50% + " + dx + "px), calc(-50% + " + dy + "px)) rotate(" + dreh + ")", opacity: 1, offset: .45 },
+        { transform: "translate(calc(-50% + " + dx * 1.15 + "px), calc(-50% + " + (dy + 160) + "px)) rotate(" + dreh + ")", opacity: 0 }
+      ], { duration: 1300 + Math.random() * 700, easing: "cubic-bezier(.2,.7,.4,1)" }).onfinish = (function (el) {
+        return function () { el.remove(); };
+      })(k);
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".ab-j");
+    if (!b || b.disabled) return;
+    var art = b.closest(".adv-tuer");
+    tipps[art.dataset.tuer] = b.dataset.j;
+    aufloesen(b.closest(".ab-raten"), b.dataset.j);
+    if (b.classList.contains("is-richtig")) konfetti(b);
+    var orig = document.getElementById("tuer-" + art.dataset.tuer);   // auch die Liste unter dem Raster auflösen
+    if (orig && orig !== art) ratenWiederherstellen(orig.parentNode);
+  });
+
   var grid = document.querySelector(".adv-grid"), dlg = document.querySelector(".adv-dlg");
   if (!grid || !dlg || typeof dlg.showModal !== "function") return;   // ohne <dialog>: Liste + Anker reichen
   var inhalt = dlg.querySelector(".adv-dlg-inhalt"), toast = document.querySelector(".adv-toast");
@@ -28,6 +92,7 @@
     kopie.removeAttribute("id");                                  // die Anker-ID bleibt beim Original
     var h = kopie.querySelector("[id]"); if (h) { h.id = "dlg-song"; kopie.setAttribute("aria-labelledby", "dlg-song"); }
     inhalt.appendChild(kopie);
+    ratenWiederherstellen(inhalt);
     dlg.setAttribute("aria-labelledby", "dlg-song");
     var i = nrn.indexOf(n);
     dlg.querySelector('[data-schritt="-1"]').disabled = i <= 0;

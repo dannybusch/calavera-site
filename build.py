@@ -1468,6 +1468,9 @@ class AdventTuer:
     rolle: str = ""
     text_html: str = ""
     links: list[dict] = field(default_factory=list)    # [{dienst, url}] in der Reihenfolge der Datei
+    raten: list[int] = field(default_factory=list)     # Ratespiel: drei Jahre (eins richtig), gemischt; leer = kein Spiel
+    raten_salz: str = ""
+    raten_h: str = ""                                  # Prüfwert des richtigen Jahres (das Jahr selbst steht nicht im HTML)
 
     @property
     def fertig(self) -> bool:
@@ -1487,7 +1490,7 @@ class Advent:
     in_sitemap: bool = True
     startseite_ab: date | None = None   # Karte auf der Startseite (neben dem Kellerfunk) ab diesem Tag (Standard: 27.11.)
     startseite_bis: date | None = None  # … bis einschließlich diesem Tag (Standard: 6.1. des Folgejahres)
-    startseite: bool = True             # false = gar keine Karte auf der Startseite
+    startseite: bool = True             # false = keine Karte auf der Startseite (Menüpunkt bleibt)
 
     @property
     def url(self) -> str:
@@ -1537,19 +1540,69 @@ def _advent_datum(roh, standard: date, wo: str) -> date:
 
 
 def advent_hinweis(a: Advent, now: datetime) -> dict | None:
-    """Karte auf der Startseite, die sich den Platz mit dem Kellerfunk teilt. None = außerhalb des Zeitraums.
+    """Karte auf der Startseite (teilt sich den Platz mit dem Kellerfunk) und hervorgehobener Menüpunkt.
+    None = außerhalb des Zeitraums. startseite: false schaltet nur die Karte ab, nicht den Menüpunkt.
     Liegt der Build bis zu 7 Tage vor startseite_ab, steht die Karte schon versteckt im HTML und
     site.js blendet sie am Stichtag ein (und nach startseite_bis wieder aus) – ohne eigenen Deploy.
     Gezeigt wird nur, was ohnehin offen ist: vor dem 1.12. Titel + Einleitung, danach die Tür von heute."""
     heute = now.date()
-    if not a.startseite or heute > a.startseite_bis or (a.startseite_ab - heute).days > 7:
+    if heute > a.startseite_bis or (a.startseite_ab - heute).days > 7:
         return None
     start, ende = date(a.jahr, 12, 1), date(a.jahr, 12, 24)
     tag = (heute - start).days + 1 if start <= heute <= ende else 0
     t = a.tueren.get(tag) if tag else None
     return {"url": a.url, "ab": a.startseite_ab.isoformat(), "bis": a.startseite_bis.isoformat(),
-            "versteckt": heute < a.startseite_ab, "vor_start": heute < start, "tag": tag,
+            "versteckt": heute < a.startseite_ab, "vor_start": heute < start, "tag": tag, "karte": a.startseite,
             "tuer": t if t and t.fertig else None, "titel_teile": a.titel_teile, "einleitung": a.einleitung}
+
+
+def _fnv1a(text: str) -> str:
+    """32-bit FNV-1a als Hex – dieselbe Rechnung macht adventskalender.js."""
+    h = 0x811C9DC5
+    for b in text.encode("utf-8"):
+        h = ((h ^ b) * 0x01000193) & 0xFFFFFFFF
+    return f"{h:08x}"
+
+
+def _advent_raten(e: dict, tag: int, jahr_kal: int, wo: str) -> tuple[list[int], str, str]:
+    """Ratespiel „Wann ist der Song erschienen?“: das richtige Jahr + zwei falsche, gemischt.
+    jahr_raten: [1983, 1991] in der Tür legt die falschen selbst fest; jahr_raten: false schaltet das Spiel ab.
+    Sonst gewürfelt: ±2 bis 5 Jahre ums echte Jahr, nicht in der Zukunft – fest pro Tür (alle sehen dieselben Zahlen).
+    Ins HTML kommt nur ein Prüfwert des richtigen Jahres, nicht das Jahr selbst."""
+    roh_jahr = str(e.get("erschienen") or "").strip()
+    vorgabe = e.get("jahr_raten")
+    if vorgabe is False or not re.fullmatch(r"\d{4}", roh_jahr):
+        return [], "", ""
+    echt = int(roh_jahr)
+    rng = random.Random(f"{jahr_kal}-{tag}-{echt}-{e.get('song')}")
+    falsch: list[int] = []
+    if vorgabe not in (None, True, ""):
+        werte = vorgabe if isinstance(vorgabe, list) else [vorgabe]
+        for w in werte:
+            try:
+                w = int(w)
+            except (TypeError, ValueError):
+                hinweis(f"{wo}: jahr_raten: „{w}“ ist keine Jahreszahl – wird ignoriert")
+                continue
+            if w != echt and w not in falsch:
+                falsch.append(w)
+        if len(falsch) > 2:
+            hinweis(f"{wo}: jahr_raten: mehr als zwei Jahre – nehme die ersten beiden")
+            falsch = falsch[:2]
+    kandidaten = [echt + d for d in (-5, -4, -3, -2, 2, 3, 4, 5)
+                  if echt + d <= jahr_kal and echt + d not in falsch]
+    rng.shuffle(kandidaten)
+    for k in kandidaten:
+        if len(falsch) >= 2:
+            break
+        if all(abs(k - f) >= 2 for f in falsch):     # nicht zwei fast gleiche Jahre
+            falsch.append(k)
+    if len(falsch) < 2:
+        return [], "", ""
+    wahl = [echt] + falsch
+    rng.shuffle(wahl)
+    salz = f"{random.SystemRandom().getrandbits(32):08x}"
+    return wahl, salz, _fnv1a(salz + str(echt))
 
 
 def load_advent(belegt: set[str]) -> Advent | None:
@@ -1582,7 +1635,8 @@ def load_advent(belegt: set[str]) -> Advent | None:
                     hinweis(f"advent/{path.name}: tag: {tag} ist doppelt oder nicht 1–24 – wird ignoriert")
                     continue
                 txt = lambda k: str(e.get(k) or "").strip()  # noqa: E731
-                tueren[tag] = AdventTuer(
+                raten, salz, pruef = _advent_raten(e, tag, jahr, f"advent/{path.name}, Tür {tag}")
+                tueren[tag] = AdventTuer(raten=raten, raten_salz=salz, raten_h=pruef,
                     tag=tag, datum=date(jahr, 12, tag), song=txt("song"), kuenstler=txt("kuenstler"),
                     erschienen=txt("erschienen"), person=txt("person"), rolle=txt("rolle"),
                     text_html=md(txt("text")) if txt("text") else "",

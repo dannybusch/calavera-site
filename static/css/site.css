@@ -99,6 +99,21 @@ a:hover { color: var(--accent-text); }
 .nav a:hover, .nav a[aria-current="page"] { color: var(--text); }
 .nav a[aria-current="page"] { box-shadow: inset 0 -2px 0 var(--accent-display); }
 .nav-kf, .nav-meta { display: none; }
+.nav-adv[hidden] { display: none; }
+/* Adventskalender im Menü: hell statt grau, rote Marke mit der Tür von heute, alle paar Sekunden ein feiner Lichtstreif */
+.nav .nav-adv a { gap: 10px; color: var(--text); }
+.nav-adv-marke { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center;
+                 min-width: 24px; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--accent); color: #f1ebe2;
+                 font-size: 12px; letter-spacing: .04em; }
+.nav-adv-marke::after { content: ""; position: absolute; inset: 0; transform: translateX(-120%);
+                        background: linear-gradient(100deg, transparent 30%, rgba(255, 236, 200, .55) 50%, transparent 70%);
+                        animation: navAdvGlanz 7s ease-in-out 1.5s infinite; }
+@keyframes navAdvGlanz { 0%, 82% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) { .nav-adv-marke::after { animation: none; display: none; } }
+.menu-toggle { position: relative; }
+.menu-adv { position: absolute; top: 8px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }   /* Handy: Punkt am Menü-Knopf */
+.menu-adv[hidden], .menu-toggle[aria-expanded="true"] .menu-adv { display: none; }
+.nav-adv-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .menu-toggle { display: none; }
 
 /* ---------- Startseite: Claim + Kellerfunk ---------- */

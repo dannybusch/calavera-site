@@ -29,7 +29,7 @@
     </a>
   </div>
 
-  {% if advent_hero %}
+  {% if advent_hero and advent_hero.karte %}
   <div class="hero-seite">
     {% include "partials/advent_karte.html" %}
     {% include "partials/kellerfunk.html" %}

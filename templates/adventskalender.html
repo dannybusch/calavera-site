@@ -66,8 +66,16 @@
   <article class="adv-tuer" id="tuer-{{ t.tag }}" data-tuer="{{ t.tag }}" aria-labelledby="tuer-{{ t.tag }}-song">
     <p class="ab-kopf"><span class="ab-nr">Tür {{ "%02d"|format(t.tag) }}</span> · {{ t.datum|wd }} {{ "%02d.12."|format(t.tag) }}</p>
     <h3 class="ab-song" id="tuer-{{ t.tag }}-song">{{ t.song }}</h3>
-    <p class="ab-artist">{{ t.kuenstler }}{% if t.erschienen %} · {{ t.erschienen }}{% endif %}</p>
+    <p class="ab-artist">{{ t.kuenstler }}{% if t.erschienen and not t.raten %} · {{ t.erschienen }}{% endif %}<span class="ab-jahr"></span></p>
     <p class="ab-wer"><span class="label">Ausgewählt von</span> <strong>{{ t.person }}</strong>{% if t.rolle %} <span class="muted">· {{ t.rolle }}</span>{% endif %}</p>
+    {% if t.raten %}
+    {# Ratespiel: das richtige Jahr steht nicht im HTML, nur ein Prüfwert (adventskalender.js) #}
+    <div class="ab-raten" data-salz="{{ t.raten_salz }}" data-h="{{ t.raten_h }}">
+      <p class="label">Wann ist der Song erschienen?</p>
+      <div class="ab-raten-wahl">{% for j in t.raten %}<button type="button" class="ab-j" data-j="{{ j }}">{{ j }}</button>{% endfor %}</div>
+      <p class="ab-raten-aufl" aria-live="polite"></p>
+    </div>
+    {% endif %}
     {% if t.text_html %}<div class="ab-text">{{ t.text_html|safe }}</div>{% endif %}
     {% if t.links %}
     <div class="ab-links" aria-label="Anhören bei">
