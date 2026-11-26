@@ -41,20 +41,19 @@ startseite_bis: 2026-12-30
 tueren:
 
   - tag: 1                                   # Di 01.12.
-    song: "Danger Zone"
-    kuenstler: "Kenny Loggins"
-    erschienen: "1986"
+    song: "Without You"
+    kuenstler: "Mötley Crüe"
+    erschienen: "1989"
     person: "Christine"
     rolle: "Inhaberin"
-    text: "Die Titelmusik zu »Top Gun« - mehr 80er geht kaum"
+    text: "Die Powerballade aus den 80ern - aus dem Album »Dr. Feelgood«"
     links:
-      youtube_music: "https://music.youtube.com/watch?v=siwpn14IE7E"
-      bandcamp: ""
-      spotify: "https://open.spotify.com/intl-de/track/7ajsDipI8WFdcTTsfGl7hm?si=f5b5fd0f828e404f"
-      tidal: "https://tidal.com/track/5119939/u"
-      apple_music: "https://music.apple.com/de/song/danger-zone/387193955"
-      deezer: "https://www.deezer.com/track/7675051"
-
+      youtube_music: "https://music.youtube.com/watch?v=DQkv_-Vag98"
+      spotify: "https://open.spotify.com/track/4HcBshqrvH5tD8Cz3xkmKl"
+      apple_music: "https://music.apple.com/de/album/without-you-2024-remaster/1763317264?i=1763317272"
+      tidal: "https://tidal.com/track/4879922"
+      deezer: "https://www.deezer.com/track/3786102172"
+      
   - tag: 2                                   # Mi 02.12.
     song: "Girls And Boys"
     kuenstler: "Blur"
@@ -351,16 +350,15 @@ tueren:
       apple_music: "https://music.apple.com/de/album/i-tried-to-die-young/1752803587?i=1752803589"
 
   - tag: 24                                  # Do 24.12.
-    song: "Like A Prayer"
-    kuenstler: "Madonna"
-    erschienen: 1989
+    song: "I Won't Be Home For Christmas"
+    kuenstler: "Blink-182"
+    erschienen: 2001
     person: "Christine"
     rolle: "Inhaberin"
-    text: "Na klar - Madonna! Kaum eine Künstlerin zeigt sich so wandlungsfähig und trotzdem zeitlos aktuell."
+    text: "Wenn euch die Decke auf den Kopf fällt - am 25.12. und 26.12. haben wir für euch geöffnet - kommt rum!"
     links:
-      youtube_music: "https://music.youtube.com/watch?v=ilottRbDnGY"
-      bandcamp: ""
-      spotify: "https://open.spotify.com/track/2v7ywbUzCgcVohHaKUcacV"
-      apple_music: "https://music.apple.com/de/album/like-a-prayer/1874757108?i=1874757282"
-      tidal: "https://tidal.com/track/534548661"
-      deezer: "https://www.deezer.com/track/664507"
+      youtube_music: "https://music.youtube.com/watch?v=UVPdkfVYvk0"
+      spotify: "https://open.spotify.com/track/41olw7iIGVyds8dnSR9pb0"
+      apple_music: "https://music.apple.com/de/album/i-wont-be-home-for-christmas-previously-unreleased/1445288730?i=1445288731"
+      tidal: "https://tidal.com/track/581752771"
+      deezer: "https://www.deezer.com/track/1760963077"
