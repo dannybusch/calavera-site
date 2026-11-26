@@ -34,7 +34,8 @@
 .di-artist { margin-top: auto; margin-bottom: -4px; font: 500 11px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .di-song { font-family: var(--display); font-size: 26px; line-height: 1; text-transform: uppercase; color: var(--text);
-  overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+  overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+  padding-top: .14em; }   /* Platz für Umlaut-Punkte (ÄÖÜ), die overflow sonst abschneidet */
 .door.h2 .di-song { font-size: 44px; -webkit-line-clamp: 4; line-clamp: 4; }
 .di-by { font-size: 14px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .door.is-auf:hover .door-in { background: #1c1c1c; }

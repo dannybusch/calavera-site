@@ -195,7 +195,7 @@ a:hover { color: var(--accent-text); }
                background: var(--accent); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
 .adv-k-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .adv-k-artist { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
-.adv-k-titel { font-family: var(--display); font-size: 40px; line-height: .95; text-transform: uppercase;
+.adv-k-titel { font-family: var(--display); font-size: 40px; line-height: .95; text-transform: uppercase; padding-top: .14em;   /* Platz für Ü-Punkte: overflow (Zeilenbegrenzung) schneidet sonst ab */
                display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
 .adv-k-titel .accent { color: var(--accent-display); }
 .adv-k-by { font-size: 15px; color: var(--text-2); }
