@@ -96,7 +96,14 @@ def hauptname(name: str) -> str:
     return norm(FEAT.sub("", str(name).strip()))
 
 
-VERWORFEN: list[tuple[float, str]] = []      # pro Tür: (Ähnlichkeit, Zeile) – wird bei „nichts gefunden“ gezeigt
+VERWORFEN: list[tuple[float, str, str]] = []  # pro Tür: (Ähnlichkeit, Dienst-Schlüssel, Zeile) – für „am nächsten dran“
+NUR_VIDEO: set[str] = set()                    # YouTube-Treffer, die nur ein hochgeladenes Video sind
+DIENST_SCHLUESSEL = {"Apple": "apple_music", "Deezer": "deezer", "Spotify": "spotify", "YouTube": "youtube_music"}
+
+
+def merke(score: float, dienst: str, zeile: str) -> None:
+    key = next((v for k, v in DIENST_SCHLUESSEL.items() if dienst.startswith(k)), "")
+    VERWORFEN.append((score, key, f"{dienst}: {zeile}"))
 
 
 def aehnlich(a: str, b: str) -> float:
@@ -112,13 +119,17 @@ def bewerte(titel: str, kuenstler: str, album: str, jahr: str, song: str, artist
     t_ist, t_soll = norm(re.sub(FEAT_TITEL, "", titel)), norm(song)
     k_aeh, t_aeh = aehnlich(k_ist, k_soll), aehnlich(t_ist, t_soll)
     p = 0
+    if k_ist != k_soll and k_ist == hauptname(song) and t_ist == norm(artist):
+        merke(9, dienst, f"{kuenstler} – {titel} · {album}{' · ' + jahr if jahr else ''}  → "
+                         "passt, wenn man song und kuenstler tauscht – in der Datei vertauscht?")
+        return None
     if k_ist != k_soll:                          # beim Namen kein „fast“: „Suicide Commander“ ist jemand anderes
         grund = "anderer Künstler" if t_ist == t_soll else "anderer Künstler und Titel"
-        VERWORFEN.append((k_aeh + t_aeh, f"{dienst}: {kuenstler} – {titel} · {album}{' · ' + jahr if jahr else ''}  → {grund}"))
+        merke(k_aeh + t_aeh, dienst, f"{kuenstler} – {titel} · {album}{' · ' + jahr if jahr else ''}  → {grund}")
         return None
     if t_ist != t_soll:                          # beim Titel reicht fast gleich (Tippfehler, Schreibweise)
         if t_aeh < .9:
-            VERWORFEN.append((k_aeh + t_aeh, f"{dienst}: {kuenstler} – {titel} · {album}{' · ' + jahr if jahr else ''}  → Titel passt nicht"))
+            merke(k_aeh + t_aeh, dienst, f"{kuenstler} – {titel} · {album}{' · ' + jahr if jahr else ''}  → Titel passt nicht")
             return None
         p += 30
     if FASSUNG_WEG.search(titel) and not FASSUNG_WEG.search(song):
@@ -138,7 +149,7 @@ def suche_apple(song: str, artist: str, erschienen: str) -> dict | None:
         q = urllib.parse.urlencode({"term": f"{artist} {song}", "entity": "song", "country": land, "limit": 50})
         ergebnisse = hole(f"https://itunes.apple.com/search?{q}", "iTunes-Suche").get("results", [])
         if not ergebnisse:
-            VERWORFEN.append((0, f"Apple ({land}): keine Ergebnisse für „{artist} {song}“"))
+            merke(0, f"Apple ({land})", f"keine Ergebnisse für „{artist} {song}“")
         for r in ergebnisse:
             jahr = (r.get("releaseDate") or "")[:4]
             p = bewerte(r.get("trackName", ""), r.get("artistName", ""), r.get("collectionName", ""), jahr, song,
@@ -160,7 +171,10 @@ def suche_deezer(song: str, artist: str, erschienen: str) -> dict | None:
     # erst frei, dann mit Feldern – gefiltert wird danach über Künstler:in + Titel
     for frage in (f"{artist} {song}", f'artist:"{artist}" track:"{song}"'):
         q = urllib.parse.urlencode({"q": frage, "limit": 50})
-        for r in hole(f"https://api.deezer.com/search?{q}", "Deezer-Suche").get("data", []):
+        daten = hole(f"https://api.deezer.com/search?{q}", "Deezer-Suche").get("data", [])
+        if not daten:
+            merke(0, "Deezer", f"keine Ergebnisse für „{frage}“")
+        for r in daten:
             p = bewerte(r.get("title", ""), r.get("artist", {}).get("name", ""), r.get("album", {}).get("title", ""), "",
                         song, artist, "", "Deezer")
             if p is not None:
@@ -203,25 +217,48 @@ def suche_tidal(isrc: str) -> str | None:
 
 def suche_youtube_music(song: str, artist: str, erschienen: str) -> str | None:
     """Nur wenn das Paket ytmusicapi installiert ist (pip install ytmusicapi) – ohne Konto und ohne Schlüssel.
-    Inoffiziell: Ändert YouTube etwas, kann es ausfallen; dann einfach von Hand eintragen."""
+    Inoffiziell: Ändert YouTube etwas, kann es ausfallen; dann einfach von Hand eintragen.
+    Sucht erst unter „Songs“, dann unter „Videos“ – manches gibt es dort nur als hochgeladenes Video
+    („EA80 - Von leeren Herzen“, hochgeladen von irgendwem). Bei Videos wird „Künstler - Titel“ aus dem
+    Videotitel gelesen; der Kanal zählt nur, wenn er wie die Band heißt (auch „… - Topic“)."""
     try:
         from ytmusicapi import YTMusic
     except ImportError:
         return None
     try:
-        ergebnisse = YTMusic(language="de", location=LAND).search(f"{artist} {song}", filter="songs", limit=20)
+        yt = YTMusic(language="de", location=LAND)
     except Exception as exc:  # noqa: BLE001
-        raise DienstFehler(f"YouTube-Music-Suche (ytmusicapi): {exc}") from None
-    treffer = []
-    for i, r in enumerate(ergebnisse):
-        artists = [a.get("name", "") for a in r.get("artists") or []]
-        p = bewerte(r.get("title", ""), artists[0] if artists else "", (r.get("album") or {}).get("name", ""),
-                    str(r.get("year") or ""), song, artist, erschienen, "YouTube Music")
-        if p is not None and r.get("videoId"):
-            treffer.append((p, i, r))
-    if not treffer:
-        return None
-    return f"https://music.youtube.com/watch?v={min(treffer, key=lambda t: (t[0], t[1]))[2]['videoId']}"
+        raise DienstFehler(f"YouTube-Music (ytmusicapi): {exc}") from None
+    for art, filt in (("Song", "songs"), ("Video", "videos")):
+        try:
+            ergebnisse = yt.search(f"{artist} {song}", filter=filt, limit=20)
+        except Exception as exc:  # noqa: BLE001
+            raise DienstFehler(f"YouTube-Music-Suche ({filt}, ytmusicapi): {exc}") from None
+        dienst = f"YouTube Music ({art})"
+        if not ergebnisse:
+            merke(0, dienst, f"keine Ergebnisse für „{artist} {song}“")
+        treffer = []
+        for i, r in enumerate(ergebnisse):
+            if not r.get("videoId"):
+                continue
+            namen = [re.sub(r"\s+-\s+Topic$", "", a.get("name", "")) for a in r.get("artists") or []]
+            titel = r.get("title", "")
+            album = (r.get("album") or {}).get("name", "") if isinstance(r.get("album"), dict) else ""
+            lesarten = [(titel, namen[0] if namen else "")]
+            m = re.match(r"^\s*(.+?)\s+[-–—|:]\s+(.+?)\s*$", titel)       # „EA80 - Von leeren Herzen“
+            if m:
+                lesarten.insert(0, (m.group(2), m.group(1)))
+            for t_, k_ in lesarten:
+                p = bewerte(t_, k_, album, str(r.get("year") or ""), song, artist, erschienen, dienst)
+                if p is not None:
+                    treffer.append((p + (0 if art == "Song" else 5), i, r))
+                    break
+        if treffer:
+            url = f"https://music.youtube.com/watch?v={min(treffer, key=lambda t: (t[0], t[1]))[2]['videoId']}"
+            if art == "Video":
+                NUR_VIDEO.add(url)
+            return url
+    return None
 
 
 _spotify_token = None
@@ -244,8 +281,11 @@ def suche_spotify(song: str, artist: str, erschienen: str) -> tuple[str, str] | 
     treffer = []
     for frage in (f"{artist} {song}", f"track:{song} artist:{artist}"):
         q = urllib.parse.urlencode({"q": frage, "type": "track", "market": LAND, "limit": 10})
-        for r in hole(f"https://api.spotify.com/v1/search?{q}", "Spotify-Suche",
-                      kopf={"Authorization": f"Bearer {_spotify_token}"}).get("tracks", {}).get("items", []):
+        items = hole(f"https://api.spotify.com/v1/search?{q}", "Spotify-Suche",
+                     kopf={"Authorization": f"Bearer {_spotify_token}"}).get("tracks", {}).get("items", [])
+        if not items:
+            merke(0, "Spotify", f"keine Ergebnisse für „{frage}“")
+        for r in items:
             jahr = (r.get("album", {}).get("release_date") or "")[:4]
             artists = [a.get("name", "") for a in r.get("artists", [])]
             p = bewerte(r.get("name", ""), artists[0] if artists else "", r.get("album", {}).get("name", ""), jahr,
@@ -421,19 +461,18 @@ def main() -> int:
                       "bitte prüfen (zählt fürs Ratespiel)")
         if not gefunden:
             print("    nichts gefunden – bitte von Hand eintragen")
-        if not seed or not gefunden:
-            naechste = sorted(VERWORFEN, key=lambda v: -v[0])[:5]
-            if naechste:
-                print("    am nächsten dran waren:")
-                for _, zeile in naechste:
-                    print(f"      {zeile}")
-        if not gefunden:
-            continue
         neu = {k: v for k, v in gefunden.items() if k in leer}
         fehlt = fehlt_einrichtung()
         for k in leer:
             grund = f"nicht eingerichtet: {fehlt[k]}" if k in fehlt else "bei diesem Dienst nicht gefunden"
-            print(f"    {k:14} {neu.get(k, f'– ({grund})')}")
+            zusatz = "   (nur als Video gefunden – bitte anhören, ob es passt)" if neu.get(k) in NUR_VIDEO else ""
+            print(f"    {k:14} {neu.get(k, f'– ({grund})')}{zusatz}")
+            if k not in neu and k not in fehlt:      # warum nicht? die nächsten Kandidaten dieses Dienstes
+                naechste = sorted((v for v in VERWORFEN if v[1] == k), key=lambda v: -v[0])[:3]
+                for _, _, zeile in naechste:
+                    print(f"        {zeile}")
+        if not gefunden:
+            continue
         if args.schreiben and neu:
             zeilen, geaendert = trage_ein(zeilen, tag, neu)
             print(f"    eingetragen: {', '.join(geaendert) or 'nichts'}")

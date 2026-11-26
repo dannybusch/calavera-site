@@ -119,8 +119,12 @@ tueren:
     rolle: "DJ"
     text: "Nach dem Titel dieses Liedes hat sich eine andere Band später benannt"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=uh1vrty3du8"
       bandcamp: "https://nomore.bandcamp.com/track/suicide-commando"
+      spotify: "https://open.spotify.com/track/4aIKHm31Sj6WWEWptGD9F7"
+      apple_music: "https://music.apple.com/de/album/suicide-commando/1488365094?i=1488365490"
+      tidal: "https://tidal.com/track/122867240"
+      deezer: "https://www.deezer.com/track/811143002"
 
   - tag: 7                                   # Mo 07.12.
     song: "Joel"
@@ -141,9 +145,9 @@ tueren:
     erschienen: 1987
     person: "Doc Grotabol"
     rolle: "DJ"
-    text: "Der sechste Track auf dem Album »Mehr Schreie« von EA80"
+    text: "Der sechste Track auf dem Album »Mehr Schreie« von EA80 - Geheimtipp, den man nicht mal bei Spotify findet"
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=_7r9iQmzCSM"
       bandcamp: ""
 
   - tag: 9                                   # Mi 09.12.
@@ -152,7 +156,7 @@ tueren:
     erschienen: 2018
     person: "Frank S aus HB"
     rolle: "DJ"
-    text: "Ein echter Geheimtipp"
+    text: "Auch in der Gegenwart können noch Lieder produziert werden, die etwas länger Freude bringen"
     links:
       youtube_music: "https://music.youtube.com/watch?v=JNBLvNw4XSg"
       bandcamp: "https://handsofficial.bandcamp.com/track/nano-creator"
