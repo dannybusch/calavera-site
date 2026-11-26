@@ -248,18 +248,19 @@ tueren:
       deezer: "https://www.deezer.com/track/2565717"
 
   - tag: 16                                  # Mi 16.12.
-    song: "Good Time"
-    kuenstler: "The Dare"
-    erschienen: 2023
-    person: "TiM"
+    song: "Can't Take My Eyes Off You"
+    kuenstler: "Andy Williams"
+    erschienen: 1967
+    person: "Alexis On Fire"
     rolle: "DJ"
-    text: "Kann man »Electroclash« noch mal in das aktuelle Jahrzehnt heben? »The Dare«: »Ja!«"
+    text: "Eine goldene Single - wurde in den 80ern auch noch mal in einer Disco-Version von der »Boys Town Gang« herausgebracht."
     links:
-      youtube_music: "https://music.youtube.com/watch?v=7CdQ-5MAqO0"
-      bandcamp: ""
-      spotify: "https://open.spotify.com/track/4yX77sedjv7v6MfRZnuKyy"
-      apple_music: "https://music.apple.com/de/album/good-time/1763155718?i=1763155723"
-
+      youtube_music: "https://music.youtube.com/watch?v=MuVRnr4AsrE"
+      spotify: "https://open.spotify.com/track/1lLRi0LvCwKaKONxzoeJfj"
+      apple_music: "https://music.apple.com/de/album/cant-take-my-eyes-off-you/316712045?i=316712425"
+      tidal: "https://tidal.com/track/58732954"
+      deezer: "https://www.deezer.com/track/4272588"
+      
   - tag: 17                                  # Do 17.12.
     song: "Possédée"
     kuenstler: "Potochkine"
@@ -341,17 +342,18 @@ tueren:
       deezer: "https://www.deezer.com/track/4085212"
 
   - tag: 23                                  # Mi 23.12.
-    song: "I Tried To Die Young"
-    kuenstler: "The Manges"
-    erschienen: 2024
-    person: "Pete Bo"
+    song: "Der Letzte Song (Alles Wird Gut)"
+    kuenstler: "Kummer & Fred Rabe"
+    erschienen: 2021
+    person: "Alexis On Fire"
     rolle: "DJ"
-    text: "Das Cover eines Liedes der Folk-Sängerin Melanie Safka, die schon bei Woodstock aufgetreten ist - und eine Brücke in die heutige Zeit schlägt"
+    text: "Ein Lebensgefühl der Zerrissenheit und dem Wunsch nach mehr Zuversicht"
     links:
-      youtube_music: "https://music.youtube.com/watch?v=2aiwqRcELzw"
-      bandcamp: "https://themanges.bandcamp.com/track/i-tried-to-die-young-2"
-      spotify: "https://open.spotify.com/track/5UaZcIXFXcWPrUcy3ivXz0"
-      apple_music: "https://music.apple.com/de/album/i-tried-to-die-young/1752803587?i=1752803589"
+      youtube_music: "https://music.youtube.com/watch?v=WkhPU2P4Fwk"
+      spotify: "https://open.spotify.com/track/4FxaCzWS3M4eSfoEiStq79"
+      apple_music: "https://music.apple.com/de/album/der-letzte-song-alles-wird-gut/6793979013?i=6793979016"
+      tidal: "https://tidal.com/track/545050471"
+      deezer: "https://www.deezer.com/track/4167341302"
 
   - tag: 24                                  # Do 24.12.
     song: "I Won't Be Home For Christmas"
