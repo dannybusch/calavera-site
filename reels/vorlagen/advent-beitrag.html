@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Bild · Adventskalender</title><link rel="stylesheet" href="basis.css"><link rel="stylesheet" href="advent.css">
+<style>
+/* Standbild für einen Instagram-Beitrag (1080 × 1350, 4:5) – reels.py advent. Gleiche Daten wie advent.html.
+   Nichts aus den Türen: nur Titel, Raster (Tür 1 rot), Start und Ratespiel-Frage. */
+html, body, .stage { height: 1350px; }
+.stage { padding: 150px 60px 0; text-align: center; }
+.kicker { margin-bottom: 30px; }
+.titel { margin-bottom: 52px; }
+#grid { grid-auto-rows: 118px; text-align: left; }
+#grid .df-num { font-size: 52px; }
+#grid .door.h2 .df-num { font-size: 150px; }
+#grid .df-lab { font-size: 13px; }
+.chips { display: flex; justify-content: center; gap: 12px; margin-top: 44px; }
+.url { margin-top: 34px; font: 500 26px/1 "IBM Plex Mono", monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--text-3); }
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <p class="kicker" id="kicker"></p>
+  <div class="titel" id="titel"></div>
+  <div class="adv-grid" id="grid"></div>
+  <div class="chips"><span class="chip chip--rot" id="start"></span><span class="chip" id="raten"></span></div>
+  <p class="url" id="url"></p>
+</div>
+<script src="daten.js"></script>
+<script src="reel.js"></script>
+<script>
+const { D, $, textBlock } = Reel;
+$("kicker").textContent = D.kicker;
+textBlock($("titel"), "display", D.titel_vorne, { maxW: 960, maxPx: 150, minPx: 70, zweizeilig: false });
+const rot = textBlock($("titel"), "display", D.titel_rot, { maxW: 960, maxPx: 150, minPx: 70, zweizeilig: false });
+rot.style.color = "var(--accent-display)";
+// beide Zeilen gleich groß (die kleinere gewinnt)
+const px = Math.min(...[...$("titel").querySelectorAll(".fit")].map(s => parseFloat(s.style.fontSize)));
+$("titel").querySelectorAll(".fit").forEach(s => s.style.fontSize = px + "px");
+D.raster.forEach(([tag, gross]) => {
+  const d = document.createElement("div"); d.className = "door " + (gross || "") + (tag === 1 ? " is-rot" : "");
+  d.innerHTML = `<div class="door-front"><span class="df-num">${tag}</span><span class="df-lab">${String(tag).padStart(2, "0")}.12.</span></div>`;
+  $("grid").appendChild(d);
+});
+$("start").textContent = D.chip_start;
+$("raten").textContent = D.chip_raten;
+$("url").textContent = D.infozeile;
+window.REEL = { beats: 4, render() {} };
+</script>
+</body></html>

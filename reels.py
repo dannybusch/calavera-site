@@ -2,7 +2,7 @@
 """
 Calavera Bremen – Reels für Instagram (1080 × 1920, 30 fps, H.264 + AAC)
 
-Eigenständig, unabhängig vom Website-Build: liest nur events/*.md und config.yml,
+Eigenständig, unabhängig vom Website-Build: liest nur events/*.md, advent/*.yml und config.yml,
 schreibt nur nach reels/out/. Braucht: Python-Pakete aus requirements.txt + requirements-reels.txt,
 den Browser von Playwright (einmal: python -m playwright install chromium) und ffmpeg.
 
@@ -11,6 +11,7 @@ den Browser von Playwright (einmal: python -m playwright install chromium) und f
   python reels.py halloween --vorlage flyerfahrt,teaser
   python reels.py woche                Programm der nächsten 7 Tage (--ab 2026-11-02 --tage 7)
   python reels.py kellerfunk           Kellerfunk-Sendeplan eines Monats (--monat 2026-11, --plan datei.yml)
+  python reels.py advent               Ankündigung Adventskalender: Reel, Beitragsbild 1080 × 1350, Bildtext
   python reels.py --liste              zeigt, was es rendern würde
   python reels.py melancholie --pruefen   prüft nur Musik/BPM/Eins
 
@@ -580,9 +581,110 @@ def kellerfunk(cfg, args, now, tz) -> None:
     (AUSGABE / f"{job}-bildtext.txt").write_text("\n".join(zeilen) + "\n", encoding="utf-8")
 
 
+# ---------------------------------------------------------------------------
+#  Adventskalender: Ankündigung (Reel + Beitragsbild + Bildtext) aus advent/adventskalender<jahr>.yml
+#  Verrät nichts aus den Türen – keine Songs, keine Künstler:innen, keine Jahre. Gezeigt werden nur Titel,
+#  Raster, Ratespiel-Frage und die Namen unter "Mit dabei" (stehen ohnehin auf der Website, gemischt).
+# ---------------------------------------------------------------------------
+ADVENT_HAPPEN = [["Jeden Tag", "eine Tür."], ["Dahinter ein", "Lieblingssong"], ["aus dem Team", "& von den DJs."]]
+
+
+def standbild(ordner: Path, vorlage: str, daten: dict, ziel: Path, hoehe: int) -> None:
+    """Ein Bild aus einer Vorlage (z. B. Beitrag 1080 × 1350) – ohne Animation, ohne ffmpeg."""
+    from playwright.sync_api import sync_playwright
+    (ordner / "daten.js").write_text("window.DATA = " + json.dumps(daten, ensure_ascii=False) + ";\n", encoding="utf-8")
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 1080, "height": hoehe}, device_scale_factor=1)
+        fehlerliste: list[str] = []
+        page.on("pageerror", lambda e: fehlerliste.append(str(e)))
+        page.goto((ordner / f"{vorlage}.html").as_uri())
+        page.evaluate("document.fonts.ready")
+        page.wait_for_timeout(300)
+        if fehlerliste:
+            fehler(f"Vorlage {vorlage}: {fehlerliste[0]}")
+        page.screenshot(path=str(ziel), type="jpeg", quality=92)
+        browser.close()
+
+
+def advent(cfg, args, now) -> None:
+    rcfg = cfg.get("reels", {}) or {}
+    a = build.load_advent(set())
+    if not a:
+        fehler("kein Adventskalender gefunden (advent/adventskalender<jahr>.yml ohne draft: true)")
+    start = datetime(a.jahr, 12, 1, tzinfo=now.tzinfo)
+    vor_start = now < start
+    fertig = [t for t in a.tueren.values() if t.fertig]
+    mit_raten = [t for t in fertig if t.raten]
+    # Namen wie auf der Website gemischt (nicht nach Tür sortiert), aber fest – jedes Rendern gleich
+    mitwirkende = sorted({t.person.strip() for t in fertig if t.person.strip()})
+    import random
+    random.Random(f"advent-{a.jahr}").shuffle(mitwirkende)
+    vorne, rot = a.titel_teile
+    url = re.sub(r"^https?://(www\.)?", "", cfg["site"]["url"]).rstrip("/") + a.url.rstrip("/")
+    info(f"Adventskalender {a.jahr}: {len(fertig)} von 24 Türen ausgefüllt, {len(mit_raten)} mit Ratespiel, "
+         f"{len(mitwirkende)} Mitwirkende")
+    if len(fertig) < 24:
+        info("  ! noch nicht alle Türen ausgefüllt – im Reel stehen nur die Namen, die schon eingetragen sind")
+
+    job = f"adventskalender-{a.jahr}"
+    ordner = arbeitsordner(job)
+    daten = {"bpm": float(args.bpm or rcfg.get("advent_bpm") or rcfg.get("bpm", 124)),
+             "kicker": a.kicker, "titel_vorne": vorne or a.titel, "titel_rot": rot,
+             "raster": [[t, build.ADVENT_GROSS.get(t, "")] for t in build.ADVENT_MISCHUNG],
+             "happen": ADVENT_HAPPEN, "happen_rot": ["Lieblingssong"],
+             "raten_frage": "Wann ist der Song erschienen?", "raten_unter": "Drei Jahre – eins stimmt. Ratet mit!",
+             "mitwirkende": mitwirkende,
+             # Schlusstafel (reel.js → ende): Datum, Titel, Zeile darunter, Adresse
+             "datum": "Ab 1.12." if vor_start else "Jetzt offen", "titel": "Adventskalender",
+             "byline": "Jeden Tag eine neue Tür", "byline_mit": False, "infozeile": url,
+             "chip_start": "Ab 1. Dezember" if vor_start else "Jeden Tag eine neue Tür", "chip_raten": "Mit Ratespiel",
+             "atmo": rcfg.get("advent_atmo", "schnee"), "energie": [], "hilfslinien": args.hilfslinien}
+    ziel_dir = AUSGABE / job
+    ziel_dir.mkdir(parents=True, exist_ok=True)
+
+    bild = ziel_dir / "beitrag.jpg"
+    info(f"  → {bild.relative_to(ROOT)} (Beitrag 1080 × 1350)")
+    standbild(ordner, "advent-beitrag", daten, bild, 1350)
+
+    audio = None if args.klick else programm_musik(args.musik or rcfg.get("advent_musik"), args.eins or rcfg.get("advent_eins", 0), ordner, "advent", daten)
+    ziel = ziel_dir / "ankuendigung.mp4"
+    info(f"  → {ziel.relative_to(ROOT)} (Reel/Story 1080 × 1920, Titelbild daneben als .jpg)")
+    rendern(ordner, "advent", daten, audio, ziel, args.schnell, args.klick)
+
+    # Bildtext für Instagram – nur, was in der Datei steht; Instagram-Namen aus config.yml → kuenstler
+    kuenstler = cfg.get("kuenstler") or {}
+    def mit_insta(n: str) -> str:
+        for k in (n, f"DJ {n}"):
+            ig = ((kuenstler.get(k) or {}).get("instagram") or "").strip().lstrip("@")
+            if ig:
+                return f"{n} (@{ig})"
+        return n
+    raten = ("In jeder Tür" if len(mit_raten) == 24 else "In den Türen") + \
+        " wartet außerdem ein kleines Ratespiel: Wann ist der Song erschienen? Drei Jahre, eins stimmt."
+    zeilen = [f"{a.titel} 🎁"]
+    if a.einleitung:
+        zeilen.append(a.einleitung)
+    zeilen += ["",
+               ("Ab 1. Dezember" if vor_start else "Bis Heiligabend") + " öffnet sich auf unserer Website jeden Tag eine Tür, "
+               "immer kurz nach Mitternacht. Dahinter steckt ein Lieblingssong von jemandem aus dem Team oder von unseren DJs – "
+               "mit ein paar Worten dazu und Links zum Anhören.", "", raten]
+    if mitwirkende:
+        zeilen += ["", "Mit dabei: " + ", ".join(mit_insta(n) for n in mitwirkende)]
+    zeilen += ["", f"Zum Kalender: {url} (Link in Bio)", "",
+               " ".join(dict.fromkeys("#" + re.sub(r"[^0-9a-zäöüß]", "", str(h).lower()) for h in
+                                      ["adventskalender", *((cfg.get("abbinder") or {}).get("hashtags") or []),
+                                       "musikadventskalender", "lieblingssong", "advent"]))]
+    text = "\n".join(zeilen) + "\n"
+    if len(text) > 2200:
+        info(f"  ! Bildtext hat {len(text)} Zeichen – Instagram erlaubt 2200")
+    (ziel_dir / "bildtext-instagram.txt").write_text(text, encoding="utf-8")
+    info(f"  → {(ziel_dir / 'bildtext-instagram.txt').relative_to(ROOT)} ({len(text)} Zeichen)")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Reels für Instagram aus den Event-Dateien", formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
-    ap.add_argument("auswahl", nargs="?", help='Teil des Dateinamens einer Veranstaltung, oder "woche" / "kellerfunk"')
+    ap.add_argument("auswahl", nargs="?", help='Teil des Dateinamens einer Veranstaltung, oder "woche" / "kellerfunk" / "advent"')
     ap.add_argument("--vorlage", help=f"nur diese Vorlage(n), Komma-getrennt: {', '.join(ALLE_VORLAGEN)}")
     ap.add_argument("--countdown", default="3,1,0", help="Countdown-Varianten in Tagen (Standard 3,1,0)")
     ap.add_argument("--schnell", action="store_true", help="Vorschau ohne Bewegungsunschärfe")
@@ -593,9 +695,9 @@ def main() -> int:
     ap.add_argument("--now", help="so tun, als wäre jetzt … (JJJJ-MM-TT HH:MM)")
     ap.add_argument("--ab", help="woche: erster Tag (JJJJ-MM-TT), Standard heute")
     ap.add_argument("--tage", type=int, default=7, help="woche: Anzahl Tage (Standard 7)")
-    ap.add_argument("--musik", help="woche/kellerfunk: Musikdatei (in reels/musik/ oder events/)")
-    ap.add_argument("--bpm", type=float, help="woche/kellerfunk: Tempo der Musik")
-    ap.add_argument("--eins", help="woche/kellerfunk: Zeitpunkt der Eins in der Musik")
+    ap.add_argument("--musik", help="woche/kellerfunk/advent: Musikdatei (in reels/musik/ oder events/)")
+    ap.add_argument("--bpm", type=float, help="woche/kellerfunk/advent: Tempo der Musik")
+    ap.add_argument("--eins", help="woche/kellerfunk/advent: Zeitpunkt der Eins in der Musik")
     ap.add_argument("--monat", help="kellerfunk: Monat JJJJ-MM (Standard: bis zum 14. dieser, danach der nächste)")
     ap.add_argument("--plan", help="kellerfunk: Sendeplan aus dieser Datei/Adresse statt live.calavera.club/config.yml")
     args = ap.parse_args()
@@ -611,6 +713,9 @@ def main() -> int:
     cfg = yaml.safe_load((ROOT / "config.yml").read_text(encoding="utf-8"))
     tz = ZoneInfo(cfg["site"].get("timezone", "Europe/Berlin"))
     now = datetime.strptime(args.now, "%Y-%m-%d %H:%M").replace(tzinfo=tz) if args.now else datetime.now(tz)
+    if args.auswahl == "advent":   # braucht keine Event-Dateien
+        advent(cfg, args, now)
+        return 0
     events = build.load_events(cfg, tz)
     upcoming = [e for e in events if e.end > now]
 

@@ -649,6 +649,7 @@ python reels.py melancholie --schnell       # Vorschau, ca. 4× schneller (ohne 
 python reels.py melancholie --pruefen       # nur Musik prüfen: Tempo und Eins
 python reels.py woche                       # Programm der nächsten 7 Tage (--ab 2026-11-02 --tage 7)
 python reels.py kellerfunk                  # Kellerfunk-Sendeplan eines Monats (--monat 2026-11)
+python reels.py advent                      # Ankündigung Adventskalender: Reel + Beitragsbild + Bildtext
 ```
 
 Weitere Schalter: `--vorlage flyerfahrt,teaser`, `--countdown 7,3,1,0`, `--klick` (Metronom statt Musik,
@@ -685,6 +686,18 @@ Kellerfunk-Logo auf Streifen; Platzhalter wie `[DJ]` werden weggelassen. Ergebni
 `.jpg` (Titelbild: Monat + Anzahl) und `kellerfunk-JJJJ-MM-bildtext.txt` mit allen Terminen.
 Ohne Internet oder zum Ausprobieren: `--plan pfad/zur/config.yml` (Visuals und `kellerfunk.png` werden dann
 relativ zu dieser Datei gesucht).
+
+**Adventskalender-Ankündigung:** `python reels.py advent` liest `advent/adventskalender<jahr>.yml` und legt in
+`reels/out/adventskalender-<jahr>/` ab: `ankuendigung.mp4` (Reel/Story, ca. 22 s: Titel · die 24 Türen wie auf
+der Website · Tür 1 wird rot und geht auf, dahinter ein „?“ · „Jeden Tag eine Tür …“ · Ratespiel-Frage mit
+„????“-Knöpfen · „Mit dabei“ · Schlusstafel „Ab 1.12.“), `ankuendigung.jpg` (Titelbild), `beitrag.jpg`
+(Standbild 1080 × 1350 für den Feed) und `bildtext-instagram.txt`. **Aus den Türen wird nichts verraten** –
+keine Songs, Künstler:innen oder Jahre. Gezeigt werden nur Titel, Einleitung und die Namen der Mitwirkenden
+(stehen ohnehin gemischt auf der Website; im Reel ebenfalls gemischt, nicht nach Tür). Instagram-Namen kommen
+aus `config.yml → kuenstler` (Name wie bei `person:` oder mit „DJ “ davor). Vorlagen: `reels/vorlagen/advent.html`,
+`advent-beitrag.html`, `advent.css`. Ab dem 1.12. heißt es „Jetzt offen“ statt „Ab 1.12.“.
+Musik wie bei `woche`: `--musik datei.mp3 --bpm 100 --eins 0:19.19` oder in `config.yml → reels:`
+`advent_musik`, `advent_bpm`, `advent_eins` (optional `advent_atmo`, Standard `schnee`).
 
 Die Stimmung passt sich den Effekten der Website an: Nebel bei `rauschnebel` & Co., Blitze bei `gewitter`,
 Konfetti bei `konfetti`, Schnee bei `snow`, Sterne bei `twinklestar` – sonst Funken.

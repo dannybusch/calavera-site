@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Reel · Adventskalender</title><link rel="stylesheet" href="basis.css"><link rel="stylesheet" href="advent.css">
+<style>
+/* Ankündigung des Adventskalenders (reels.py advent). Verrät nichts aus den Türen: keine Songs, keine Jahre –
+   nur Titel, Raster, Ratespiel-Frage und die Namen unter "Mit dabei" (die stehen auch auf der Website).
+   Ablauf in Schlägen: 0 Titel · 4 Türen erscheinen · 8 Tür 1 wird rot, Kamera fährt hin, Tür geht auf ("?")
+   · 12 "Jeden Tag eine Tür …" · 18 Ratespiel · 24 Mit dabei · 30 Schlusstafel (= Titelbild). */
+#welt { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; will-change: transform, opacity; }
+#grid { position: absolute; left: 60px; top: 470px; width: 960px; grid-auto-rows: 190px; }
+#kopf { position: absolute; left: 60px; right: 60px; top: 0; height: 1920px; text-align: center; }
+#kopf .kicker { position: absolute; left: 0; right: 0; top: 232px; }
+#kopf .titel { position: absolute; left: 0; right: 0; top: 680px; transform-origin: 50% 0; }
+#kopf .titel span.fit { display: inline-block; }
+.happen { position: absolute; left: 60px; right: 60px; top: 0; height: 1920px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--hell); line-height: .92; }
+.happen .w { display: inline-block; }
+.happen .w.rot { color: var(--rot); }
+#raten { position: absolute; left: 60px; right: 60px; top: 0; height: 1920px; text-align: center; }
+#raten .label { position: absolute; left: 0; right: 0; top: 610px; font: 500 30px/1 "IBM Plex Mono", monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--accent-text); }
+#raten .frage { position: absolute; left: 0; right: 0; top: 680px; color: var(--hell); }
+#raten .wahl { position: absolute; left: 0; right: 0; top: 1060px; display: flex; justify-content: center; gap: 24px; }
+#raten .unter { position: absolute; left: 0; right: 0; top: 1240px; font-size: 46px; color: var(--text-2); }
+#mit { position: absolute; left: 60px; right: 60px; top: 0; height: 1920px; text-align: center; }
+#mit .label { position: absolute; left: 0; right: 0; top: 400px; font: 500 30px/1 "IBM Plex Mono", monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+#mit .namen { position: absolute; left: 0; right: 0; top: 480px; display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 6px 0;
+  font-family: "Bebas Neue", sans-serif; font-size: 96px; line-height: 1; text-transform: uppercase; color: var(--hell); }
+#mit .name { display: inline-block; white-space: nowrap; }
+#mit .namen { column-gap: 44px; }
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="ebene" id="atmo"></div>
+  <div id="welt"><div class="adv-grid" id="grid"></div></div>
+  <div id="kopf"><p class="kicker" id="kicker"></p><div class="titel" id="titel"></div></div>
+  <div class="ebene" id="text"></div>
+  <div id="raten"><p class="label">Ratespiel</p><div class="display frage" id="frage"></div><div class="wahl" id="wahl"></div><p class="unter" id="unter"></p></div>
+  <div id="mit"><p class="label">Mit dabei</p><div class="namen" id="namen"></div></div>
+  <div class="ebene" id="tafel"></div>
+</div>
+<script src="daten.js"></script>
+<script src="reel.js"></script>
+<script>
+const { D, clamp, prog, pump, set, $, fit, textBlock, atmo, ende, endeZeigen } = Reel;
+atmo($("atmo"), D.atmo || "schnee", { dichte: .5 });
+
+// ---------- Türen (Reihenfolge und Größen wie auf der Website) ----------
+const tueren = D.raster.map(([tag, gross]) => {
+  const d = document.createElement("div"); d.className = "door " + (gross || "");
+  d.innerHTML = `<div class="door-in"><span class="di-num">${String(tag).padStart(2, "0")}</span><span class="di-frage">?</span></div>` +
+                `<div class="door-front"><span class="df-num">${tag}</span><span class="df-lab">${String(tag).padStart(2, "0")}.12.</span></div>`;
+  $("grid").appendChild(d);
+  return { tag, el: d, front: d.querySelector(".door-front"), innen: d.querySelector(".door-in") };
+});
+const eins = tueren.find(x => x.tag === 1);
+const r = eins.el.getBoundingClientRect(), CX = r.left + r.width / 2, CY = r.top + r.height / 2;
+const ZOOM = 2.6;
+
+// ---------- Kopf: Kicker + Titel (letzter Satz rot) ----------
+$("kicker").textContent = D.kicker;
+const t1 = textBlock($("titel"), "display", D.titel_vorne, { maxW: 960, maxPx: 270, minPx: 80, zweizeilig: false });
+const t2 = textBlock($("titel"), "display rot", D.titel_rot, { maxW: 960, maxPx: 270, minPx: 80, zweizeilig: false });
+t2.style.color = "var(--rot)";
+// beide Zeilen gleich groß (die kleinere gewinnt) – wie auf der Website
+const tpx = Math.min(...[t1, t2].map(x => parseFloat(x.querySelector(".fit").style.fontSize)));
+[t1, t2].forEach(x => x.querySelector(".fit").style.fontSize = tpx + "px");
+const titelH = $("titel").getBoundingClientRect().height;
+
+// ---------- Häppchen: "Jeden Tag eine Tür." … ----------
+const happen = D.happen.map(zeilen => {
+  const box = document.createElement("div"); box.className = "display happen"; $("text").appendChild(box);
+  const inner = document.createElement("div"); box.appendChild(inner);
+  const spans = [];
+  zeilen.forEach((z, zi) => {
+    const line = document.createElement("span"); line.className = "fit"; inner.appendChild(line);
+    z.split(" ").forEach((w, i, a) => {
+      const s = document.createElement("span"); s.className = "w" + (D.happen_rot.includes(w.replace(/[.,!?]/g, "")) ? " rot" : ""); s.textContent = w;
+      line.appendChild(s); spans.push(s); if (i < a.length - 1) line.appendChild(document.createTextNode(" "));
+    });
+    if (zi < zeilen.length - 1) inner.appendChild(document.createElement("br"));
+  });
+  const lines = [...inner.querySelectorAll(".fit")];
+  const px = Math.min(...lines.map(l => fit(l, 940, 220, 100)));
+  lines.forEach(l => l.style.fontSize = px + "px");
+  return { box, spans };
+});
+
+// ---------- Ratespiel: nur die Frage, keine Jahre ----------
+textBlock($("frage"), "", D.raten_frage, { maxW: 960, maxPx: 170, minPx: 90, zweizeilig: true });
+const pillen = [0, 1, 2].map(() => { const p = document.createElement("span"); p.className = "jahr"; p.textContent = "????"; $("wahl").appendChild(p); return p; });
+$("unter").textContent = D.raten_unter;
+
+// ---------- Mit dabei ----------
+const namen = D.mitwirkende.map(n => { const s = document.createElement("span"); s.className = "name"; s.textContent = n; $("namen").appendChild(s); return s; });
+const namenSchritt = namen.length ? Math.min(.5, 4 / namen.length) : .5;
+
+// ---------- Schlusstafel ----------
+const tafel = ende($("tafel"), 930, { datumPx: 230, titelPx: 150 });
+
+const H0 = 12, R0 = 18, M0 = 24, E0 = 30, BEATS = 36;
+const mix = (a, b, p) => a + (b - a) * p;
+const ROT = [179, 18, 46], GRAU = [28, 28, 28];
+
+window.REEL = { beats: BEATS, render(b, t) {
+  const pm = pump(b, t);
+
+  // Titel: groß in der Mitte, ab Schlag 4 als Kopf über das Raster
+  const tIn1 = prog(b, 0, .25), tIn2 = prog(b, 1, .25), hoch = prog(b, 4, 1, "inOut");
+  const s = mix(1, .5, hoch), zielTop = 262, y = mix(0, zielTop - 680, hoch);
+  set($("titel"), { transform: `translateY(${y}px) scale(${s * (1 + (b < 4 ? pm * .03 : 0))})`, opacity: 1 - prog(b, 8.5, 1, "inOut") });
+  set(t1, { opacity: tIn1, transform: `scale(${1 + (1 - tIn1) * .4})` });
+  set(t2, { opacity: tIn2, transform: `translateY(${(1 - tIn2) * 60}px)` });
+  set($("kicker"), { opacity: Math.min(prog(b, 4.5, .5, "out"), 1 - prog(b, 8.5, 1, "inOut")) });
+  set($("kopf"), { display: b < H0 ? "block" : "none" });
+
+  // Welt (Raster): 4–8 Türen erscheinen · 8–12 Fahrt zu Tür 1 · 30– klein oben über der Schlusstafel
+  let tx = 0, ty = 0, sc = 1, ox = 0, oy = 0, op = 1;
+  if (b < E0) {
+    const z = prog(b, 8.5, 2, "inOut");
+    sc = mix(1, ZOOM, z); ox = CX; oy = CY; tx = mix(CX, 540, z); ty = mix(CY, 900, z);
+    op = b < H0 ? 1 : 0;
+  } else {
+    const e = prog(b, E0, .6);
+    sc = mix(.5, .62, e); ox = 540; oy = 470; tx = 540; ty = 240; op = e;
+  }
+  set($("welt"), { transform: `translate(${tx}px, ${ty}px) scale(${sc}) translate(${-ox}px, ${-oy}px)`, opacity: op });
+  tueren.forEach((d, i) => {
+    const p = b >= E0 ? 1 : prog(b, 4.6 + i * (2.2 / 24), .4);
+    set(d.el, { opacity: p, transform: `translateY(${(1 - p) * 40}px) scale(${.85 + .15 * p})` });
+  });
+  // Tür 1: rot ab Schlag 8, geht bei 10.5 auf (schwenkt zum Betrachter), bleibt offen
+  const rot = b >= 8 || b >= E0;
+  eins.el.classList.toggle("is-rot", rot);
+  const auf = b >= E0 ? 1 : prog(b, 10.5, 1.2, "out");
+  set(eins.front, { transform: `rotateY(${-74 * auf}deg) scale(${rot && b < 10.5 ? 1 + pm * .05 : 1})` });
+  set(eins.innen, { opacity: auf > 0 ? 1 : 0 });
+
+  // Häppchen 12–18
+  happen.forEach((h, i) => {
+    const at = H0 + i * 2, on = b >= at && b < at + 2;
+    set(h.box, { opacity: on ? 1 : 0, transform: `translateY(${-prog(b, at + 1.85, .15, "in") * 200}px)` });
+    h.spans.forEach((sp, k) => { const p = prog(b, at + k * .5, .2); set(sp, { opacity: p, transform: `translateY(${(1 - p) * 80}px) scale(${1 + (1 - p) * .3})` }); });
+  });
+
+  // Ratespiel 18–24: Frage, drei Knöpfe "????" blinken nacheinander rot (wie auf der Website)
+  set($("raten"), { display: b >= R0 && b < M0 ? "block" : "none" });
+  if (b >= R0 && b < M0) {
+    const raus = prog(b, M0 - .3, .3, "in");
+    set($("raten"), { opacity: 1 - raus });
+    set($("raten").querySelector(".label"), { opacity: prog(b, R0, .3) });
+    const f = prog(b, R0 + .25, .3); set($("frage"), { opacity: f, transform: `translateY(${(1 - f) * 60}px)` });
+    pillen.forEach((p, i) => {
+      const a = prog(b, R0 + 1 + i * .25, .25);
+      const blink = Math.max(...[R0 + 2, R0 + 4].map(st => { const d = b - (st + i * .5); return d < 0 || d > 1 ? 0 : Math.sin(d * Math.PI); }));
+      const c = GRAU.map((g, k) => Math.round(mix(g, ROT[k], blink)));
+      set(p, { opacity: a, transform: `scale(${(.7 + .3 * a) * (1 + blink * .06)})`, background: `rgb(${c})`, color: blink > .5 ? "#f1ebe2" : "" });
+    });
+    set($("unter"), { opacity: prog(b, R0 + 3, .5, "out") });
+  }
+
+  // Mit dabei 24–30
+  set($("mit"), { display: b >= M0 && b < E0 ? "block" : "none" });
+  if (b >= M0 && b < E0) {
+    set($("mit"), { opacity: 1 - prog(b, E0 - .3, .3, "in") });
+    set($("mit").querySelector(".label"), { opacity: prog(b, M0, .3) });
+    namen.forEach((n, i) => { const p = prog(b, M0 + .5 + i * namenSchritt, .25); set(n, { opacity: p, transform: `translateY(${(1 - p) * 50}px)` }); });
+  }
+
+  // Schlusstafel
+  endeZeigen(tafel, b, E0 + .5, pm);
+} };
+</script>
+</body></html>
