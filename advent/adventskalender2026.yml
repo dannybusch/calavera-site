@@ -145,7 +145,7 @@ tueren:
     erschienen: 1987
     person: "Doc Grotabol"
     rolle: "DJ"
-    text: "Der sechste Track auf dem Album »Mehr Schreie« von EA80 - Geheimtipp, den man nicht mal bei Spotify findet"
+    text: "Der sechste Track auf dem Album »Mehr Schreie« von EA80"
     links:
       youtube_music: "https://music.youtube.com/watch?v=_7r9iQmzCSM"
       bandcamp: ""
@@ -205,19 +205,18 @@ tueren:
       apple_music: "https://music.apple.com/de/album/wir/1622670966?i=1622670977"
 
   - tag: 13                                  # So 13.12.
-    song: "Love Missile F1-11"
-    kuenstler: "Sigue Sigue Sputnik"
-    erschienen: 1986
-    person: "TiM"
+    song: "Lose Yourself"
+    kuenstler: "Eminem"
+    erschienen: 2002
+    person: "Keine Kunst"
     rolle: "DJ"
-    text: "Direkt im Debütalbum ein großer Hit von Sigue Sigue Sputnik - gegründet von dem Bassisten der Band »Generation X«. James von »Sigue Sigue Sputnik« ist 1989 zu »The Sisters of Mercy« gewechselt."
+    text: "Mehr Gänsehaut geht kaum - mit »8 Mile« als »Film zur Musik«, der eine ganze Generation beeinflusst hat, ist dieser Song auf der ewigen Bestenliste im Bereich Hip-Hop fest verankert."
     links:
-      youtube_music: "https://music.youtube.com/watch?v=yvQ_W2Af1FY"
-      bandcamp: ""
-      spotify: "https://open.spotify.com/track/2nnK8on14B6tYkiPEBL84w"
-      apple_music: "https://music.apple.com/de/album/love-missile-f1-11/1437332311?i=1437332313"
-      tidal: "https://tidal.com/track/6755189"
-      deezer: "https://www.deezer.com/track/3786405842"
+      youtube_music: "https://music.youtube.com/watch?v=4wOLVrGHiIU"
+      spotify: "https://open.spotify.com/track/1v7L65Lzy0j0vdpRjJewt1"
+      apple_music: "https://music.apple.com/de/album/lose-yourself/1440903339?i=1440903439"
+      tidal: "https://tidal.com/track/255437994"
+      deezer: "https://www.deezer.com/track/1109731"
 
   - tag: 14                                  # Mo 14.12.
     song: "Ice Age"
@@ -233,19 +232,17 @@ tueren:
       apple_music: "https://music.apple.com/de/album/ice-age/275968300?i=275968327"
 
   - tag: 15                                  # Di 15.12.
-    song: "Ballroom Blitz"
-    kuenstler: "Sweet"
-    erschienen: 1973
-    person: "Kijote"
+    song: "Solidarity"
+    kuenstler: "Stage Bottles"
+    erschienen: 2007
+    person: "Keine Kunst"
     rolle: "DJ"
-    text: "Ein Song, der heute noch Jubel bei Jung & Alt auf der Tanzfläche auslöst - das schaffen nicht viele Titel aus den wilden 70ern."
+    text: "Die »Stage Bottles« aus Frankfurt singen vom Zusammenhalt der arbeitenden Klasse - moderner Street-Punk mit klarer antifaschistischer Haltung"
     links:
-      youtube_music: "https://music.youtube.com/watch?v=mPQPdYttl7U"
-      bandcamp: ""
-      spotify: "https://open.spotify.com/track/1PcERoNH2UMQ19lnD2BWfn"
-      apple_music: "https://music.apple.com/de/album/the-ballroom-blitz/1110348361?i=1110348474"
-      tidal: "https://tidal.com/track/7848727"
-      deezer: "https://www.deezer.com/track/2565717"
+      youtube_music: "https://music.youtube.com/watch?v=_h8zC7cDLoY"
+      spotify: "https://open.spotify.com/track/40cgT7WCQoH2qStJJH8M7e"
+      tidal: "https://tidal.com/track/301232132"
+      deezer: "https://www.deezer.com/track/2338442215"
 
   - tag: 16                                  # Mi 16.12.
     song: "Can't Take My Eyes Off You"
@@ -267,7 +264,7 @@ tueren:
     erschienen: 2021
     person: "Frank S aus HB"
     rolle: "DJ"
-    text: ""
+    text: "Französische Dunkelmusik hat oft einen ganz eigenen Klang - wie hier bei Potochkine"
     links:
       youtube_music: "https://music.youtube.com/watch?v=YXzueaBM8PE"
       bandcamp: "https://potochkine.bandcamp.com/track/poss-d-e"
@@ -280,7 +277,7 @@ tueren:
     erschienen: 2004
     person: "Doc Grotabol"
     rolle: "DJ"
-    text: "Aus dem Album »Mork Teklogi« von 2004"
+    text: "Aus dem Album »Mork Teklogi« - gut, wenn es etwas gibt, dem sich Sorgen anvertrauen lassen - wenn es manchmal auch nur ein Stein ist"
     links:
       youtube_music: ""
       bandcamp: ""
@@ -323,8 +320,11 @@ tueren:
     rolle: "DJ"
     text: "Aus der Zeit, als »Goth Rock« oder »Wave Punk« noch gängige Begriffe waren."
     links:
-      youtube_music: ""
+      youtube_music: "https://music.youtube.com/watch?v=t8vNZNajDqA"
       bandcamp: ""
+      apple_music: "https://music.apple.com/de/album/lagartija-nick/360271685?i=360271809"
+      tidal: "https://tidal.com/track/256484042"
+      deezer: "https://www.deezer.com/track/5509975"
 
   - tag: 22                                  # Di 22.12.
     song: "Love Street"
@@ -347,7 +347,7 @@ tueren:
     erschienen: 2021
     person: "Alexis On Fire"
     rolle: "DJ"
-    text: "Ein Lebensgefühl der Zerrissenheit und dem Wunsch nach mehr Zuversicht"
+    text: "Trägt das junge Lebensgefühl der Zerrissenheit ebenso wie die Sehnsucht nach mehr Zuversicht und Aufbruch"
     links:
       youtube_music: "https://music.youtube.com/watch?v=WkhPU2P4Fwk"
       spotify: "https://open.spotify.com/track/4FxaCzWS3M4eSfoEiStq79"
